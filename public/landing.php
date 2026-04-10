@@ -1,0 +1,509 @@
+<?php $page = 'landing'; ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Sinta — Plan Your Perfect Event | Premium Event Organizer</title>
+  <meta name="description" content="Sinta curates extraordinary events — from intimate weddings to grand celebrations — with meticulous care and seamless execution.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="assets/css/landing.css">
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav" id="navbar">
+  <div class="nav__inner">
+    <a href="landing.php" class="nav__logo">
+      <img src="assets/img/logo.png" alt="Sinta Logo" class="nav__logo-img" onerror="this.src='https://placehold.co/38x38/8A7650/white?text=S'">
+      <span class="nav__logo-text">Sinta</span>
+    </a>
+    <button class="nav__toggle" id="navToggle" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="nav__links" id="navLinks">
+      <a href="#home">Home</a>
+      <a href="#about">About</a>
+      <a href="#bundles">Services</a>
+      <a href="#how-it-works">How It Works</a>
+      <a href="#contact">Contact</a>
+    </div>
+    <div class="nav__actions">
+      <a href="signin.php" class="btn btn--ghost btn--sm">Sign In</a>
+      <a href="signup.php" class="btn btn--primary btn--sm">Get Started</a>
+    </div>
+  </div>
+</nav>
+
+<main>
+  <!-- Hero Section -->
+  <section class="hero" id="home">
+    <div class="hero__content">
+      <div class="hero__eyebrow">
+        <span class="rule"></span>
+        <span>Premium Event Organizer · Philippines</span>
+      </div>
+      <h1 class="hero__title">Crafting moments<br>worth <em>remembering</em></h1>
+      <p class="hero__sub">From intimate weddings to grand galas — we design extraordinary celebrations with meticulous care and flawless execution.</p>
+      <div class="hero__actions">
+        <a href="signup.php" class="btn btn--primary btn--lg">Start Planning</a>
+        <a href="#bundles" class="btn btn--outline btn--lg">View Packages</a>
+      </div>
+      <div class="hero__stats">
+        <div class="hero__stat">
+          <div class="hero__stat-number">1,200+</div>
+          <div class="hero__stat-label">Events Planned</div>
+        </div>
+        <div class="hero__stat-divider"></div>
+        <div class="hero__stat">
+          <div class="hero__stat-number">98%</div>
+          <div class="hero__stat-label">Satisfaction Rate</div>
+        </div>
+        <div class="hero__stat-divider"></div>
+        <div class="hero__stat">
+          <div class="hero__stat-number">8 Yrs</div>
+          <div class="hero__stat-label">Of Excellence</div>
+        </div>
+      </div>
+    </div>
+    <div class="hero__visual">
+  <div class="hero__visual-inner">
+    <img src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=900&h=1100&fit=crop" alt="Elegant wedding ceremony" class="hero__visual-img">
+  </div>
+  <div class="hero__visual-card animate-float">
+    <div class="hero__visual-quote">"The most magical day of our lives."</div>
+    <div class="hero__visual-author">— Maria & James · Wedding 2024</div>
+  </div>
+</div>
+  </section>
+
+  <!-- Marquee -->
+  <div class="marquee">
+    <div class="marquee__track">
+      <span class="marquee__item">Weddings <span class="marquee__dot"></span></span>
+      <span class="marquee__item">Corporate Events <span class="marquee__dot"></span></span>
+      <span class="marquee__item">Birthday Celebrations <span class="marquee__dot"></span></span>
+      <span class="marquee__item">Anniversaries <span class="marquee__dot"></span></span>
+      <span class="marquee__item">Debut Parties <span class="marquee__dot"></span></span>
+      <span class="marquee__item">Gala Dinners <span class="marquee__dot"></span></span>
+      <span class="marquee__item">Product Launches <span class="marquee__dot"></span></span>
+      <span class="marquee__item">Weddings <span class="marquee__dot"></span></span>
+      <span class="marquee__item">Corporate Events <span class="marquee__dot"></span></span>
+      <span class="marquee__item">Birthday Celebrations <span class="marquee__dot"></span></span>
+      <span class="marquee__item">Anniversaries <span class="marquee__dot"></span></span>
+      <span class="marquee__item">Debut Parties <span class="marquee__dot"></span></span>
+      <span class="marquee__item">Gala Dinners <span class="marquee__dot"></span></span>
+      <span class="marquee__item">Product Launches <span class="marquee__dot"></span></span>
+    </div>
+  </div>
+
+  <!-- About Section -->
+  <section class="section" id="about">
+    <div class="container">
+      <div class="about__grid">
+        <div class="about__visual reveal">
+          <!-- REPLACE WITH YOUR DOWNLOADED "ABOUT SINTA EVENTS" IMAGE -->
+          <img src="assets/img/sinta eventsjpg.jpg" alt="About Sinta Events">
+          <div class="about__visual-badge animate-float-delayed">
+            <span class="about__visual-badge-num">8</span>
+            <span class="about__visual-badge-label">Years of Excellence</span>
+          </div>
+        </div>
+        <div class="about__content reveal">
+          <div class="eyebrow"><span class="rule"></span> Our Story</div>
+          <h2>Crafting <em>unforgettable</em><br>experiences since 2016</h2>
+          <p class="about__desc">Sinta began with a simple belief: extraordinary events don't just happen — they are carefully curated with passion, precision, and heart. Today, we're the Philippines' most trusted event partner, turning visions into lasting memories.</p>
+          <div class="about__features">
+            <div class="about__feature">
+              <div class="about__feature-icon"><i class="fas fa-heart"></i></div>
+              <div><h4>Personalized Approach</h4><p>Every event tailored to your unique vision and style.</p></div>
+            </div>
+            <div class="about__feature">
+              <div class="about__feature-icon"><i class="fas fa-star"></i></div>
+              <div><h4>Premium Vendors</h4><p>Curated network of the industry's finest partners.</p></div>
+            </div>
+            <div class="about__feature">
+              <div class="about__feature-icon"><i class="fas fa-clock"></i></div>
+              <div><h4>Stress-Free Planning</h4><p>We handle every detail so you can enjoy your day.</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Bundles/Services - Unique Images -->
+  <section class="section section--alt" id="bundles">
+    <div class="container">
+      <div class="section__header text-center">
+        <div class="eyebrow"><span class="rule"></span> Signature Collections</div>
+        <h2>Curated event <em>packages</em><br>for every occasion</h2>
+        <p class="section__subtitle">All-inclusive bundles or fully customized — your celebration, your way.</p>
+      </div>
+      <div class="bundles__grid stagger">
+        <div class="bundle__card">
+          <div class="bundle__image">
+            <img src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=600&h=400&fit=crop" alt="Wedding event">
+            <div class="bundle__tag">Most Popular</div>
+          </div>
+          <div class="bundle__content">
+            <div class="bundle__icon-wrap"><i class="fas fa-ring"></i></div>
+            <h3 class="bundle__title">Timeless Wedding</h3>
+            <p class="bundle__desc">Complete wedding planning including venue styling, catering, photography, and full coordination.</p>
+            <ul class="bundle__features">
+              <li><i class="fas fa-check"></i> Full Coordination</li>
+              <li><i class="fas fa-check"></i> Premium Styling</li>
+              <li><i class="fas fa-check"></i> Photography & Video</li>
+              <li><i class="fas fa-check"></i> Catering & Cake</li>
+            </ul>
+            <div class="bundle__footer">
+              <div class="bundle__price">From ₱150K</div>
+              <a href="signup.php" class="btn btn--primary btn--sm">Inquire</a>
+            </div>
+          </div>
+        </div>
+        <div class="bundle__card">
+          <div class="bundle__image">
+            <img src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&h=400&fit=crop" alt="Corporate event">
+            <div class="bundle__tag">Best Value</div>
+          </div>
+          <div class="bundle__content">
+            <div class="bundle__icon-wrap"><i class="fas fa-building"></i></div>
+            <h3 class="bundle__title">Corporate Elegance</h3>
+            <p class="bundle__desc">Professional conferences, product launches, and gala dinners with AV support and branding.</p>
+            <ul class="bundle__features">
+              <li><i class="fas fa-check"></i> AV & Lighting</li>
+              <li><i class="fas fa-check"></i> Venue Sourcing</li>
+              <li><i class="fas fa-check"></i> Catering Services</li>
+              <li><i class="fas fa-check"></i> On-site Management</li>
+            </ul>
+            <div class="bundle__footer">
+              <div class="bundle__price">From ₱200K</div>
+              <a href="signup.php" class="btn btn--primary btn--sm">Inquire</a>
+            </div>
+          </div>
+        </div>
+        <div class="bundle__card">
+          <div class="bundle__image">
+            <img src="https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=600&h=400&fit=crop" alt="Birthday party">
+          </div>
+          <div class="bundle__content">
+            <div class="bundle__icon-wrap"><i class="fas fa-birthday-cake"></i></div>
+            <h3 class="bundle__title">Birthday & Socials</h3>
+            <p class="bundle__desc">Intimate birthday parties, anniversaries, and milestone celebrations made truly memorable.</p>
+            <ul class="bundle__features">
+              <li><i class="fas fa-check"></i> Party Styling</li>
+              <li><i class="fas fa-check"></i> Entertainment</li>
+              <li><i class="fas fa-check"></i> Photography</li>
+              <li><i class="fas fa-check"></i> Invitations</li>
+            </ul>
+            <div class="bundle__footer">
+              <div class="bundle__price">From ₱50K</div>
+              <a href="signup.php" class="btn btn--primary btn--sm">Inquire</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Events Gallery - All Unique Images -->
+  <section class="section">
+    <div class="container">
+      <div class="section__header text-center">
+        <div class="eyebrow"><span class="rule"></span> Real Moments</div>
+        <h2>Events we've<br>brought to <em>life</em></h2>
+        <p class="section__subtitle">A glimpse into the unforgettable celebrations we've crafted for our beloved clients.</p>
+      </div>
+      <div class="featured__grid stagger">
+        <div class="featured__card">
+          <div class="featured__image-wrap">
+            <img src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=700&h=520&fit=crop" alt="Ethereal Garden Wedding">
+            <div class="featured__overlay">
+              <div class="featured__category">Wedding</div>
+              <h3 class="featured__title">Ethereal Garden Wedding</h3>
+              <a href="#" class="featured__link">View Story <i class="fas fa-arrow-right"></i></a>
+            </div>
+          </div>
+        </div>
+        <div class="featured__card">
+          <div class="featured__image-wrap">
+            <img src="https://images.unsplash.com/photo-1470058869958-2a77ade41c02?w=700&h=520&fit=crop" alt="Annual Awards Night">
+            <div class="featured__overlay">
+              <div class="featured__category">Corporate Gala</div>
+              <h3 class="featured__title">Annual Awards Night</h3>
+              <a href="#" class="featured__link">View Story <i class="fas fa-arrow-right"></i></a>
+            </div>
+          </div>
+        </div>
+        <div class="featured__card">
+          <div class="featured__image-wrap">
+            <!-- REPLACE WITH YOUR DOWNLOADED "MAGICAL 30TH BIRTHDAY" IMAGE -->
+            <img src="assets/img/30th.png" alt="Magical 30th Birthday">
+            <div class="featured__overlay">
+              <div class="featured__category">Birthday</div>
+              <h3 class="featured__title">Magical 30th Birthday</h3>
+              <a href="#" class="featured__link">View Story <i class="fas fa-arrow-right"></i></a>
+            </div>
+          </div>
+        </div>
+        <div class="featured__card">
+          <div class="featured__image-wrap">
+            <!-- REPLACE WITH YOUR DOWNLOADED "GOLDEN ANNIVERSARY GALA" IMAGE -->
+            <img src="assets/img/golden.jpg" alt="Golden Anniversary Gala">
+            <div class="featured__overlay">
+              <div class="featured__category">Anniversary</div>
+              <h3 class="featured__title">Golden Anniversary Gala</h3>
+              <a href="#" class="featured__link">View Story <i class="fas fa-arrow-right"></i></a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="text-center" style="margin-top: 2.5rem;">
+        <a href="#" class="btn btn--outline">View Full Gallery <i class="fas fa-arrow-right"></i></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section class="section section--alt" id="how-it-works">
+    <div class="container">
+      <div class="section__header text-center">
+        <div class="eyebrow"><span class="rule"></span> Simple Process</div>
+        <h2>How it <em>works</em></h2>
+        <p class="section__subtitle">Four steps to your perfect event, from vision to reality.</p>
+      </div>
+      <div class="howit__grid">
+        <div class="howit__step reveal">
+          <div class="howit__number">01</div>
+          <div class="howit__icon"><i class="fas fa-comment-dots"></i></div>
+          <h3>Consultation</h3>
+          <p>Share your vision, budget, and preferences in a free discovery call.</p>
+        </div>
+        <div class="howit__step reveal">
+          <div class="howit__number">02</div>
+          <div class="howit__icon"><i class="fas fa-magic"></i></div>
+          <h3>Design & Plan</h3>
+          <p>We create mood boards, source premium vendors, and build your timeline.</p>
+        </div>
+        <div class="howit__step reveal">
+          <div class="howit__number">03</div>
+          <div class="howit__icon"><i class="fas fa-check-double"></i></div>
+          <h3>Execution</h3>
+          <p>Our team manages every detail — you relax and soak in every moment.</p>
+        </div>
+        <div class="howit__step reveal">
+          <div class="howit__number">04</div>
+          <div class="howit__icon"><i class="fas fa-camera-retro"></i></div>
+          <h3>Celebrate</h3>
+          <p>Experience your flawless event and receive memories that last a lifetime.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  <section class="section">
+    <div class="container">
+      <div class="section__header text-center">
+        <div class="eyebrow"><span class="rule"></span> Love Notes</div>
+        <h2>What our <em>clients</em> say</h2>
+        <p class="section__subtitle">Don't just take our word for it — hear from our happy clients.</p>
+      </div>
+      <div class="testimonials__grid stagger">
+        <div class="testimonial__card">
+          <div class="testimonial__stars">★★★★★</div>
+          <p class="testimonial__quote">"Sinta transformed our vision into reality beyond our wildest dreams. Every guest was speechless at the beauty and flow of our wedding day."</p>
+          <div class="testimonial__author-row">
+            <div class="testimonial__avatar" style="background-image: url('https://randomuser.me/api/portraits/women/68.jpg');"></div>
+            <div>
+              <div class="testimonial__name">Isabella Rodriguez</div>
+              <div class="testimonial__role">Wedding Client</div>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial__card">
+          <div class="testimonial__stars">★★★★★</div>
+          <p class="testimonial__quote">"As a corporate client with high expectations, Sinta delivered flawlessly. The team was professional, creative, and handled every detail."</p>
+          <div class="testimonial__author-row">
+            <div class="testimonial__avatar" style="background-image: url('https://randomuser.me/api/portraits/men/32.jpg');"></div>
+            <div>
+              <div class="testimonial__name">Marcus Tan</div>
+              <div class="testimonial__role">Corporate Event</div>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial__card">
+          <div class="testimonial__stars">★★★★★</div>
+          <p class="testimonial__quote">"Planning my 30th from abroad was stressful, but Sinta made it effortless. The surprise element was perfectly executed!"</p>
+          <div class="testimonial__author-row">
+            <div class="testimonial__avatar" style="background-image: url('https://randomuser.me/api/portraits/women/44.jpg');"></div>
+            <div>
+              <div class="testimonial__name">Chloe Santos</div>
+              <div class="testimonial__role">Birthday Party</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="section--sm">
+    <div class="container">
+      <div class="cta__band reveal">
+        <h2>Ready to create your<br><em>perfect event?</em></h2>
+        <p>Let's build something unforgettable together. Book a free consultation today.</p>
+        <div class="cta__actions">
+          <a href="signup.php" class="btn btn--primary btn--lg">Get Started <i class="fas fa-arrow-right"></i></a>
+          <a href="#contact" class="btn btn--outline-light btn--lg">Contact Us</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section class="section" id="contact">
+    <div class="container">
+      <div class="contact__grid">
+        <div class="reveal">
+          <div class="eyebrow"><span class="rule"></span> Get in Touch</div>
+          <h2>Let's bring your<br><em>vision</em> to life</h2>
+          <p style="color: var(--gray); margin: 1rem 0 2rem;">Have questions or ready to start planning? Reach out — we'd love to hear from you.</p>
+          <div class="contact__details">
+            <div class="contact__detail"><i class="fas fa-map-marker-alt"></i> Unit 8, The Sapphire Tower, BGC, Manila</div>
+            <div class="contact__detail"><i class="fas fa-phone"></i> +63 (2) 8123 4567</div>
+            <div class="contact__detail"><i class="fas fa-envelope"></i> hello@sintaevents.com</div>
+          </div>
+          <div class="contact__social">
+            <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" aria-label="Pinterest"><i class="fab fa-pinterest"></i></a>
+          </div>
+        </div>
+        <div class="reveal">
+          <form class="contact__form">
+            <div class="form__row">
+              <input type="text" placeholder="Your Name">
+              <input type="email" placeholder="Email Address">
+            </div>
+            <div class="form__row">
+              <input type="tel" placeholder="Phone Number">
+              <select>
+                <option value="">Event Type</option>
+                <option>Wedding</option>
+                <option>Corporate Event</option>
+                <option>Birthday Party</option>
+                <option>Anniversary</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <textarea rows="4" placeholder="Tell us about your event vision..."></textarea>
+            <button type="button" class="btn btn--primary">Send Message <i class="fas fa-paper-plane"></i></button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer__top">
+      <div>
+        <a href="landing.php" class="footer__logo">
+          <img src="assets/img/logo.png" alt="Sinta" class="footer__logo-img" onerror="this.src='https://placehold.co/32x32/8A7650/white?text=S'">
+          <span>Sinta</span>
+        </a>
+        <p class="footer__desc">Crafting extraordinary event experiences across the Philippines. Every occasion deserves to be unforgettable.</p>
+      </div>
+      <div class="footer__col">
+        <div class="footer__col-title">Explore</div>
+        <ul>
+          <li><a href="#home">Home</a></li>
+          <li><a href="#about">About Us</a></li>
+          <li><a href="#bundles">Services</a></li>
+          <li><a href="#how-it-works">How It Works</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer__col">
+        <div class="footer__col-title">Account</div>
+        <ul>
+          <li><a href="signin.php">Sign In</a></li>
+          <li><a href="signup.php">Get Started</a></li>
+        </ul>
+      </div>
+      <div class="footer__col">
+        <div class="footer__col-title">Stay Inspired</div>
+        <p style="font-size: 0.85rem; color: var(--gray); margin-bottom: 0.75rem;">Get event ideas and exclusive deals in your inbox.</p>
+        <div class="footer__input-wrap">
+          <input type="email" placeholder="your@email.com">
+          <button><i class="fas fa-arrow-right"></i></button>
+        </div>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <span>© <?= date('Y') ?> Sinta Events. All rights reserved.</span>
+      <div class="footer__bottom-links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Mobile nav toggle
+  const navToggle = document.getElementById('navToggle');
+  const navLinks = document.getElementById('navLinks');
+  
+  if (navToggle) {
+    navToggle.addEventListener('click', () => {
+      navLinks.classList.toggle('active');
+      navToggle.classList.toggle('active');
+    });
+  }
+  
+  document.querySelectorAll('.nav__links a').forEach(link => {
+    link.addEventListener('click', () => {
+      navLinks.classList.remove('active');
+      navToggle.classList.remove('active');
+    });
+  });
+
+  // Navbar scroll effect
+  window.addEventListener('scroll', () => {
+    const navbar = document.getElementById('navbar');
+    if (navbar) navbar.classList.toggle('scrolled', window.scrollY > 50);
+  });
+
+  // Smooth scroll
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function(e) {
+      e.preventDefault();
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('active');
+      }
+    });
+  }, { threshold: 0.1 });
+  
+  reveals.forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
