@@ -284,7 +284,7 @@ $occasionLabel = ucfirst($occasion);
 <body>
 
 <!-- Include external navigation -->
-<?php include __DIR__ . '/../partials/nav.php'; ?>
+<?php include __DIR__ . '/../public/nav.php'; ?>
 
 <main class="customize-main">
   <div class="breadcrumb">

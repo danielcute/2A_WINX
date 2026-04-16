@@ -1,4 +1,79 @@
-<?php $page = 'signin'; ?>
+<?php 
+session_start();
+$page = 'signin';
+
+// Clear any existing session variables that might cause auto-login
+// Remove this line after testing - it's just for debugging
+if (isset($_GET['clear'])) {
+    session_destroy();
+    header('Location: signin.php');
+    exit;
+}
+
+// Only redirect if user is trying to access while already logged in
+// But we want to show the signin page first, so let's comment these out
+/*
+if (isset($_SESSION['user_logged_in']) && $_SESSION['user_logged_in'] === true) {
+    header('Location: homepage.php');
+    exit;
+}
+
+if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true) {
+    header('Location: admin-dashboard.php');
+    exit;
+}
+*/
+
+$error = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $email = $_POST['email'] ?? '';
+    $password = $_POST['password'] ?? '';
+    $remember = isset($_POST['remember']);
+    
+    // FIXED ADMIN CREDENTIALS
+    $admin_email = 'admin@sinta.com';
+    $admin_password = 'sinta2024';
+    
+    
+    // DEMO USER CREDENTIALS
+    $users = [
+        'maria@email.com' => 'password123',
+        'user@example.com' => 'user123',
+        'john@email.com' => 'password123'
+    ];
+    
+    // CHECK IF ADMIN LOGIN
+    if ($email === $admin_email && $password === $admin_password) {
+        $_SESSION['admin_logged_in'] = true;
+        $_SESSION['admin_email'] = $email;
+        $_SESSION['admin_name'] = 'Administrator';
+        
+        if ($remember) {
+            setcookie('admin_remember', $email, time() + (86400 * 30), "/");
+        }
+        
+        header('Location: admin-dashboard.php');
+        exit;
+    }
+    // CHECK IF REGULAR USER LOGIN
+    elseif (isset($users[$email]) && $users[$email] === $password) {
+        $_SESSION['user_logged_in'] = true;
+        $_SESSION['user_email'] = $email;
+        $_SESSION['user_name'] = explode('@', $email)[0];
+        
+        if ($remember) {
+            setcookie('user_remember', $email, time() + (86400 * 30), "/");
+        }
+        
+        header('Location: homepage.php');
+        exit;
+    }
+    else {
+        $error = 'Invalid email or password';
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -35,7 +110,6 @@
       border: 1px solid var(--border);
     }
     
-    /* Brand Side - WITH BACKGROUND IMAGE (replaces brown gradient) */
     .auth-brand {
       background-image: url('assets/img/signinimg.jpg');
       background-size: cover;
@@ -48,7 +122,6 @@
       position: relative;
     }
     
-    /* Dark overlay to make text readable */
     .auth-brand::before {
       content: '';
       position: absolute;
@@ -143,7 +216,6 @@
       color: white;
     }
     
-    /* Form Side */
     .auth-form {
       padding: 3rem;
     }
@@ -156,6 +228,17 @@
     .auth-form p {
       color: var(--text-muted);
       margin-bottom: 2rem;
+    }
+    
+    .admin-badge {
+      display: inline-block;
+      background: var(--primary-pale);
+      color: var(--primary);
+      font-size: 0.7rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
     }
     
     .social-buttons {
@@ -268,6 +351,18 @@
       text-decoration: underline;
     }
     
+    .error-message {
+      background: #fee2e2;
+      color: #dc2626;
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius-md);
+      margin-bottom: 1rem;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
     .auth-footer {
       text-align: center;
       margin-top: 1.5rem;
@@ -279,6 +374,22 @@
       color: var(--primary);
       text-decoration: none;
       font-weight: 500;
+    }
+    
+    .demo-credentials {
+      margin-top: 1rem;
+      padding: 0.75rem;
+      background: var(--cream);
+      border-radius: var(--radius-md);
+      font-size: 0.7rem;
+      text-align: center;
+    }
+    
+    .demo-credentials code {
+      background: white;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: monospace;
     }
     
     @media (max-width: 900px) {
@@ -299,7 +410,6 @@
 <div class="auth-container">
   <div class="auth-card animate-fade-up">
     
-    <!-- Brand Side - With Background Image -->
     <div class="auth-brand">
       <div>
         <div class="logo">
@@ -334,8 +444,10 @@
       </div>
     </div>
     
-    <!-- Form Side -->
     <div class="auth-form">
+      <div class="admin-badge">
+        
+      </div>
       <h1>Welcome back</h1>
       <p>Sign in to continue planning your perfect event</p>
       
@@ -350,23 +462,35 @@
       
       <div class="divider"><span>or sign in with email</span></div>
       
-      <form id="signinForm">
+      <?php if ($error): ?>
+        <div class="error-message">
+          <i class="fas fa-exclamation-circle"></i> <?= htmlspecialchars($error) ?>
+        </div>
+      <?php endif; ?>
+      
+      <form method="POST" id="signinForm">
         <div class="form-group">
           <label>Email address</label>
-          <input type="email" id="email" placeholder="you@example.com" required>
+          <input type="email" name="email" id="email" placeholder="you@example.com" required value="<?= htmlspecialchars($_POST['email'] ?? '') ?>">
         </div>
         <div class="form-group">
           <label>Password</label>
-          <input type="password" id="password" placeholder="Enter your password" required>
+          <input type="password" name="password" id="password" placeholder="Enter your password" required>
         </div>
         <div class="form-options">
           <label class="checkbox">
-            <input type="checkbox"> <span>Remember me</span>
+            <input type="checkbox" name="remember"> <span>Remember me</span>
           </label>
           <a href="#" class="forgot-link">Forgot password?</a>
         </div>
         <button type="submit" class="btn btn--primary btn--full btn--lg">Sign In</button>
       </form>
+      
+      <div class="demo-credentials">
+        <i class="fas fa-info-circle"></i> Demo Credentials:<br>
+        👑 <strong>Admin:</strong> <code>admin@sinta.com</code> / <code>sinta2024</code><br>
+        👤 <strong>User:</strong> <code>maria@email.com</code> / <code>password123</code>
+      </div>
       
       <div class="auth-footer">
         <p>Don't have an account? <a href="signup.php">Create one free →</a></p>
@@ -380,13 +504,6 @@
 function socialLogin(provider) {
   alert(`Signing in with ${provider}...`);
 }
-
-document.getElementById('signinForm')?.addEventListener('submit', (e) => {
-  e.preventDefault();
-  const email = document.getElementById('email').value;
-  alert(`Welcome back! Signing in as ${email}`);
-  window.location.href = 'homepage.php';
-});
 </script>
 </body>
 </html>

@@ -415,7 +415,7 @@ $depositRequired = round($cartTotal * 0.5);
 </head>
 <body>
 
-<?php include __DIR__ . '/../partials/nav.php'; ?>
+<?php include __DIR__ . '/../public/nav.php'; ?>
 
 <main class="checkout-main">
     <div class="breadcrumb">

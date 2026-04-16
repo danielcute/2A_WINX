@@ -12,7 +12,7 @@ $id = $_GET['id'] ?? 1;
 </head>
 <body>
 
-<?php include 'partials/app-nav.php'; ?>
+<?php include 'public/app-nav.php'; ?>
 
 <div class="app-shell">
   <main class="evd-main">

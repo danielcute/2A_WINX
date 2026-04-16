@@ -194,7 +194,7 @@ $avatar_path = !empty($user['avatar']) && file_exists(__DIR__ . '/' . $user['ava
 </head>
 <body>
 
-<?php include __DIR__ . '/../partials/nav.php'; ?>
+<?php include __DIR__ . '/../public/nav.php'; ?>
 
 <div class="app-shell">
     <main class="profile-main">

@@ -167,7 +167,7 @@
 </head>
 <body>
 
-<?php include __DIR__ . '/../partials/nav.php'; ?>
+<?php include __DIR__ . '/../public/nav.php'; ?>
 
 <div class="app-shell">
   <main class="occ-main">

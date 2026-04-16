@@ -356,7 +356,7 @@ $showOther = ($occasion == 'other');
 </head>
 <body>
 
-<?php include __DIR__ . '/../partials/nav.php'; ?>
+<?php include __DIR__ . '/../public/nav.php'; ?>
 
 <main class="pkg-main">
   <div class="breadcrumb">
