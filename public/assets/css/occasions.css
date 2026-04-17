@@ -1,0 +1,121 @@
+/* ════════════════════════════════════════════════════════════
+   occasions.css  —  Sinta
+════════════════════════════════════════════════════════════ */
+
+.occ-main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 3rem 2rem 6rem;
+}
+
+/* Header */
+.occ-header {
+  text-align: center;
+  margin-bottom: 3rem;
+  animation: fadeUp 0.5s ease both;
+}
+.occ-header .eyebrow { justify-content: center; }
+.occ-header h1 {
+  font-family: var(--serif);
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 400;
+  color: var(--dark);
+  margin: 0.4rem 0 0.75rem;
+}
+.occ-header h1 em { color: var(--gold); font-style: italic; }
+.occ-header__sub { color: var(--muted); font-size: 0.95rem; max-width: 440px; margin: 0 auto; }
+
+/* Grid */
+.occ-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+  animation: fadeUp 0.5s 0.1s ease both;
+}
+
+/* Card */
+.occ-card {
+  border-radius: var(--r-xl);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--white);
+  text-decoration: none;
+  color: var(--ink);
+  display: flex;
+  flex-direction: column;
+  transition: all var(--ts);
+}
+.occ-card:hover { transform: translateY(-8px); box-shadow: var(--sh-lg); border-color: var(--gold-light); }
+
+.occ-card__img {
+  height: 165px;
+  background-size: cover;
+  background-position: center;
+  transition: transform 0.55s ease;
+  flex-shrink: 0;
+}
+.occ-card:hover .occ-card__img { transform: scale(1.05); }
+
+.occ-card__body {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem 1.25rem 1.4rem;
+}
+.occ-card__body--center {
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 3rem 1.5rem;
+  gap: 0.75rem;
+  flex: 1;
+  justify-content: center;
+}
+
+.occ-card__icon {
+  width: 44px; height: 44px;
+  border-radius: var(--r-sm);
+  background: var(--gold-pale);
+  color: var(--gold);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; flex-shrink: 0;
+  transition: all var(--tb);
+}
+.occ-card:hover .occ-card__icon { background: var(--gold); color: #fff; }
+.occ-card__icon--lg { width: 58px; height: 58px; font-size: 1.35rem; }
+
+.occ-card__text { flex: 1; }
+.occ-card h3 {
+  font-family: var(--serif);
+  font-size: 1.2rem; font-weight: 500;
+  color: var(--dark); margin-bottom: 0.2rem;
+}
+.occ-card p { font-size: 0.8rem; color: var(--muted); line-height: 1.5; margin-bottom: 0.4rem; }
+.occ-card__price {
+  display: inline-block;
+  font-size: 0.7rem; font-weight: 600;
+  color: var(--gold);
+  background: var(--gold-pale);
+  padding: 0.22rem 0.65rem;
+  border-radius: 999px;
+}
+
+.occ-card__arrow {
+  color: var(--muted-2); font-size: 0.8rem; flex-shrink: 0;
+  transition: transform var(--tb), color var(--tb);
+}
+.occ-card:hover .occ-card__arrow { color: var(--gold); transform: translateX(4px); }
+
+.occ-card--light { background: var(--ivory-2); border-style: dashed; }
+.occ-card--light h3 { color: var(--muted); }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 900px) { .occ-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) {
+  .occ-grid { grid-template-columns: 1fr; }
+  .occ-main { padding: 2rem 1rem 4rem; }
+}
