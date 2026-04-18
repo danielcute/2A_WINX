@@ -4,7 +4,9 @@
  * Handles real user-to-admin messaging system
  */
 
-define('ROOT_PATH', dirname(dirname(__DIR__)));
+if (!defined('ROOT_PATH')) {
+    define('ROOT_PATH', dirname(dirname(__DIR__)));
+}
 require_once ROOT_PATH . '/config/database.php';
 
 class MessagingController {
@@ -64,13 +66,10 @@ class MessagingController {
         $params = [$admin_id];
         $types = "i";
         
-        if ($filter === 'unread') {
-            $query .= " AND m.status = 'unread'";
-        } elseif ($filter === 'replied') {
-            $query .= " AND m.status = 'replied'";
-        }
+        // Note: The messages_tbl doesn't have read_status column,
+        // it uses timestamp instead of created_at
         
-        $query .= " ORDER BY m.created_at DESC";
+        $query .= " ORDER BY m.timestamp DESC";
         
         $stmt = $this->db->prepare($query);
         $stmt->bind_param($types, ...$params);
@@ -172,7 +171,9 @@ class MessagingController {
      * Get unread message count for admin
      */
     public function getUnreadCount($admin_id) {
-        $stmt = $this->db->prepare("SELECT COUNT(*) as count FROM messages_tbl WHERE recipient_id = ? AND status = 'unread'");
+        // Note: Messages table doesn't have explicit 'unread' status
+        // Count all messages for the admin recipient
+        $stmt = $this->db->prepare("SELECT COUNT(*) as count FROM messages_tbl WHERE recipient_id = ?");
         $stmt->bind_param("i", $admin_id);
         $stmt->execute();
         $result = $stmt->get_result();

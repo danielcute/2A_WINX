@@ -242,6 +242,10 @@ $unread_count = $_SESSION['admin_unread_count'] ?? 0;
         <i class="fas fa-calendar-check"></i>
         <span>Booking Management</span>
       </a>
+      <a href="/SINTA/public/index.php?route=admin-customizations" class="admin-sidebar__link">
+        <i class="fas fa-wand-magic-sparkles"></i>
+        <span>Customization Management</span>
+      </a>
       <a href="/SINTA/public/index.php?route=admin-testimonials" class="admin-sidebar__link">
         <i class="fas fa-star"></i>
         <span>Testimonial Management</span>

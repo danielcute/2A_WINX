@@ -4,7 +4,9 @@
  * Handles CRUD operations for packages
  */
 
-define('ROOT_PATH', dirname(dirname(__DIR__)));
+if (!defined('ROOT_PATH')) {
+    define('ROOT_PATH', dirname(dirname(__DIR__)));
+}
 require_once ROOT_PATH . '/config/database.php';
 
 class AdminPackageController {

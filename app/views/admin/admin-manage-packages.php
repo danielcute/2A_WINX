@@ -11,7 +11,6 @@ if (!isset($_SESSION['admin_logged_in'])) {
     exit;
 }
 
-define('ROOT_PATH', dirname(dirname(__DIR__)));
 require_once ROOT_PATH . '/app/controllers/AdminPackageController.php';
 
 $packageController = new AdminPackageController();

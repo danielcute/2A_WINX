@@ -1,4 +1,7 @@
 <?php
+if (!defined('ROOT_PATH')) {
+    define('ROOT_PATH', dirname(dirname(__DIR__)));
+}
 require_once ROOT_PATH . '/config/database.php';
 
 class Booking {
@@ -12,11 +15,15 @@ class Booking {
         $sql = "SELECT b.*, u.first_name, u.last_name, u.email, u.phone, p.name as package_name
                 FROM checkout_tbl b
                 LEFT JOIN users_tbl u ON b.user_id = u.user_id
-                LEFT JOIN plans_tbl pl ON b.plan_id = pl.plan_id
-                LEFT JOIN packages_tbl p ON pl.package_id = p.package_id
+                LEFT JOIN packages_tbl p ON b.package_id = p.package_id
                 ORDER BY b.date DESC";
         
         $result = $this->db->query($sql);
+        if (!$result) {
+            error_log('Booking getAll Error: ' . $this->db->error);
+            return [];
+        }
+        
         $bookings = [];
         while ($row = $result->fetch_assoc()) {
             $bookings[] = $row;

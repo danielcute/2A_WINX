@@ -167,13 +167,20 @@ switch($route) {
             header('Location: /SINTA/public/index.php?route=signin');
             exit;
         }
-        include VIEW_PATH . '/user/homepage.php';
+        include VIEW_PATH . '/user/homepage-modern.php';
         break;
     case 'occasions':
         include VIEW_PATH . '/user/occasions.php';
         break;
     case 'packages':
-        include VIEW_PATH . '/user/packages.php';
+        include VIEW_PATH . '/user/packages-modern.php';
+        break;
+    case 'bookings':
+        if (!isset($_SESSION['user_logged_in'])) {
+            header('Location: /SINTA/public/index.php?route=signin');
+            exit;
+        }
+        include VIEW_PATH . '/user/bookings-modern.php';
         break;
     case 'customize':
         include VIEW_PATH . '/user/customize.php';
@@ -188,7 +195,7 @@ switch($route) {
         include VIEW_PATH . '/user/event-detail.php';
         break;
     case 'messages':
-        include VIEW_PATH . '/user/messages.php';
+        include VIEW_PATH . '/user/messages-modern.php';
         break;
     case 'profile':
         include VIEW_PATH . '/user/profile.php';
@@ -220,6 +227,20 @@ switch($route) {
         }
         include VIEW_PATH . '/admin/admin-manage-packages.php';
         break;
+    case 'admin-bookings':
+        if (!isset($_SESSION['admin_logged_in'])) {
+            header('Location: /SINTA/public/index.php?route=signin');
+            exit;
+        }
+        include VIEW_PATH . '/admin/admin-manage-bookings.php';
+        break;
+    case 'admin-customizations':
+        if (!isset($_SESSION['admin_logged_in'])) {
+            header('Location: /SINTA/public/index.php?route=signin');
+            exit;
+        }
+        include VIEW_PATH . '/admin/admin-manage-customizations.php';
+        break;
     case 'admin-testimonials':
         if (!isset($_SESSION['admin_logged_in'])) {
             header('Location: /SINTA/public/index.php?route=signin');
@@ -232,7 +253,7 @@ switch($route) {
             header('Location: /SINTA/public/index.php?route=signin');
             exit;
         }
-        include VIEW_PATH . '/admin/admin-messages-real.php';
+        include VIEW_PATH . '/admin/admin-messages-modern.php';
         break;
     default:
         include VIEW_PATH . '/landing/landing.php';

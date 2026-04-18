@@ -9,16 +9,21 @@ class Testimonial {
     }
     
     public function getAll($approvedOnly = true) {
-        $sql = "SELECT r.*, u.first_name, u.last_name, u.image as user_image, p.name as package_name
-                FROM reviews_tbl r
-                LEFT JOIN users_tbl u ON r.user_id = u.user_id
-                LEFT JOIN packages_tbl p ON r.package_id = p.package_id";
+        $sql = "SELECT t.*, u.first_name, u.last_name, u.image as user_image, p.name as package_name
+                FROM testimonials_tbl t
+                LEFT JOIN users_tbl u ON t.user_id = u.user_id
+                LEFT JOIN packages_tbl p ON t.package_id = p.package_id";
         if ($approvedOnly) {
-            $sql .= " WHERE r.status = 'approved'";
+            $sql .= " WHERE t.status = 'approved'";
         }
-        $sql .= " ORDER BY r.created_at DESC";
+        $sql .= " ORDER BY t.created_at DESC";
         
         $result = $this->db->query($sql);
+        if (!$result) {
+            error_log('Testimonial getAll Error: ' . $this->db->error);
+            return [];
+        }
+        
         $testimonials = [];
         while ($row = $result->fetch_assoc()) {
             $testimonials[] = $row;
@@ -74,7 +79,11 @@ class Testimonial {
     }
     
     public function getPendingCount() {
-        $result = $this->db->query("SELECT COUNT(*) as total FROM reviews_tbl WHERE status = 'pending'");
+        $result = $this->db->query("SELECT COUNT(*) as total FROM testimonials_tbl WHERE status = 'pending'");
+        if (!$result) {
+            error_log('Testimonial getPendingCount Error: ' . $this->db->error);
+            return 0;
+        }
         $row = $result->fetch_assoc();
         return $row['total'];
     }
