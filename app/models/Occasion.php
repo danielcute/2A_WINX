@@ -1,4 +1,11 @@
 <?php
+/**
+ * Occasion Model
+ * Handles event occasions (weddings, birthdays, etc.)
+ */
+if (!defined('ROOT_PATH')) {
+    define('ROOT_PATH', dirname(dirname(__DIR__)));
+}
 require_once ROOT_PATH . '/config/database.php';
 
 class Occasion {

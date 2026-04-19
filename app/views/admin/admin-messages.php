@@ -1,588 +1,167 @@
-<?php 
-// Session already started in index.php
-if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
+<?php
+/**
+ * Admin Messages Management Page (Real)
+ */
+$page = 'admin-messages';
+
+if (!isset($_SESSION['admin_logged_in'])) {
     header('Location: /SINTA/public/index.php?route=signin');
     exit;
 }
-$page_title = 'Message Management';
 
-// Initialize messages session storage (simulating database)
-if (!isset($_SESSION['admin_messages'])) {
-    $_SESSION['admin_messages'] = [
-        [
-            'id' => 1,
-            'user_id' => 1,
-            'user_name' => 'Maria Santos',
-            'user_email' => 'maria@email.com',
-            'message' => 'Hi! I have a question about the wedding package. Can I customize the floral arrangements?',
-            'is_admin_reply' => 0,
-            'parent_id' => null,
-            'status' => 'unread',
-            'created_at' => '2026-04-14 09:30:00'
-        ],
-        [
-            'id' => 2,
-            'user_id' => 1,
-            'user_name' => 'Maria Santos',
-            'user_email' => 'maria@email.com',
-            'message' => 'Also, what\'s the payment schedule like?',
-            'is_admin_reply' => 0,
-            'parent_id' => null,
-            'status' => 'unread',
-            'created_at' => '2026-04-14 09:31:00'
-        ],
-        [
-            'id' => 3,
-            'user_id' => 2,
-            'user_name' => 'John Reyes',
-            'user_email' => 'john@email.com',
-            'message' => 'Is the Classic Birthday package available for December?',
-            'is_admin_reply' => 0,
-            'parent_id' => null,
-            'status' => 'read',
-            'created_at' => '2026-04-13 15:20:00'
-        ]
-    ];
-}
+require_once ROOT_PATH . '/app/controllers/MessagingController.php';
 
-// Initialize replies storage
-if (!isset($_SESSION['admin_replies'])) {
-    $_SESSION['admin_replies'] = [
-        [
-            'id' => 1,
-            'message_id' => 3,
-            'user_id' => 2,
-            'reply' => 'Hi John! Yes, the Classic Birthday package is available in December. I\'d recommend booking early to secure your date!',
-            'created_at' => '2026-04-13 16:00:00'
-        ]
-    ];
-}
+$messagingController = new MessagingController();
+$admin_id = $_SESSION['user_id'];
+
+$message = '';
+$error = '';
 
 // Handle reply submission
-$reply_success = '';
-$reply_error = '';
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
-    if ($_POST['action'] === 'send_reply') {
-        $message_id = (int)$_POST['message_id'];
-        $user_id = (int)$_POST['user_id'];
-        $user_name = $_POST['user_name'];
-        $user_email = $_POST['user_email'];
-        $reply_text = trim($_POST['reply_text']);
-        
-        if (empty($reply_text)) {
-            $reply_error = 'Please enter a reply message.';
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'reply') {
+    $message_id = intval($_POST['message_id'] ?? 0);
+    $reply_text = trim($_POST['reply_text'] ?? '');
+    if ($message_id && $reply_text) {
+        $result = $messagingController->replyToMessage($message_id, $admin_id, $reply_text);
+        if ($result['success']) {
+            $message = 'Reply sent successfully!';
         } else {
-            // Store reply
-            $new_reply_id = count($_SESSION['admin_replies']) + 1;
-            $_SESSION['admin_replies'][] = [
-                'id' => $new_reply_id,
-                'message_id' => $message_id,
-                'user_id' => $user_id,
-                'reply' => $reply_text,
-                'created_at' => date('Y-m-d H:i:s')
-            ];
-            
-            // Mark original message as replied
-            foreach ($_SESSION['admin_messages'] as &$msg) {
-                if ($msg['id'] == $message_id) {
-                    $msg['status'] = 'replied';
-                    break;
-                }
-            }
-            
-            // Update unread count (decrease)
-            if (!isset($_SESSION['admin_unread_count'])) {
-                $_SESSION['admin_unread_count'] = 0;
-            }
-            
-            $reply_success = 'Reply sent successfully to ' . htmlspecialchars($user_name);
+            $error = 'Failed to send reply: ' . $result['error'];
         }
     }
 }
 
-// Mark message as read when viewing conversation
-if (isset($_GET['view']) && is_numeric($_GET['view'])) {
-    $view_id = (int)$_GET['view'];
-    foreach ($_SESSION['admin_messages'] as &$msg) {
-        if ($msg['id'] == $view_id && $msg['status'] == 'unread') {
-            $msg['status'] = 'read';
-            // Decrease unread count
-            if (isset($_SESSION['admin_unread_count']) && $_SESSION['admin_unread_count'] > 0) {
-                $_SESSION['admin_unread_count']--;
-            }
-            break;
+// Handle admin new message to user
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'new_message') {
+    $user_id = intval($_POST['user_id'] ?? 0);
+    $subject = trim($_POST['subject'] ?? '');
+    $message_text = trim($_POST['message_text'] ?? '');
+    if ($user_id && $subject && $message_text) {
+        $result = $messagingController->sendAdminMessage($admin_id, $user_id, $subject, $message_text);
+        if ($result['success']) {
+            $message = 'Message sent to user!';
+        } else {
+            $error = 'Failed: ' . $result['error'];
         }
     }
 }
 
-// Get all conversations grouped by user
-$conversations = [];
-foreach ($_SESSION['admin_messages'] as $msg) {
-    $user_id = $msg['user_id'];
-    if (!isset($conversations[$user_id])) {
-        $conversations[$user_id] = [
-            'user_id' => $user_id,
-            'user_name' => $msg['user_name'],
-            'user_email' => $msg['user_email'],
-            'messages' => [],
-            'last_message' => $msg['created_at'],
-            'unread_count' => 0
-        ];
-    }
-    $conversations[$user_id]['messages'][] = $msg;
-    if ($msg['status'] == 'unread') {
-        $conversations[$user_id]['unread_count']++;
-    }
-    if ($msg['created_at'] > $conversations[$user_id]['last_message']) {
-        $conversations[$user_id]['last_message'] = $msg['created_at'];
-    }
+// Get filter
+$filter = isset($_GET['filter']) ? $_GET['filter'] : 'all';
+$messages = $messagingController->getAdminMessages($admin_id, $filter);
+$unread_count = $messagingController->getUnreadCount($admin_id);
+
+// Get selected message if viewing
+$selected_message = null;
+if (isset($_GET['message_id'])) {
+    $message_id = intval($_GET['message_id']);
+    $selected_message = $messagingController->getMessageWithReplies($message_id);
+    $messagingController->markAsRead($message_id);
 }
 
-// Sort conversations by last message time (newest first)
-usort($conversations, function($a, $b) {
-    return strtotime($b['last_message']) - strtotime($a['last_message']);
-});
-
-// Get selected conversation
-$selected_user = null;
-$selected_messages = [];
-$selected_user_id = null;
-
-if (isset($_GET['user']) && is_numeric($_GET['user'])) {
-    $selected_user_id = (int)$_GET['user'];
-    if (isset($conversations[$selected_user_id])) {
-        $selected_user = $conversations[$selected_user_id];
-        $selected_messages = $selected_user['messages'];
-    }
-}
-
-// Calculate total unread count
-$total_unread = 0;
-foreach ($conversations as $conv) {
-    $total_unread += $conv['unread_count'];
-}
-$_SESSION['admin_unread_count'] = $total_unread;
+// Get list of users for "new message" dropdown
+$users_stmt = $messagingController->db->prepare("SELECT user_id, first_name, last_name, email FROM users_tbl WHERE role = 'user' ORDER BY first_name");
+$users_stmt->execute();
+$users = $users_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$users_stmt->close();
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Messages | Sinta</title>
-    <link rel="stylesheet" href="assets/css/global.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/SINTA/public/assets/css/global.css">
     <style>
-        .messages-container {
-            display: flex;
-            gap: 1.5rem;
-            min-height: calc(100vh - 160px);
-            background: white;
-            border-radius: var(--radius-xl);
-            border: 1px solid var(--border);
-            overflow: hidden;
-        }
-        
-        /* Conversations Sidebar */
-        .conversations-sidebar {
-            width: 320px;
-            border-right: 1px solid var(--border);
-            background: var(--bg-primary);
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .conversations-header {
-            padding: 1.25rem;
-            border-bottom: 1px solid var(--border);
-            background: var(--cream);
-        }
-        
-        .conversations-header h3 {
-            font-size: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .conversations-header h3 i {
-            color: var(--primary);
-        }
-        
-        .conversations-search {
-            padding: 1rem;
-            border-bottom: 1px solid var(--border);
-        }
-        
-        .conversations-search input {
-            width: 100%;
-            padding: 0.6rem 1rem;
-            border: 1px solid var(--border);
-            border-radius: 60px;
-            font-size: 0.8rem;
-            outline: none;
-        }
-        
-        .conversations-search input:focus {
-            border-color: var(--primary);
-        }
-        
-        .conversations-list {
-            flex: 1;
-            overflow-y: auto;
-        }
-        
-        .conversation-item {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 1rem 1.25rem;
-            border-bottom: 1px solid var(--border);
-            cursor: pointer;
-            transition: all var(--t-fast);
-            text-decoration: none;
-            color: inherit;
-        }
-        
-        .conversation-item:hover {
-            background: var(--cream);
-        }
-        
-        .conversation-item.active {
-            background: var(--primary-pale);
-            border-left: 3px solid var(--primary);
-        }
-        
-        .conversation-avatar {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: var(--primary-pale);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            color: var(--primary);
-            flex-shrink: 0;
-        }
-        
-        .conversation-info {
-            flex: 1;
-            min-width: 0;
-        }
-        
-        .conversation-name {
-            font-weight: 600;
-            font-size: 0.9rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .conversation-name span:first-child {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        .conversation-time {
-            font-size: 0.65rem;
-            color: var(--gray-light);
-        }
-        
-        .conversation-preview {
-            font-size: 0.75rem;
-            color: var(--gray);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            margin-top: 0.2rem;
-        }
-        
-        .unread-badge {
-            background: var(--primary);
-            color: white;
-            font-size: 0.65rem;
-            padding: 0.15rem 0.5rem;
-            border-radius: 20px;
-            font-weight: 600;
-        }
-        
-        /* Chat Area */
-        .chat-area {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            background: var(--bg-secondary);
-        }
-        
-        .chat-header {
-            padding: 1rem 1.5rem;
-            background: white;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .chat-user-info {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-        
-        .chat-user-avatar {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: var(--primary-pale);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            color: var(--primary);
-        }
-        
-        .chat-user-name h4 {
-            font-size: 1rem;
-            margin-bottom: 0.2rem;
-        }
-        
-        .chat-user-name p {
-            font-size: 0.7rem;
-            color: var(--gray);
-        }
-        
-        .chat-messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 1.5rem;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-        
-        .message-group {
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .message-bubble {
-            max-width: 70%;
-            padding: 0.75rem 1rem;
-            border-radius: 20px;
-            margin-bottom: 0.25rem;
-        }
-        
-        .message-bubble.user {
-            background: white;
-            border: 1px solid var(--border);
-            align-self: flex-start;
-            border-bottom-left-radius: 4px;
-        }
-        
-        .message-bubble.admin {
-            background: var(--primary);
-            color: white;
-            align-self: flex-end;
-            border-bottom-right-radius: 4px;
-        }
-        
-        .message-bubble.admin p {
-            color: white;
-        }
-        
-        .message-bubble p {
-            font-size: 0.85rem;
-            line-height: 1.5;
-        }
-        
-        .message-time {
-            font-size: 0.6rem;
-            color: var(--gray-light);
-            margin-top: 0.25rem;
-        }
-        
-        .message-bubble.admin .message-time {
-            color: rgba(255,255,255,0.7);
-            text-align: right;
-        }
-        
-        .message-bubble.user .message-time {
-            margin-left: 0.5rem;
-        }
-        
-        .reply-divider {
-            margin: 0.5rem 0;
-            font-size: 0.7rem;
-            color: var(--gray-light);
-            text-align: center;
-            position: relative;
-        }
-        
-        .reply-divider::before,
-        .reply-divider::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            width: 40%;
-            height: 1px;
-            background: var(--border);
-        }
-        
-        .reply-divider::before {
-            left: 0;
-        }
-        
-        .reply-divider::after {
-            right: 0;
-        }
-        
-        /* Reply Form */
-        .reply-form {
-            padding: 1rem 1.5rem;
-            background: white;
-            border-top: 1px solid var(--border);
-            display: flex;
-            gap: 1rem;
-            align-items: flex-end;
-        }
-        
-        .reply-form textarea {
-            flex: 1;
-            padding: 0.75rem 1rem;
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            font-family: var(--sans);
-            font-size: 0.85rem;
-            resize: vertical;
-            min-height: 60px;
-            outline: none;
-        }
-        
-        .reply-form textarea:focus {
-            border-color: var(--primary);
-        }
-        
-        .reply-form button {
-            padding: 0.6rem 1.2rem;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 60px;
-            cursor: pointer;
-            transition: all var(--t-fast);
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .reply-form button:hover {
-            background: var(--primary-dark);
-            transform: translateY(-2px);
-        }
-        
-        .empty-chat {
-            text-align: center;
-            padding: 3rem;
-            color: var(--gray);
-        }
-        
-        .empty-chat i {
-            font-size: 3rem;
-            color: var(--border);
-            margin-bottom: 1rem;
-        }
-        
-        /* Alert Messages */
-        .alert-msg {
-            padding: 0.75rem 1rem;
-            border-radius: var(--radius-md);
-            margin-bottom: 1rem;
-            font-size: 0.85rem;
-        }
-        
-        .alert-success {
-            background: #e8f5e9;
-            color: #2e7d32;
-            border-left: 3px solid #2e7d32;
-        }
-        
-        .alert-error {
-            background: #ffebee;
-            color: #c62828;
-            border-left: 3px solid #c62828;
-        }
-        
-        @media (max-width: 768px) {
-            .conversations-sidebar {
-                width: 280px;
-            }
-            .message-bubble {
-                max-width: 85%;
-            }
+        body { background: #f5f5f5; font-family: 'DM Sans', sans-serif; }
+        .admin-container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .page-header h1 { font-family: 'Cormorant Garamond', serif; font-size: 2rem; color: #333; margin: 0; }
+        .badge { display: inline-block; background: #f44336; color: white; padding: 5px 10px; border-radius: 20px; font-size: 0.85rem; margin-left: 10px; }
+        .messages-layout { display: grid; grid-template-columns: 350px 1fr; gap: 20px; }
+        .messages-list { background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow: hidden; display: flex; flex-direction: column; height: 70vh; }
+        .messages-header { padding: 15px; border-bottom: 1px solid #eee; }
+        .filter-buttons { display: flex; gap: 5px; margin-bottom: 10px; }
+        .filter-btn { padding: 8px 12px; border: 1px solid #ddd; background: white; border-radius: 5px; cursor: pointer; font-size: 0.85rem; }
+        .filter-btn.active { background: #8A7650; color: white; border-color: #8A7650; }
+        .messages-scroll { flex: 1; overflow-y: auto; }
+        .message-item { padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; transition: background 0.2s; }
+        .message-item:hover { background: #f9f9f9; }
+        .message-item.active { background: #f0e8df; }
+        .message-item.unread { background: #fffacd; font-weight: 600; }
+        .message-from { font-weight: 600; color: #333; font-size: 0.95rem; }
+        .message-subject { color: #666; font-size: 0.9rem; margin: 5px 0; }
+        .message-preview { color: #999; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .message-date { color: #999; font-size: 0.8rem; margin-top: 5px; }
+        .message-detail { background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 20px; }
+        .msg-success { background: #d4edda; color: #155724; padding: 12px; border-radius: 5px; margin-bottom: 15px; }
+        .msg-error { background: #f8d7da; color: #721c24; padding: 12px; border-radius: 5px; margin-bottom: 15px; }
+        .detail-header { border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 20px; }
+        .detail-from { font-size: 0.9rem; color: #666; margin-bottom: 10px; }
+        .detail-subject { font-size: 1.5rem; font-weight: 700; color: #333; margin-bottom: 10px; }
+        .detail-meta { font-size: 0.85rem; color: #999; }
+        .detail-body { background: #fafafa; padding: 15px; border-radius: 5px; margin-bottom: 20px; line-height: 1.6; }
+        .conversation { margin-bottom: 20px; }
+        .conversation-item { margin-bottom: 15px; padding: 15px; background: #f9f9f9; border-left: 4px solid #8A7650; border-radius: 3px; }
+        .conversation-item.admin { background: #e3f2fd; border-left-color: #1976d2; }
+        .conversation-sender { font-weight: 600; color: #333; margin-bottom: 5px; font-size: 0.9rem; }
+        .conversation-text { color: #333; line-height: 1.5; }
+        .conversation-date { font-size: 0.8rem; color: #999; margin-top: 5px; }
+        .reply-form { margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee; }
+        .reply-form label { display: block; font-weight: 600; margin-bottom: 10px; color: #333; }
+        .reply-form textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-family: inherit; min-height: 120px; }
+        .reply-form button { background: #8A7650; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; margin-top: 10px; }
+        .reply-form button:hover { background: #6B5A3E; }
+        @media (max-width: 1000px) {
+            .messages-layout { grid-template-columns: 1fr; }
+            .messages-list { height: auto; max-height: 400px; }
         }
     </style>
 </head>
 <body>
-
-<?php include 'admin-nav.php'; ?>
-
-<div style="padding: 0 2rem 2rem;">
-    <!-- Success/Error Messages -->
-    <?php if ($reply_success): ?>
-        <div class="alert-msg alert-success" style="margin-bottom: 1rem;">
-            <i class="fas fa-check-circle"></i> <?= htmlspecialchars($reply_success) ?>
-        </div>
+<?php include __DIR__ . '/admin-nav.php'; ?>
+<div class="admin-container">
+    <div class="page-header">
+        <h1>💬 Messages <?php if ($unread_count > 0): ?><span class="badge"><?= $unread_count ?> New</span><?php endif; ?></h1>
+        <button class="btn btn--primary" id="adminNewMsgBtn"><i class="fas fa-plus"></i> New Message</button>
+    </div>
+    
+    <?php if ($message): ?>
+        <div class="msg-success"><i class="fas fa-check-circle"></i> <?= htmlspecialchars($message) ?></div>
+    <?php endif; ?>
+    <?php if ($error): ?>
+        <div class="msg-error"><i class="fas fa-exclamation-circle"></i> <?= htmlspecialchars($error) ?></div>
     <?php endif; ?>
     
-    <?php if ($reply_error): ?>
-        <div class="alert-msg alert-error" style="margin-bottom: 1rem;">
-            <i class="fas fa-exclamation-triangle"></i> <?= htmlspecialchars($reply_error) ?>
-        </div>
-    <?php endif; ?>
-    
-    <div class="messages-container">
-        <!-- Conversations Sidebar -->
-        <div class="conversations-sidebar">
-            <div class="conversations-header">
-                <h3><i class="fas fa-envelope"></i> Customer Conversations</h3>
+    <div class="messages-layout">
+        <!-- Messages List -->
+        <div class="messages-list">
+            <div class="messages-header">
+                <div class="filter-buttons">
+                    <button class="filter-btn <?= $filter === 'all' ? 'active' : '' ?>" onclick="window.location.href='?route=admin-messages&filter=all'">All</button>
+                    <button class="filter-btn <?= $filter === 'unread' ? 'active' : '' ?>" onclick="window.location.href='?route=admin-messages&filter=unread'">Unread</button>
+                    <button class="filter-btn <?= $filter === 'replied' ? 'active' : '' ?>" onclick="window.location.href='?route=admin-messages&filter=replied'">Replied</button>
+                </div>
+                <div style="font-size: 0.85rem; color: #666;">Total: <?= count($messages) ?></div>
             </div>
-            <div class="conversations-search">
-                <input type="text" id="searchConv" placeholder="Search customers..." onkeyup="filterConversations()">
-            </div>
-            <div class="conversations-list" id="conversationsList">
-                <?php if (empty($conversations)): ?>
-                    <div style="text-align: center; padding: 2rem; color: var(--gray);">
-                        <i class="fas fa-inbox" style="font-size: 2rem; opacity: 0.5;"></i>
-                        <p style="margin-top: 0.5rem;">No messages yet</p>
+            <div class="messages-scroll">
+                <?php if (empty($messages)): ?>
+                    <div style="padding: 20px; text-align: center; color: #999;">
+                        <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+                        No messages
                     </div>
                 <?php else: ?>
-                    <?php foreach ($conversations as $conv): ?>
-                        <a href="admin-messages.php?user=<?= $conv['user_id'] ?>" 
-                           class="conversation-item <?= ($selected_user_id == $conv['user_id']) ? 'active' : '' ?>"
-                           data-name="<?= strtolower(htmlspecialchars($conv['user_name'])) ?>"
-                           data-email="<?= strtolower(htmlspecialchars($conv['user_email'])) ?>">
-                            <div class="conversation-avatar">
-                                <i class="fas fa-user"></i>
-                            </div>
-                            <div class="conversation-info">
-                                <div class="conversation-name">
-                                    <span><?= htmlspecialchars($conv['user_name']) ?></span>
-                                    <?php if ($conv['unread_count'] > 0): ?>
-                                        <span class="unread-badge"><?= $conv['unread_count'] ?></span>
-                                    <?php endif; ?>
+                    <?php foreach ($messages as $msg): ?>
+                        <a href="?route=admin-messages&message_id=<?= $msg['message_id'] ?>" style="text-decoration: none; color: inherit;">
+                            <div class="message-item <?= ($selected_message && $selected_message['message']['message_id'] === $msg['message_id']) ? 'active' : '' ?> <?= $msg['status'] === 'unread' ? 'unread' : '' ?>">
+                                <div class="message-from">
+                                    <i class="fas fa-user-circle"></i> 
+                                    <?= htmlspecialchars($msg['first_name'] ?? 'Customer') ?> #<?= $msg['sender_id'] ?>
                                 </div>
-                                <div class="conversation-time">
-                                    <?= date('M d, g:i A', strtotime($conv['last_message'])) ?>
-                                </div>
-                                <div class="conversation-preview">
-                                    <?php 
-                                    $last_msg = end($conv['messages']);
-                                    echo htmlspecialchars(substr($last_msg['message'], 0, 40)) . (strlen($last_msg['message']) > 40 ? '...' : '');
-                                    ?>
-                                </div>
+                                <div class="message-subject"><?= htmlspecialchars($msg['subject']) ?></div>
+                                <div class="message-preview"><?= htmlspecialchars(substr($msg['message_text'], 0, 60)) ?></div>
+                                <div class="message-date"><?= date('M d, Y H:i', strtotime($msg['created_at'] ?? 'now')) ?></div>
                             </div>
                         </a>
                     <?php endforeach; ?>
@@ -590,146 +169,113 @@ $_SESSION['admin_unread_count'] = $total_unread;
             </div>
         </div>
         
-        <!-- Chat Area -->
-        <div class="chat-area">
-            <?php if ($selected_user): ?>
-                <div class="chat-header">
-                    <div class="chat-user-info">
-                        <div class="chat-user-avatar">
-                            <i class="fas fa-user"></i>
-                        </div>
-                        <div class="chat-user-name">
-                            <h4><?= htmlspecialchars($selected_user['user_name']) ?></h4>
-                            <p><?= htmlspecialchars($selected_user['user_email']) ?></p>
-                        </div>
+        <!-- Message Detail -->
+        <div class="message-detail">
+            <?php if ($selected_message): ?>
+                <div class="detail-header">
+                    <div class="detail-from">
+                        <i class="fas fa-user-circle"></i>
+                        <?= htmlspecialchars($selected_message['message']['first_name'] ?? 'Customer') ?> #<?= $selected_message['message']['sender_id'] ?>
+                        (<?= htmlspecialchars($selected_message['message']['email'] ?? 'No email') ?>)
                     </div>
-                    <div>
-                        <span class="badge badge--primary">
-                            <?= count($selected_messages) ?> message(s)
+                    <div class="detail-subject"><?= htmlspecialchars($selected_message['message']['subject']) ?></div>
+                    <div class="detail-meta">
+                        <i class="fas fa-clock"></i> <?= date('M d, Y H:i A', strtotime($selected_message['message']['created_at'] ?? 'now')) ?>
+                        | <span style="background: #f0f0f0; padding: 3px 8px; border-radius: 3px; font-size: 0.8rem;">
+                            <i class="fas fa-tag"></i> <?= ucfirst($selected_message['message']['message_type'] ?? 'inquiry') ?>
                         </span>
                     </div>
                 </div>
-                
-                <div class="chat-messages" id="chatMessages">
-                    <?php 
-                    $last_date = '';
-                    foreach ($selected_messages as $msg):
-                        $msg_date = date('F d, Y', strtotime($msg['created_at']));
-                        if ($msg_date != $last_date):
-                            $last_date = $msg_date;
-                    ?>
-                        <div class="reply-divider"><?= $msg_date ?></div>
-                    <?php endif; ?>
-                        <div class="message-group">
-                            <div class="message-bubble user">
-                                <p><?= nl2br(htmlspecialchars($msg['message'])) ?></p>
-                                <div class="message-time">
-                                    <?= date('g:i A', strtotime($msg['created_at'])) ?>
-                                    <?php if ($msg['status'] == 'replied'): ?>
-                                        <span style="color: var(--primary); margin-left: 0.5rem;">
-                                            <i class="fas fa-check-double"></i> Replied
-                                        </span>
-                                    <?php elseif ($msg['status'] == 'read'): ?>
-                                        <span style="color: var(--gray-light); margin-left: 0.5rem;">
-                                            <i class="fas fa-check"></i> Read
-                                        </span>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <?php 
-                        // Display admin replies for this message
-                        foreach ($_SESSION['admin_replies'] as $reply):
-                            if ($reply['message_id'] == $msg['id']):
-                        ?>
-                            <div class="message-group">
-                                <div class="message-bubble admin">
-                                    <p><?= nl2br(htmlspecialchars($reply['reply'])) ?></p>
-                                    <div class="message-time">
-                                        <i class="fas fa-reply"></i> Admin · <?= date('g:i A', strtotime($reply['created_at'])) ?>
-                                    </div>
-                                </div>
-                            </div>
-                        <?php 
-                            endif;
-                        endforeach; 
-                        ?>
-                    <?php endforeach; ?>
+                <div class="detail-body">
+                    <?= nl2br(htmlspecialchars($selected_message['message']['message_text'])) ?>
                 </div>
                 
-                <form method="POST" class="reply-form" id="replyForm">
-                    <input type="hidden" name="action" value="send_reply">
-                    <input type="hidden" name="message_id" value="<?= $selected_messages[0]['id'] ?? '' ?>">
-                    <input type="hidden" name="user_id" value="<?= $selected_user['user_id'] ?>">
-                    <input type="hidden" name="user_name" value="<?= htmlspecialchars($selected_user['user_name']) ?>">
-                    <input type="hidden" name="user_email" value="<?= htmlspecialchars($selected_user['user_email']) ?>">
-                    <textarea name="reply_text" id="replyText" placeholder="Type your reply to <?= htmlspecialchars($selected_user['user_name']) ?>..." rows="2"></textarea>
-                    <button type="submit">
-                        <i class="fas fa-paper-plane"></i> Send
-                    </button>
+                <!-- Replies -->
+                <?php if (!empty($selected_message['replies'])): ?>
+                    <div style="margin-bottom: 20px; border-top: 2px solid #eee; padding-top: 20px;">
+                        <h3 style="color: #333; margin-bottom: 15px;">Conversation History</h3>
+                        <div class="conversation">
+                            <?php foreach ($selected_message['replies'] as $reply): ?>
+                                <div class="conversation-item <?= $reply['role'] === 'admin' ? 'admin' : '' ?>">
+                                    <div class="conversation-sender">
+                                        <i class="fas fa-user-circle"></i>
+                                        <?php if ($reply['role'] === 'admin'): ?>
+                                            Admin Support
+                                            <span style="background: #1976d2; color: white; padding: 2px 8px; border-radius: 3px; font-size: 0.75rem; margin-left: 5px;">Staff</span>
+                                        <?php else: ?>
+                                            Customer #<?= $reply['sender_id'] ?>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="conversation-text">
+                                        <?= nl2br(htmlspecialchars($reply['reply_text'] ?? '')) ?>
+                                    </div>
+                                    <div class="conversation-date">
+                                        <?= date('M d, Y H:i A', strtotime($reply['created_at'] ?? 'now')) ?>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
+                
+                <!-- Reply Form -->
+                <form method="POST" class="reply-form">
+                    <input type="hidden" name="action" value="reply">
+                    <input type="hidden" name="message_id" value="<?= $selected_message['message']['message_id'] ?>">
+                    <label for="reply_text"><i class="fas fa-reply"></i> Send Reply</label>
+                    <textarea name="reply_text" id="reply_text" placeholder="Type your reply here..." required></textarea>
+                    <button type="submit"><i class="fas fa-paper-plane"></i> Send Reply</button>
                 </form>
             <?php else: ?>
-                <div class="empty-chat">
-                    <i class="fas fa-inbox"></i>
-                    <h3>No conversation selected</h3>
-                    <p>Select a customer from the left to view and reply to messages</p>
+                <div style="text-align: center; color: #999; padding: 40px;">
+                    <i class="fas fa-inbox" style="font-size: 3rem; margin-bottom: 20px; display: block;"></i>
+                    <p>Select a message to view details and reply</p>
                 </div>
             <?php endif; ?>
         </div>
     </div>
 </div>
 
+<!-- New Message Modal (Admin to User) -->
+<div id="newMsgModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:1000;">
+    <div style="background:white; max-width:500px; width:90%; border-radius:12px; padding:1.5rem;">
+        <h3>New Message to User</h3>
+        <form method="POST">
+            <input type="hidden" name="action" value="new_message">
+            <label>Select User:</label>
+            <select name="user_id" required style="width:100%; margin-bottom:1rem; padding:0.5rem;">
+                <?php foreach ($users as $u): ?>
+                    <option value="<?= $u['user_id'] ?>"><?= htmlspecialchars($u['first_name'] . ' ' . $u['last_name']) ?> (<?= $u['email'] ?>)</option>
+                <?php endforeach; ?>
+            </select>
+            <input type="text" name="subject" placeholder="Subject" required style="width:100%; margin-bottom:1rem; padding:0.5rem;">
+            <textarea name="message_text" placeholder="Message" rows="5" required style="width:100%; margin-bottom:1rem;"></textarea>
+            <div style="display:flex; justify-content:flex-end; gap:1rem;">
+                <button type="button" id="closeModalBtn" class="btn btn--ghost">Cancel</button>
+                <button type="submit" class="btn btn--primary">Send</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
-// Auto-scroll to bottom of chat
-const chatMessages = document.getElementById('chatMessages');
-if (chatMessages) {
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-}
+// Modal handling
+const modal = document.getElementById('newMsgModal');
+document.getElementById('adminNewMsgBtn')?.addEventListener('click', () => modal.style.display = 'flex');
+document.getElementById('closeModalBtn')?.addEventListener('click', () => modal.style.display = 'none');
+window.onclick = function(e) { if (e.target === modal) modal.style.display = 'none'; }
 
-// Filter conversations
-function filterConversations() {
-    const searchTerm = document.getElementById('searchConv').value.toLowerCase();
-    const conversations = document.querySelectorAll('.conversation-item');
-    
-    conversations.forEach(conv => {
-        const name = conv.getAttribute('data-name') || '';
-        const email = conv.getAttribute('data-email') || '';
-        
-        if (name.includes(searchTerm) || email.includes(searchTerm)) {
-            conv.style.display = 'flex';
-        } else {
-            conv.style.display = 'none';
-        }
-    });
-}
-
-// Auto-resize textarea
-const replyText = document.getElementById('replyText');
-if (replyText) {
-    replyText.addEventListener('input', function() {
-        this.style.height = 'auto';
-        this.style.height = Math.min(this.scrollHeight, 120) + 'px';
-    });
-}
-
-// Confirm before sending
-document.getElementById('replyForm')?.addEventListener('submit', function(e) {
-    const replyText = document.getElementById('replyText');
-    if (replyText && replyText.value.trim() === '') {
-        e.preventDefault();
-        alert('Please enter a reply message.');
-    }
-});
-
-// Refresh page to show new messages (or use AJAX polling)
-// For demo, simple refresh after reply
-<?php if ($reply_success): ?>
-setTimeout(function() {
-    window.location.href = window.location.href;
-}, 1500);
-<?php endif; ?>
+// Auto-refresh (optional, keep from original)
+let lastMessageCount = <?= count($messages) ?>;
+setInterval(() => {
+    fetch('/SINTA/public/api-messages.php?action=get-count')
+        .then(r => r.json())
+        .then(data => {
+            if (data.success && data.messageCount > lastMessageCount) {
+                location.reload();
+            }
+        }).catch(console.log);
+}, 10000);
 </script>
-
 </body>
 </html>

@@ -7,6 +7,7 @@ session_start();
 define('ROOT_PATH', dirname(__DIR__));
 define('MODEL_PATH', ROOT_PATH . '/models/');
 define('VIEW_PATH', ROOT_PATH . '/app/views/');
+define('BASE_URL', '/SINTA/public');
 
 // Get the route parameter
 $route = isset($_GET['route']) ? $_GET['route'] : 'landing';
@@ -170,30 +171,66 @@ switch($route) {
         include VIEW_PATH . '/user/homepage.php';
         break;
     case 'occasions':
+        if (isset($_SESSION['admin_logged_in'])) {
+            header('Location: /SINTA/public/index.php?route=admin-dashboard');
+            exit;
+        }
         include VIEW_PATH . '/user/occasions.php';
         break;
     case 'packages':
+        if (isset($_SESSION['admin_logged_in'])) {
+            header('Location: /SINTA/public/index.php?route=admin-dashboard');
+            exit;
+        }
         include VIEW_PATH . '/user/packages.php';
         break;
     case 'customize':
+        if (isset($_SESSION['admin_logged_in'])) {
+            header('Location: /SINTA/public/index.php?route=admin-dashboard');
+            exit;
+        }
         include VIEW_PATH . '/user/customize.php';
         break;
     case 'checkout':
+        if (isset($_SESSION['admin_logged_in'])) {
+            header('Location: /SINTA/public/index.php?route=admin-dashboard');
+            exit;
+        }
         include VIEW_PATH . '/user/checkout.php';
         break;
     case 'plans':
+        if (isset($_SESSION['admin_logged_in'])) {
+            header('Location: /SINTA/public/index.php?route=admin-dashboard');
+            exit;
+        }
         include VIEW_PATH . '/user/plans.php';
         break;
     case 'event-detail':
+        if (isset($_SESSION['admin_logged_in'])) {
+            header('Location: /SINTA/public/index.php?route=admin-dashboard');
+            exit;
+        }
         include VIEW_PATH . '/user/event-detail.php';
         break;
     case 'messages':
+        if (isset($_SESSION['admin_logged_in'])) {
+            header('Location: /SINTA/public/index.php?route=admin-dashboard');
+            exit;
+        }
         include VIEW_PATH . '/user/messages.php';
         break;
     case 'profile':
+        if (isset($_SESSION['admin_logged_in'])) {
+            header('Location: /SINTA/public/index.php?route=admin-dashboard');
+            exit;
+        }
         include VIEW_PATH . '/user/profile.php';
         break;
     case 'about':
+        if (isset($_SESSION['admin_logged_in'])) {
+            header('Location: /SINTA/public/index.php?route=admin-dashboard');
+            exit;
+        }
         include VIEW_PATH . '/user/about.php';
         break;
     case 'contact':
@@ -220,6 +257,13 @@ switch($route) {
         }
         include VIEW_PATH . '/admin/admin-manage-packages.php';
         break;
+    case 'admin-occasions':
+        if (!isset($_SESSION['admin_logged_in'])) {
+            header('Location: /SINTA/public/index.php?route=signin');
+            exit;
+        }
+        include VIEW_PATH . '/admin/admin-occasions.php';
+        break;
     case 'admin-testimonials':
         if (!isset($_SESSION['admin_logged_in'])) {
             header('Location: /SINTA/public/index.php?route=signin');
@@ -227,12 +271,66 @@ switch($route) {
         }
         include VIEW_PATH . '/admin/admin-testimonials.php';
         break;
-    case 'admin-messages':
+   case 'admin-messages':
+    if (!isset($_SESSION['admin_logged_in'])) {
+        header('Location: /SINTA/public/index.php?route=signin');
+        exit;
+    }
+    include VIEW_PATH . '/admin/admin-messages-real.php';
+    break;
+    case 'admin-customize':
         if (!isset($_SESSION['admin_logged_in'])) {
             header('Location: /SINTA/public/index.php?route=signin');
             exit;
         }
-        include VIEW_PATH . '/admin/admin-messages-real.php';
+        require_once ROOT_PATH . '/app/controllers/CustomizeController.php';
+        $controller = new CustomizeController();
+        $controller->listAll();
+        break;
+    case 'admin-customize-add':
+        if (!isset($_SESSION['admin_logged_in'])) {
+            header('Location: /SINTA/public/index.php?route=signin');
+            exit;
+        }
+        require_once ROOT_PATH . '/app/controllers/CustomizeController.php';
+        $controller = new CustomizeController();
+        $controller->addForm();
+        break;
+    case 'admin-customize-create':
+        if (!isset($_SESSION['admin_logged_in'])) {
+            header('Location: /SINTA/public/index.php?route=signin');
+            exit;
+        }
+        require_once ROOT_PATH . '/app/controllers/CustomizeController.php';
+        $controller = new CustomizeController();
+        $controller->create();
+        break;
+    case 'admin-customize-edit':
+        if (!isset($_SESSION['admin_logged_in'])) {
+            header('Location: /SINTA/public/index.php?route=signin');
+            exit;
+        }
+        require_once ROOT_PATH . '/app/controllers/CustomizeController.php';
+        $controller = new CustomizeController();
+        $controller->editForm();
+        break;
+    case 'admin-customize-update':
+        if (!isset($_SESSION['admin_logged_in'])) {
+            header('Location: /SINTA/public/index.php?route=signin');
+            exit;
+        }
+        require_once ROOT_PATH . '/app/controllers/CustomizeController.php';
+        $controller = new CustomizeController();
+        $controller->update();
+        break;
+    case 'admin-customize-delete':
+        if (!isset($_SESSION['admin_logged_in'])) {
+            header('Location: /SINTA/public/index.php?route=signin');
+            exit;
+        }
+        require_once ROOT_PATH . '/app/controllers/CustomizeController.php';
+        $controller = new CustomizeController();
+        $controller->delete();
         break;
     default:
         include VIEW_PATH . '/landing/landing.php';

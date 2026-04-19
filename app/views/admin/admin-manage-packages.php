@@ -11,10 +11,23 @@ if (!isset($_SESSION['admin_logged_in'])) {
     exit;
 }
 
-define('ROOT_PATH', dirname(dirname(__DIR__)));
+if (!defined('ROOT_PATH')) {
+    define('ROOT_PATH', dirname(dirname(__DIR__)));
+}
 require_once ROOT_PATH . '/app/controllers/AdminPackageController.php';
+require_once ROOT_PATH . '/config/database.php';
 
 $packageController = new AdminPackageController();
+$db = Database::getInstance()->getConnection();
+
+// Fetch all occasions for dropdown
+$occasions = [];
+$result = $db->query("SELECT occasion_id, events as name FROM occasions_tbl ORDER BY events ASC");
+if ($result) {
+    while ($row = $result->fetch_assoc()) {
+        $occasions[] = $row;
+    }
+}
 
 $message = '';
 $error = '';
@@ -24,57 +37,60 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['action'])) {
         switch ($_POST['action']) {
             case 'create':
+                $name = trim($_POST['package_name'] ?? '');
                 $package_name = trim($_POST['package_name'] ?? '');
                 $description = trim($_POST['description'] ?? '');
                 $price = floatval($_POST['price'] ?? 0);
-                $event_type = trim($_POST['event_type'] ?? '');
+                $occasion_id = intval($_POST['event_type'] ?? 0);
                 $category = trim($_POST['category'] ?? '');
                 $features = trim($_POST['features'] ?? '');
                 $max_guests = intval($_POST['max_guests'] ?? 100);
                 $duration_hours = intval($_POST['duration_hours'] ?? 4);
                 $venue_type = trim($_POST['venue_type'] ?? '');
+                $status = 'active';
                 
                 // Validate required fields
-                if (!$package_name || !$description || $price <= 0 || !$event_type) {
-                    $error = 'Please fill in all required fields';
+                if (!$name || !$description || $price <= 0 || !$occasion_id) {
+                    $error = 'Please fill in all required fields (Name, Description, Price, Event Type)';
                     break;
                 }
                 
                 $package_data = [
+                    'name' => $name,
                     'package_name' => $package_name,
                     'description' => $description,
                     'price' => $price,
-                    'event_type' => $event_type,
+                    'occasion_id' => $occasion_id,
+                    'event_type' => '',
                     'category' => $category,
                     'features' => $features,
                     'max_guests' => $max_guests,
                     'duration_hours' => $duration_hours,
                     'venue_type' => $venue_type,
-                    'status' => 'active'
+                    'status' => $status,
+                    'image' => ''
                 ];
                 
-                // Handle image upload
+                // Create the package first
+                $result = $packageController->create($package_data);
+                
+                if (!$result['success']) {
+                    $error = 'Failed to create package: ' . $result['error'];
+                    break;
+                }
+                
+                $package_id = $result['package_id'];
+                
+                // Handle image upload after package creation
                 if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-                    $result = $packageController->create($package_data);
-                    if ($result['success']) {
-                        $image_upload = $packageController->uploadImage($_FILES['image'], $result['package_id']);
-                        if ($image_upload['success']) {
-                            $package_data['image'] = $image_upload['path'];
-                            $packageController->update($result['package_id'], ['image' => $image_upload['path']]);
-                            $message = 'Package created successfully with image!';
-                        } else {
-                            $message = 'Package created but image upload failed: ' . $image_upload['error'];
-                        }
+                    $image_result = $packageController->uploadImage($_FILES['image'], $package_id);
+                    if ($image_result['success']) {
+                        $message = 'Package created successfully with image!';
                     } else {
-                        $error = 'Failed to create package: ' . $result['error'];
+                        $message = 'Package created but image upload failed: ' . $image_result['error'];
                     }
                 } else {
-                    $result = $packageController->create($package_data);
-                    if ($result['success']) {
-                        $message = 'Package created successfully!';
-                    } else {
-                        $error = 'Failed to create package: ' . $result['error'];
-                    }
+                    $message = 'Package created successfully!';
                 }
                 break;
                 
@@ -85,30 +101,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     break;
                 }
                 
-                $update_data = [];
-                if (isset($_POST['package_name'])) $update_data['package_name'] = trim($_POST['package_name']);
-                if (isset($_POST['description'])) $update_data['description'] = trim($_POST['description']);
-                if (isset($_POST['price'])) $update_data['price'] = floatval($_POST['price']);
-                if (isset($_POST['event_type'])) $update_data['event_type'] = trim($_POST['event_type']);
-                if (isset($_POST['category'])) $update_data['category'] = trim($_POST['category']);
-                if (isset($_POST['features'])) $update_data['features'] = trim($_POST['features']);
-                if (isset($_POST['max_guests'])) $update_data['max_guests'] = intval($_POST['max_guests']);
-                if (isset($_POST['duration_hours'])) $update_data['duration_hours'] = intval($_POST['duration_hours']);
-                if (isset($_POST['venue_type'])) $update_data['venue_type'] = trim($_POST['venue_type']);
-                
-                // Handle image upload
-                if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-                    $image_upload = $packageController->uploadImage($_FILES['image'], $package_id);
-                    if ($image_upload['success']) {
-                        $update_data['image'] = $image_upload['path'];
-                    }
-                }
+                $update_data = [
+                    'name' => trim($_POST['package_name'] ?? ''),
+                    'package_name' => trim($_POST['package_name'] ?? ''),
+                    'description' => trim($_POST['description'] ?? ''),
+                    'price' => floatval($_POST['price'] ?? 0),
+                    'occasion_id' => intval($_POST['event_type'] ?? 0),
+                    'event_type' => '',
+                    'category' => trim($_POST['category'] ?? ''),
+                    'features' => trim($_POST['features'] ?? ''),
+                    'max_guests' => intval($_POST['max_guests'] ?? 100),
+                    'duration_hours' => intval($_POST['duration_hours'] ?? 4),
+                    'venue_type' => trim($_POST['venue_type'] ?? ''),
+                    'status' => 'active',
+                    'image' => ''
+                ];
                 
                 $result = $packageController->update($package_id, $update_data);
-                if ($result['success']) {
-                    $message = 'Package updated successfully!';
-                } else {
+                if (!$result['success']) {
                     $error = 'Failed to update package: ' . $result['error'];
+                    break;
+                }
+                
+                // Handle image upload after package update
+                if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+                    $image_result = $packageController->uploadImage($_FILES['image'], $package_id);
+                    if ($image_result['success']) {
+                        $message = 'Package updated successfully with new image!';
+                    } else {
+                        $message = 'Package updated but image upload failed: ' . $image_result['error'];
+                    }
+                } else {
+                    $message = 'Package updated successfully!';
                 }
                 break;
                 
@@ -195,13 +219,13 @@ $packages = $packageController->getAll();
     <div class="packages-grid">
         <?php foreach ($packages as $pkg): ?>
             <div class="package-card">
-                <img src="<?= htmlspecialchars($pkg['image'] ?? '/SINTA/public/assets/img/placeholder.jpg') ?>" alt="<?= htmlspecialchars($pkg['package_name']) ?>" class="package-image">
+                <img src="<?= htmlspecialchars($pkg['image'] ?? '/SINTA/public/assets/img/placeholder.jpg') ?>" alt="<?= htmlspecialchars($pkg['name'] ?? 'Package') ?>" class="package-image">
                 <div class="package-info">
-                    <div class="package-name"><?= htmlspecialchars($pkg['package_name']) ?></div>
+                    <div class="package-name"><?= htmlspecialchars($pkg['package_name'] ?? $pkg['name'] ?? 'Unnamed') ?></div>
                     <div class="package-price">₱<?= number_format($pkg['price'], 2) ?></div>
                     <div class="package-desc"><?= htmlspecialchars(substr($pkg['description'], 0, 80)) ?>...</div>
                     <div style="font-size: 0.85rem; color: #999; margin-bottom: 10px;">
-                        <i class="fas fa-tag"></i> <?= htmlspecialchars($pkg['event_type']) ?>
+                        <i class="fas fa-tag"></i> <?= htmlspecialchars($pkg['occasion_name'] ?? 'N/A') ?>
                     </div>
                     <div class="package-actions">
                         <button class="btn" onclick="editPackage(<?= $pkg['package_id'] ?>)"><i class="fas fa-edit"></i> Edit</button>
@@ -244,11 +268,9 @@ $packages = $packageController->getAll();
                 <label>Event Type *</label>
                 <select name="event_type" required>
                     <option value="">Select Event Type</option>
-                    <option value="wedding">Wedding</option>
-                    <option value="birthday">Birthday</option>
-                    <option value="corporate">Corporate</option>
-                    <option value="anniversary">Anniversary</option>
-                    <option value="debut">Debut</option>
+                    <?php foreach ($occasions as $occ): ?>
+                        <option value="<?= $occ['occasion_id'] ?>"><?= htmlspecialchars($occ['name']) ?></option>
+                    <?php endforeach; ?>
                 </select>
             </div>
             
@@ -300,11 +322,33 @@ function openAddModal() {
 }
 
 function editPackage(packageId) {
-    // In a real app, fetch package data via AJAX
-    document.getElementById('modalTitle').textContent = 'Edit Package';
-    document.getElementById('formAction').value = 'update';
-    document.getElementById('packageId').value = packageId;
-    document.getElementById('packageModal').classList.add('active');
+    // Fetch package data via AJAX
+    fetch('/SINTA/public/api-package.php?action=get_package&id=' + packageId)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const pkg = data.package;
+                document.getElementById('modalTitle').textContent = 'Edit Package';
+                document.getElementById('formAction').value = 'update';
+                document.getElementById('packageId').value = pkg.package_id;
+                document.querySelector('input[name="package_name"]').value = pkg.package_name || pkg.name || '';
+                document.querySelector('textarea[name="description"]').value = pkg.description || '';
+                document.querySelector('input[name="price"]').value = pkg.price || '';
+                document.querySelector('select[name="event_type"]').value = pkg.occasion_id || '';
+                document.querySelector('input[name="category"]').value = pkg.category || '';
+                document.querySelector('textarea[name="features"]').value = pkg.features || '';
+                document.querySelector('input[name="max_guests"]').value = pkg.max_guests || 100;
+                document.querySelector('input[name="duration_hours"]').value = pkg.duration_hours || 4;
+                document.querySelector('input[name="venue_type"]').value = pkg.venue_type || '';
+                document.getElementById('packageModal').classList.add('active');
+            } else {
+                alert('Failed to load package data');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error loading package data');
+        });
 }
 
 function deletePackage(packageId) {
