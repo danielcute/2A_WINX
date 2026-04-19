@@ -1,4 +1,11 @@
-<?php $page = 'occasions'; ?>
+<?php 
+$page = 'occasions';
+
+// Get occasions from database
+require_once ROOT_PATH . '/app/models/Occasion.php';
+$occasionModel = new Occasion();
+$occasions = $occasionModel->getAll();
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -179,72 +186,45 @@
     </div>
     
     <div class="occ-grid stagger">
-      <a href="/SINTA/public/index.php?route=packages&occasion=wedding" class="occ-card">
-        <div class="occ-card__img" style="background-image:url('/SINTA/public/assets/img/wedding.jpg')"></div>
-        <div class="occ-card__body">
-          <div class="occ-card__icon"><i class="fas fa-ring"></i></div>
-          <div class="occ-card__text">
-            <h3>Wedding</h3>
-            <p>Full-service planning from intimate to grand</p>
-            <span class="occ-card__price">From ₱150K</span>
-          </div>
-          <i class="fas fa-arrow-right occ-card__arrow"></i>
-        </div>
-      </a>
-      
-      <a href="/SINTA/public/index.php?route=packages&occasion=debut" class="occ-card">
-        <div class="occ-card__img" style="background-image:url('/SINTA/public/assets/img/debut.jpg')"></div>
-        <div class="occ-card__body">
-          <div class="occ-card__icon"><i class="fas fa-crown"></i></div>
-          <div class="occ-card__text">
-            <h3>Debut</h3>
-            <p>Celebrate 18th birthday in elegant style</p>
-            <span class="occ-card__price">From ₱80K</span>
-          </div>
-          <i class="fas fa-arrow-right occ-card__arrow"></i>
-        </div>
-      </a>
-      
-      <a href="/SINTA/public/index.php?route=packages&occasion=birthday" class="occ-card">
-        <div class="occ-card__img" style="background-image:url('/SINTA/public/assets/img/birthday.jpg')"></div>
-        <div class="occ-card__body">
-          <div class="occ-card__icon"><i class="fas fa-cake-candles"></i></div>
-          <div class="occ-card__text">
-            <h3>Birthday</h3>
-            <p>Memorable celebrations for all ages</p>
-            <span class="occ-card__price">From ₱50K</span>
-          </div>
-          <i class="fas fa-arrow-right occ-card__arrow"></i>
-        </div>
-      </a>
-      
-      <a href="/SINTA/public/index.php?route=packages&occasion=corporate" class="occ-card">
-        <div class="occ-card__img" style="background-image:url('/SINTA/public/assets/img/corporate.jpg')"></div>
-        <div class="occ-card__body">
-          <div class="occ-card__icon"><i class="fas fa-briefcase"></i></div>
-          <div class="occ-card__text">
-            <h3>Corporate</h3>
-            <p>Professional galas, conferences, launches</p>
-            <span class="occ-card__price">From ₱200K</span>
-          </div>
-          <i class="fas fa-arrow-right occ-card__arrow"></i>
-        </div>
-      </a>
-      
-      <a href="/SINTA/public/index.php?route=packages&occasion=anniversary" class="occ-card">
-        <div class="occ-card__img" style="background-image:url('/SINTA/public/assets/img/anniversary.jpg')"></div>
-        <div class="occ-card__body">
-          <div class="occ-card__icon"><i class="fas fa-heart"></i></div>
-          <div class="occ-card__text">
-            <h3>Anniversary</h3>
-            <p>Celebrate years of love and commitment</p>
-            <span class="occ-card__price">From ₱60K</span>
-          </div>
-          <i class="fas fa-arrow-right occ-card__arrow"></i>
-        </div>
-      </a>
+      <?php if (!empty($occasions)): ?>
+        <?php foreach ($occasions as $occasion): ?>
+          <a href="/SINTA/public/index.php?route=packages&occasion=<?= urlencode(strtolower($occasion['events'])) ?>" class="occ-card">
+            <?php if (isset($occasion['image']) && $occasion['image']): ?>
+              <div class="occ-card__img" id="img_<?= $occasion['occasion_id'] ?>">
+                <script>
+                  (function() {
+                    const occId = <?= $occasion['occasion_id'] ?>;
+                    fetch('/SINTA/public/api-occasion.php?image=' + occId)
+                      .then(res => res.json())
+                      .then(data => {
+                        if (data.success && data.image) {
+                          const img = document.getElementById('img_' + occId);
+                          img.style.backgroundImage = 'url(' + data.image + ')';
+                        }
+                      });
+                  })();
+                </script>
+              </div>
+            <?php else: ?>
+              <div class="occ-card__img" style="background: linear-gradient(135deg, #E2D9C8 0%, #D4C7B1 100%); display: flex; align-items: center; justify-content: center;"><i class="fas fa-calendar-alt" style="font-size: 2.5rem; color: #8A7650;"></i></div>
+            <?php endif; ?>
+            <div class="occ-card__body">
+              <div class="occ-card__icon"><i class="fas fa-calendar"></i></div>
+              <div class="occ-card__text">
+                <h3><?= htmlspecialchars($occasion['events']) ?></h3>
+                <p><?= htmlspecialchars($occasion['descriptions'] ?? 'Event planning') ?></p>
+                <span class="occ-card__price">Custom Quote</span>
+              </div>
+              <i class="fas fa-arrow-right occ-card__arrow"></i>
+            </div>
+          </a>
+        <?php endforeach; ?>
+      <?php else: ?>
+        <p>No occasions available.</p>
+      <?php endif; ?>
       
       <a href="/SINTA/public/index.php?route=packages&occasion=other" class="occ-card">
+        <div class="occ-card__img" style="background: linear-gradient(135deg, #F0E5D8 0%, #E8D5C4 100%); display: flex; align-items: center; justify-content: center;"><i class="fas fa-plus" style="font-size: 2.5rem; color: #8A7650;"></i></div>
         <div class="occ-card__body occ-card__body--center">
           <div class="occ-card__icon occ-card__icon--lg"><i class="fas fa-plus"></i></div>
           <div class="occ-card__text">

@@ -1,4 +1,11 @@
 <?php
+/**
+ * Package Model
+ * Handles event packages and related data
+ */
+if (!defined('ROOT_PATH')) {
+    define('ROOT_PATH', dirname(dirname(__DIR__)));
+}
 require_once ROOT_PATH . '/config/database.php';
 
 class Package {
@@ -23,9 +30,10 @@ class Package {
         
         $packages = [];
         while ($row = $result->fetch_assoc()) {
-            // Get inclusions
-            $row['inclusions'] = $this->getInclusions($row['package_id']);
-            $row['images'] = $this->getImages($row['package_id']);
+            // Parse features as array if stored as string
+            $row['inclusions'] = !empty($row['features']) ? array_filter(explode(',', $row['features'])) : [];
+            // Get image as array
+            $row['images'] = !empty($row['image']) ? [$row['image']] : [];
             $packages[] = $row;
         }
         return $packages;
@@ -33,20 +41,24 @@ class Package {
     
     public function getInclusions($packageId) {
         $packageId = (int)$packageId;
-        $result = $this->db->query("SELECT * FROM package_inclusions_tbl WHERE package_id = $packageId");
+        $result = $this->db->query("SELECT features FROM packages_tbl WHERE package_id = $packageId");
         $inclusions = [];
-        while ($row = $result->fetch_assoc()) {
-            $inclusions[] = $row['item'];
+        if ($result && $row = $result->fetch_assoc()) {
+            if (!empty($row['features'])) {
+                $inclusions = array_filter(explode(',', $row['features']));
+            }
         }
         return $inclusions;
     }
     
     public function getImages($packageId) {
         $packageId = (int)$packageId;
-        $result = $this->db->query("SELECT * FROM package_images_tbl WHERE package_id = $packageId");
+        $result = $this->db->query("SELECT image FROM packages_tbl WHERE package_id = $packageId");
         $images = [];
-        while ($row = $result->fetch_assoc()) {
-            $images[] = $row['image_path'];
+        if ($result && $row = $result->fetch_assoc()) {
+            if (!empty($row['image'])) {
+                $images[] = $row['image'];
+            }
         }
         return $images;
     }
@@ -59,8 +71,10 @@ class Package {
                                     WHERE p.package_id = $id");
         $package = $result->fetch_assoc();
         if ($package) {
-            $package['inclusions'] = $this->getInclusions($id);
-            $package['images'] = $this->getImages($id);
+            // Parse features as array
+            $package['inclusions'] = !empty($package['features']) ? array_filter(explode(',', $package['features'])) : [];
+            // Get image as array
+            $package['images'] = !empty($package['image']) ? [$package['image']] : [];
         }
         return $package;
     }
@@ -71,33 +85,27 @@ class Package {
         $occasionId = (int)$data['occasion_id'];
         $price = (float)$data['price'];
         
-        $sql = "INSERT INTO packages_tbl (name, description, occasion_id, price) 
-                VALUES ('$name', '$description', $occasionId, $price)";
+        // Handle features/inclusions as comma-separated string
+        $features = '';
+        if (isset($data['inclusions']) && is_array($data['inclusions'])) {
+            $features = implode(',', array_map([$this->db, 'real_escape_string'], $data['inclusions']));
+        } elseif (isset($data['features'])) {
+            $features = $this->db->real_escape_string($data['features']);
+        }
+        
+        // Handle image
+        $image = '';
+        if (isset($data['image'])) {
+            $image = $this->db->real_escape_string($data['image']);
+        } elseif (isset($data['images']) && is_array($data['images']) && !empty($data['images'][0])) {
+            $image = $this->db->real_escape_string($data['images'][0]);
+        }
+        
+        $sql = "INSERT INTO packages_tbl (name, description, occasion_id, price, features, image) 
+                VALUES ('$name', '$description', $occasionId, $price, '$features', '$image')";
         
         if ($this->db->query($sql)) {
-            $packageId = $this->db->insert_id;
-            
-            // Save inclusions
-            if (isset($data['inclusions']) && is_array($data['inclusions'])) {
-                foreach ($data['inclusions'] as $item) {
-                    if (!empty($item)) {
-                        $item = $this->db->real_escape_string($item);
-                        $this->db->query("INSERT INTO package_inclusions_tbl (package_id, item) VALUES ($packageId, '$item')");
-                    }
-                }
-            }
-            
-            // Save images
-            if (isset($data['images']) && is_array($data['images'])) {
-                foreach ($data['images'] as $imagePath) {
-                    if (!empty($imagePath)) {
-                        $imagePath = $this->db->real_escape_string($imagePath);
-                        $this->db->query("INSERT INTO package_images_tbl (package_id, image_path) VALUES ($packageId, '$imagePath')");
-                    }
-                }
-            }
-            
-            return $packageId;
+            return $this->db->insert_id;
         }
         return false;
     }
@@ -119,45 +127,29 @@ class Package {
             $sets[] = "occasion_id = " . (int)$data['occasion_id'];
         }
         
+        // Handle features/inclusions as comma-separated string
+        if (isset($data['inclusions']) && is_array($data['inclusions'])) {
+            $features = implode(',', array_map([$this->db, 'real_escape_string'], $data['inclusions']));
+            $sets[] = "features = '$features'";
+        } elseif (isset($data['features'])) {
+            $sets[] = "features = '" . $this->db->real_escape_string($data['features']) . "'";
+        }
+        
+        // Handle image
+        if (isset($data['image'])) {
+            $sets[] = "image = '" . $this->db->real_escape_string($data['image']) . "'";
+        } elseif (isset($data['images']) && is_array($data['images']) && !empty($data['images'][0])) {
+            $sets[] = "image = '" . $this->db->real_escape_string($data['images'][0]) . "'";
+        }
+        
         if (empty($sets)) return false;
         
         $sql = "UPDATE packages_tbl SET " . implode(', ', $sets) . " WHERE package_id = $id";
-        $result = $this->db->query($sql);
-        
-        // Update inclusions if provided
-        if (isset($data['inclusions']) && is_array($data['inclusions'])) {
-            // Delete old inclusions
-            $this->db->query("DELETE FROM package_inclusions_tbl WHERE package_id = $id");
-            // Add new inclusions
-            foreach ($data['inclusions'] as $item) {
-                if (!empty($item)) {
-                    $item = $this->db->real_escape_string($item);
-                    $this->db->query("INSERT INTO package_inclusions_tbl (package_id, item) VALUES ($id, '$item')");
-                }
-            }
-        }
-        
-        // Update images if provided
-        if (isset($data['images']) && is_array($data['images'])) {
-            // Delete old images
-            $this->db->query("DELETE FROM package_images_tbl WHERE package_id = $id");
-            // Add new images
-            foreach ($data['images'] as $imagePath) {
-                if (!empty($imagePath)) {
-                    $imagePath = $this->db->real_escape_string($imagePath);
-                    $this->db->query("INSERT INTO package_images_tbl (package_id, image_path) VALUES ($id, '$imagePath')");
-                }
-            }
-        }
-        
-        return $result;
+        return $this->db->query($sql);
     }
     
     public function delete($id) {
         $id = (int)$id;
-        // Delete associated inclusions and images first
-        $this->db->query("DELETE FROM package_inclusions_tbl WHERE package_id = $id");
-        $this->db->query("DELETE FROM package_images_tbl WHERE package_id = $id");
         return $this->db->query("DELETE FROM packages_tbl WHERE package_id = $id");
     }
     

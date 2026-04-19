@@ -1,4 +1,11 @@
 <?php
+/**
+ * Plan Model
+ * Handles event plans and planning
+ */
+if (!defined('ROOT_PATH')) {
+    define('ROOT_PATH', dirname(dirname(__DIR__)));
+}
 require_once ROOT_PATH . '/config/database.php';
 
 class Plan {
@@ -10,35 +17,48 @@ class Plan {
     
     public function create($data) {
         $userId = (int)$data['user_id'];
-        $occasionId = (int)$data['occasion_id'];
-        $packageId = isset($data['package_id']) ? (int)$data['package_id'] : 'NULL';
-        $customizeId = isset($data['customize_id']) ? (int)$data['customize_id'] : 'NULL';
+        $occasionId = isset($data['occasion_id']) ? (int)$data['occasion_id'] : null;
+        $packageId = isset($data['package_id']) ? (int)$data['package_id'] : null;
+        $customizeId = isset($data['customize_id']) ? (int)$data['customize_id'] : null;
         $eventName = $this->db->real_escape_string($data['event_name']);
         $eventDate = $this->db->real_escape_string($data['event_date']);
-        $eventTime = isset($data['event_time']) ? "'" . $this->db->real_escape_string($data['event_time']) . "'" : 'NULL';
+        $eventTime = isset($data['event_time']) ? $data['event_time'] : null;
         $guestCount = isset($data['guest_count']) ? (int)$data['guest_count'] : 0;
-        $venue = isset($data['venue']) ? "'" . $this->db->real_escape_string($data['venue']) . "'" : 'NULL';
-        $theme = isset($data['theme']) ? "'" . $this->db->real_escape_string($data['theme']) . "'" : 'NULL';
+        $venue = isset($data['venue']) ? $this->db->real_escape_string($data['venue']) : null;
+        $theme = isset($data['theme']) ? $this->db->real_escape_string($data['theme']) : null;
         $totalPrice = (float)$data['total_price'];
         $status = $data['status'] ?? 'pending';
-        $events = isset($data['events']) ? "'" . $this->db->real_escape_string($data['events']) . "'" : 'NULL';
+        $events = isset($data['events']) ? $this->db->real_escape_string($data['events']) : null;
         
-        $sql = "INSERT INTO tbl_plans (user_id, occasion_id, package_id, customize_id, event_name, event_date, event_time, guest_count, venue, theme, total_price, status, events) 
-                VALUES ($userId, $occasionId, $packageId, $customizeId, '$eventName', '$eventDate', $eventTime, $guestCount, $venue, $theme, $totalPrice, '$status', $events)";
+        $stmt = $this->db->prepare("INSERT INTO plans_tbl 
+        (user_id, occasion_id, package_id, customize_id, event_name, event_date, event_time, guest_count, venue, theme, total_price, status, events) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         
-        if ($this->db->query($sql)) {
-            return $this->db->insert_id;
+        if (!$stmt) {
+            error_log("Plan create prepare failed: " . $this->db->error);
+            return false;
         }
-        return false;
+        
+        $stmt->bind_param("iiiisssisiiss", $userId, $occasionId, $packageId, $customizeId, $eventName, $eventDate, $eventTime, $guestCount, $venue, $theme, $totalPrice, $status, $events);
+        
+        if ($stmt->execute()) {
+            $result = $this->db->insert_id;
+            $stmt->close();
+            return $result;
+        } else {
+            error_log("Plan create execute failed: " . $stmt->error);
+            $stmt->close();
+            return false;
+        }
     }
     
     public function getUserPlans($userId) {
         $userId = (int)$userId;
-        $sql = "SELECT p.*, o.name as occasion_name, pk.name as package_name,
-                (SELECT SUM(total_amount) FROM tbl_checkout WHERE plan_id = p.plan_id AND status = 'paid') as paid_amount
-                FROM tbl_plans p
-                LEFT JOIN tbl_occasions o ON p.occasion_id = o.occasion_id
-                LEFT JOIN tbl_packages pk ON p.package_id = pk.package_id
+        $sql = "SELECT p.*, o.events as occasion_name, pk.name as package_name,
+                (SELECT SUM(total_amount) FROM checkout_tbl WHERE plan_id = p.plan_id AND status = 'paid') as paid_amount
+                FROM plans_tbl p
+                LEFT JOIN occasions_tbl o ON p.occasion_id = o.occasion_id
+                LEFT JOIN packages_tbl pk ON p.package_id = pk.package_id
                 WHERE p.user_id = $userId
                 ORDER BY p.event_date ASC";
         
@@ -52,12 +72,12 @@ class Plan {
     
     public function findById($id) {
         $id = (int)$id;
-        $sql = "SELECT p.*, o.name as occasion_name, pk.name as package_name,
+        $sql = "SELECT p.*, o.events as occasion_name, pk.name as package_name,
                 u.first_name, u.last_name, u.email, u.phone
-                FROM tbl_plans p
-                LEFT JOIN tbl_occasions o ON p.occasion_id = o.occasion_id
-                LEFT JOIN tbl_packages pk ON p.package_id = pk.package_id
-                LEFT JOIN tbl_users u ON p.user_id = u.user_id
+                FROM plans_tbl p
+                LEFT JOIN occasions_tbl o ON p.occasion_id = o.occasion_id
+                LEFT JOIN packages_tbl pk ON p.package_id = pk.package_id
+                LEFT JOIN users_tbl u ON p.user_id = u.user_id
                 WHERE p.plan_id = $id";
         
         $result = $this->db->query($sql);
@@ -83,7 +103,7 @@ class Plan {
         
         if (empty($sets)) return false;
         
-        $sql = "UPDATE tbl_plans SET " . implode(', ', $sets) . " WHERE plan_id = $id";
+        $sql = "UPDATE plans_tbl SET " . implode(', ', $sets) . " WHERE plan_id = $id";
         return $this->db->query($sql);
     }
     

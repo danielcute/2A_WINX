@@ -53,25 +53,66 @@ $occasionLabel = $occasionData ? $occasionData['events'] : ucfirst($occasion);
         }
         .pkg-card {
             background: var(--white);
-            border: 1px solid var(--border);
+            border: 2px solid transparent;
             border-radius: var(--radius-xl);
             overflow: hidden;
             transition: all var(--t-base);
             position: relative;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
         }
         .pkg-card:hover {
             transform: translateY(-8px);
-            box-shadow: var(--shadow-lg);
+            box-shadow: 0 12px 30px rgba(138, 118, 80, 0.15);
             border-color: var(--primary);
         }
+        .pkg-card__img-wrapper {
+            position: relative;
+            height: 250px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #f5f1f1 0%, #f9f7f7 100%);
+        }
         .pkg-card__img {
-            height: 200px;
+            height: 100%;
+            width: 100%;
             background-size: cover;
             background-position: center;
-            transition: transform 0.5s ease;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
         }
         .pkg-card:hover .pkg-card__img {
-            transform: scale(1.05);
+            transform: scale(1.08);
+        }
+        .pkg-card__img-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.1) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .pkg-card:hover .pkg-card__img-overlay {
+            opacity: 1;
+        }
+        .pkg-card__img-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            backdrop-filter: blur(10px);
+        }
+        .pkg-card__img-badge i {
+            color: var(--primary);
         }
         .pkg-card__body {
             padding: 1.5rem;
@@ -179,11 +220,20 @@ $occasionLabel = $occasionData ? $occasionData['events'] : ucfirst($occasion);
         <?php else: ?>
             <?php foreach ($packages as $package): ?>
                 <div class="pkg-card">
-                    <?php if (!empty($package['images'])): ?>
-                        <div class="pkg-card__img" style="background-image: url('<?= htmlspecialchars($package['images'][0]) ?>')"></div>
-                    <?php else: ?>
-                        <div class="pkg-card__img" style="background-image: url('/SINTA/public/assets/img/package-placeholder.jpg')"></div>
-                    <?php endif; ?>
+                    <div class="pkg-card__img-wrapper">
+                        <?php if (!empty($package['images'])): ?>
+                            <div class="pkg-card__img" style="background-image: url('<?= htmlspecialchars($package['images'][0]) ?>')"></div>
+                            <div class="pkg-card__img-overlay"></div>
+                            <?php if (count($package['images']) > 1): ?>
+                                <div class="pkg-card__img-badge">
+                                    <i class="fas fa-images"></i> <?= count($package['images']) ?> photos
+                                </div>
+                            <?php endif; ?>
+                        <?php else: ?>
+                            <div class="pkg-card__img" style="background-image: url('/SINTA/public/assets/img/package-placeholder.jpg'); opacity: 0.6;"></div>
+                            <div class="pkg-card__img-overlay"></div>
+                        <?php endif; ?>
+                    </div>
                     <div class="pkg-card__body">
                         <h3><?= htmlspecialchars($package['name']) ?></h3>
                         <p class="pkg-card__desc"><?= htmlspecialchars(substr($package['description'] ?? '', 0, 120)) ?></p>
