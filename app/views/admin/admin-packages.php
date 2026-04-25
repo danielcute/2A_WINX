@@ -91,7 +91,22 @@ $packages = $packageModel->getAll();
         .admin-table { width: 100%; border-collapse: collapse; background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
         .admin-table th, .admin-table td { padding: 1rem; text-align: left; border-bottom: 1px solid var(--border); }
         .admin-table th { background: var(--cream); font-weight: 600; }
-        .btn-sm { padding: 0.3rem 0.8rem; font-size: 0.75rem; }
+        .package-action-buttons { display: flex; gap: 0.75rem; }
+        .package-action-buttons .btn {
+            flex: 1;
+            min-width: 130px;
+        }
+        .btn-animation {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .animated-icon { display: inline-flex; color: var(--primary); animation: pulse 1.4s ease-in-out infinite; }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
         .form-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 2000; }
         .form-modal.active { display: flex; }
         .form-modal-content { background: white; border-radius: 28px; padding: 2rem; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto; }
@@ -119,10 +134,9 @@ $packages = $packageModel->getAll();
 <body>
 <?php include 'admin-nav.php'; ?>
 
-<div class="admin-container">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-        <h1>📦 Package <em>Management</em></h1>
-        <button class="btn btn--primary" onclick="openModal('create')">+ Create New Package</button>
+        <h1><i class="fas fa-box-open animated-icon"></i> Package <em>Management</em></h1>
+        <button class="btn btn--primary btn--sm" onclick="openModal('create')"><i class="fas fa-plus"></i> Create New Package</button>
     </div>
     
     <table class="admin-table">
@@ -150,8 +164,10 @@ $packages = $packageModel->getAll();
                         <td><?= number_format($pkg['price'], 0) ?></td>
                         <td><?= htmlspecialchars(substr($pkg['description'] ?? '', 0, 50)) ?>...</td>
                         <td>
-                            <button class="btn btn--primary btn-sm" onclick="editPackage(<?= $pkg['package_id'] ?>)">Edit</button>
-                            <button class="btn btn--ghost btn-sm" onclick="deletePackage(<?= $pkg['package_id'] ?>)">Delete</button>
+                            <div class="package-action-buttons">
+                                <button class="btn btn--primary btn--sm btn-animation" onclick="editPackage(<?= $pkg['package_id'] ?>)"><i class="fas fa-edit"></i> Edit</button>
+                                <button class="btn btn--ghost btn--sm btn-delete-custom btn-animation" onclick="deletePackage(<?= $pkg['package_id'] ?>)"><i class="fas fa-trash"></i> Delete</button>
+                            </div>
                         </td>
                     </tr>
                 <?php endforeach; ?>
@@ -198,10 +214,10 @@ $packages = $packageModel->getAll();
                 <div id="inclusionsContainer">
                     <div class="inclusion-item">
                         <input type="text" class="inclusion-input" placeholder="e.g., Full Event Coordination">
-                        <button type="button" class="btn btn--ghost btn-sm" onclick="removeInclusion(this)">✕</button>
+                        <button type="button" class="btn btn--ghost btn--icon" onclick="removeInclusion(this)">✕</button>
                     </div>
                 </div>
-                <button type="button" class="btn btn--ghost btn-sm" onclick="addInclusion()">+ Add Inclusion</button>
+                <button type="button" class="btn btn--ghost btn--sm" onclick="addInclusion()">+ Add Inclusion</button>
             </div>
             
             <div class="form-group">
@@ -231,7 +247,7 @@ function addInclusion() {
     div.className = 'inclusion-item';
     div.innerHTML = `
         <input type="text" class="inclusion-input" placeholder="e.g., Full Event Coordination">
-        <button type="button" class="btn btn--ghost btn-sm" onclick="removeInclusion(this)">✕</button>
+        <button type="button" class="btn btn--ghost btn--icon" onclick="removeInclusion(this)">✕</button>
     `;
     container.appendChild(div);
 }
@@ -289,7 +305,7 @@ function openModal(action, data = null) {
         document.getElementById('inclusionsContainer').innerHTML = `
             <div class="inclusion-item">
                 <input type="text" class="inclusion-input" placeholder="e.g., Full Event Coordination">
-                <button type="button" class="btn btn--ghost btn-sm" onclick="removeInclusion(this)">✕</button>
+                <button type="button" class="btn btn--ghost btn--icon" onclick="removeInclusion(this)">✕</button>
             </div>
         `;
     } else if (action === 'update' && data) {
@@ -309,7 +325,7 @@ function openModal(action, data = null) {
                 div.className = 'inclusion-item';
                 div.innerHTML = `
                     <input type="text" class="inclusion-input" value="${escapeHtml(item)}">
-                    <button type="button" class="btn btn--ghost btn-sm" onclick="removeInclusion(this)">✕</button>
+                    <button type="button" class="btn btn--ghost btn--icon" onclick="removeInclusion(this)">✕</button>
                 `;
                 container.appendChild(div);
             });
@@ -317,7 +333,7 @@ function openModal(action, data = null) {
             container.innerHTML = `
                 <div class="inclusion-item">
                     <input type="text" class="inclusion-input" placeholder="e.g., Full Event Coordination">
-                    <button type="button" class="btn btn--ghost btn-sm" onclick="removeInclusion(this)">✕</button>
+                    <button type="button" class="btn btn--ghost btn--icon" onclick="removeInclusion(this)">✕</button>
                 </div>
             `;
         }
@@ -419,5 +435,4 @@ document.getElementById('packageModal').addEventListener('click', function(e) {
     if (e.target === this) closeModal();
 });
 </script>
-</body>
-</html>
+<?php include 'admin-footer.php'; ?>

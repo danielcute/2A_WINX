@@ -136,6 +136,147 @@ em {
   padding: 0 2rem;
 }
 
+.admin-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.admin-container h1,
+.admin-page-title,
+.admin-page-header h1,
+.admin-page-header h2,
+.occasions-header h1,
+.messages-header h1,
+.page-header h1,
+.header-section h1,
+.category-title,
+.section-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2rem;
+  color: var(--dark);
+  margin: 0 0 1rem;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+}
+
+.admin-page-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.admin-page-title em,
+.admin-container h1 em {
+  color: var(--primary);
+  font-style: italic;
+  font-weight: 500;
+}
+
+.admin-subtitle,
+.admin-section-note,
+.category-summary-note,
+.message-subtitle,
+.section-description,
+.occasions-header p,
+.messages-header p {
+  font-family: var(--sans);
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.admin-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding: 1.6rem 2rem;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+}
+
+.admin-page-header .btn {
+  flex: 0;
+  width: auto;
+}
+
+.admin-card {
+  background: var(--bg-primary);
+  border: 2px solid var(--border);
+  border-radius: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  transition: all var(--t-base);
+  overflow: hidden;
+}
+
+.admin-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--primary);
+}
+
+.admin-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.admin-card-content {
+  padding: 1.5rem;
+}
+
+.admin-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.btn--icon {
+  padding: 0.45rem 0.9rem;
+  min-width: auto;
+  font-size: 0.8rem;
+  border-radius: 999px;
+}
+
+.animated-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+.btn-animation {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-delete-custom {
+  color: #f44336;
+  border-color: #f44336;
+}
+
+.btn-delete-custom:hover {
+  background: rgba(244, 67, 54, 0.15);
+  color: #d32f2f;
+  border-color: #d32f2f;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+
 /* Buttons */
 .btn {
   display: inline-flex;
@@ -156,7 +297,7 @@ em {
   background: none;
 }
 
-.btn--sm { padding: 0.55rem 1.2rem; font-size: 0.75rem; }
+.btn--sm { padding: 0.55rem 1.2rem; font-size: 0.75rem; min-width: 130px; }
 .btn--lg { padding: 1rem 2.2rem; font-size: 0.9rem; }
 .btn--full { width: 100%; justify-content: center; }
 

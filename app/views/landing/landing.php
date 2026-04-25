@@ -302,51 +302,122 @@
     </div>
   </section>
 
-  <!-- Testimonials -->
+  <!-- Client Feedback Section -->
   <section class="section">
     <div class="container">
       <div class="section__header text-center">
-        <div class="eyebrow"><span class="rule"></span> Love Notes</div>
+        <div class="eyebrow"><span class="rule"></span> Client Feedback</div>
         <h2>What our <em>clients</em> say</h2>
-        <p class="section__subtitle">Don't just take our word for it — hear from our happy clients.</p>
+        <p class="section__subtitle">Hear from the people who've experienced Sinta's service firsthand.</p>
       </div>
-      <div class="testimonials__grid stagger">
-        <div class="testimonial__card">
-          <div class="testimonial__stars">★★★★★</div>
-          <p class="testimonial__quote">"Sinta transformed our vision into reality beyond our wildest dreams. Every guest was speechless at the beauty and flow of our wedding day."</p>
-          <div class="testimonial__author-row">
-            <div class="testimonial__avatar" style="background-image: url('https://randomuser.me/api/portraits/women/68.jpg');"></div>
-            <div>
-              <div class="testimonial__name">Isabella Rodriguez</div>
-              <div class="testimonial__role">Wedding Client</div>
-            </div>
-          </div>
-        </div>
-        <div class="testimonial__card">
-          <div class="testimonial__stars">★★★★★</div>
-          <p class="testimonial__quote">"As a corporate client with high expectations, Sinta delivered flawlessly. The team was professional, creative, and handled every detail."</p>
-          <div class="testimonial__author-row">
-            <div class="testimonial__avatar" style="background-image: url('https://randomuser.me/api/portraits/men/32.jpg');"></div>
-            <div>
-              <div class="testimonial__name">Marcus Tan</div>
-              <div class="testimonial__role">Corporate Event</div>
-            </div>
-          </div>
-        </div>
-        <div class="testimonial__card">
-          <div class="testimonial__stars">★★★★★</div>
-          <p class="testimonial__quote">"Planning my 30th from abroad was stressful, but Sinta made it effortless. The surprise element was perfectly executed!"</p>
-          <div class="testimonial__author-row">
-            <div class="testimonial__avatar" style="background-image: url('https://randomuser.me/api/portraits/women/44.jpg');"></div>
-            <div>
-              <div class="testimonial__name">Chloe Santos</div>
-              <div class="testimonial__role">Birthday Party</div>
-            </div>
-          </div>
+      <div class="feedback__grid stagger" id="feedbackContainer">
+        <div style="grid-column: 1/-1; text-align: center; padding: 2rem; color: var(--gray);">
+          <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+          <p>Loading client feedback...</p>
         </div>
       </div>
     </div>
   </section>
+  
+  <style>
+    .feedback__grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+    
+    .feedback__card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: all 0.3s ease;
+    }
+    
+    .feedback__card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .feedback__meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+    }
+    
+    .feedback__user {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex: 1;
+    }
+    
+    .feedback__avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--primary-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary);
+      font-weight: 600;
+      font-size: 0.8rem;
+    }
+    
+    .feedback__user-info h4 {
+      margin: 0;
+      font-size: 0.9rem;
+      color: var(--text-primary);
+    }
+    
+    .feedback__user-date {
+      margin: 0.2rem 0 0;
+      font-size: 0.75rem;
+      color: var(--gray);
+    }
+    
+    .feedback__subject {
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.75rem;
+      font-size: 1rem;
+    }
+    
+    .feedback__message {
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 1rem;
+      font-size: 0.95rem;
+    }
+    
+    .feedback__footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.8rem;
+    }
+    
+    .feedback__status {
+      display: inline-block;
+      padding: 0.25rem 0.6rem;
+      border-radius: 20px;
+      background: var(--primary-pale);
+      color: var(--primary);
+      font-weight: 600;
+    }
+    
+    .feedback__empty {
+      grid-column: 1/-1;
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--gray);
+    }
+  </style>
 
   <!-- CTA Section -->
   <section class="section--sm">
@@ -501,6 +572,115 @@
   }, { threshold: 0.1 });
   
   reveals.forEach(el => observer.observe(el));
+
+  // Load client feedback
+  async function loadClientFeedback() {
+    try {
+      const response = await fetch('/SINTA/public/api-feedback.php');
+      const data = await response.json();
+      
+      const container = document.getElementById('feedbackContainer');
+      
+      if (!data.success || !data.data || data.data.length === 0) {
+        container.innerHTML = `
+          <div class="feedback__empty">
+            <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+            <p>Client feedback will appear here soon...</p>
+          </div>
+        `;
+        return;
+      }
+      
+      container.innerHTML = data.data.map((feedback, index) => {
+        const date = new Date(feedback.created_at).toLocaleDateString('en-US', { 
+          year: 'numeric', 
+          month: 'short', 
+          day: 'numeric' 
+        });
+        const initials = (feedback.user_name || 'U').split(' ').map(n => n[0]).join('').toUpperCase();
+        
+        // Generate star rating
+        let stars = '';
+        for (let i = 0; i < 5; i++) {
+          stars += (i < feedback.rating) ? '★' : '☆';
+        }
+        
+        // Format admin reply if exists
+        let adminReplyHtml = '';
+        if (feedback.admin_reply) {
+          const replyDate = new Date(feedback.admin_reply_date).toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric' 
+          });
+          adminReplyHtml = `
+            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #E2D9C8; background: #f9f9f9; padding: 1rem; border-radius: 8px;">
+              <div style="font-weight: 600; color: #8A7650; margin-bottom: 0.5rem;">
+                <i class="fas fa-reply"></i> Admin Response
+              </div>
+              <div style="color: #555; font-size: 0.95rem; line-height: 1.5; margin-bottom: 0.5rem;">${feedback.admin_reply}</div>
+              <div style="font-size: 0.8rem; color: #8B7355;">${replyDate}</div>
+            </div>
+          `;
+        }
+        
+        return `
+          <div class="feedback__card" style="animation: fadeInUp 0.5s ease forwards; animation-delay: ${index * 0.1}s; opacity: 0;">
+            <div class="feedback__meta">
+              <div class="feedback__user">
+                <div class="feedback__avatar">${initials}</div>
+                <div class="feedback__user-info">
+                  <h4>${feedback.user_name || 'Anonymous'}</h4>
+                  <div class="feedback__user-date">${date}</div>
+                </div>
+              </div>
+            </div>
+            <div style="display: inline-block; padding: 0.25rem 0.6rem; border-radius: 20px; background: #FFF3E0; color: #E65100; font-weight: 600; font-size: 0.9rem; margin-bottom: 0.75rem;">${stars}</div>
+            <div class="feedback__subject">${feedback.subject}</div>
+            <div class="feedback__message">${feedback.message}</div>
+            ${adminReplyHtml}
+            <div class="feedback__footer">
+              <span class="feedback__status">${feedback.status === 'closed' ? 'Completed' : 'Resolved'}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+      
+      // Add animation styles if not already present
+      if (!document.querySelector('style[data-feedback-animation]')) {
+        const style = document.createElement('style');
+        style.setAttribute('data-feedback-animation', '');
+        style.textContent = `
+          @keyframes fadeInUp {
+            from {
+              opacity: 0;
+              transform: translateY(20px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+        `;
+        document.head.appendChild(style);
+      }
+    } catch (error) {
+      console.error('Error loading feedback:', error);
+      document.getElementById('feedbackContainer').innerHTML = `
+        <div class="feedback__empty" style="grid-column: 1/-1;">
+          <i class="fas fa-exclamation-circle" style="font-size: 2rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+          <p>Unable to load client feedback at this time.</p>
+        </div>
+      `;
+    }
+  }
+
+  // Load feedback when page is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadClientFeedback);
+  } else {
+    loadClientFeedback();
+  }
 </script>
 </body>
 </html>

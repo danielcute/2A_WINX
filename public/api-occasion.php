@@ -11,6 +11,7 @@ header('Content-Type: application/json');
 session_start();
 
 require_once dirname(__FILE__) . '/../config/database.php';
+require_once dirname(__FILE__) . '/../app/models/Notification.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
 $db = Database::getInstance()->getConnection();
@@ -149,7 +150,31 @@ try {
                 $stmt->bind_param("ssbs", $events, $descriptions, $image_data, $image_name);
                 
                 if ($stmt->execute()) {
+                    $newOccasionId = $db->insert_id;
                     $_SESSION['success_message'] = 'Occasion created successfully!';
+                    
+                    // Create notifications for all users about the new occasion
+                    try {
+                        $notificationModel = new Notification();
+                        
+                        // Get all user IDs
+                        $userResult = $db->query("SELECT user_id FROM users_tbl WHERE role = 'user'");
+                        if ($userResult) {
+                            while ($userRow = $userResult->fetch_assoc()) {
+                                $notificationModel->create([
+                                    'user_id' => $userRow['user_id'],
+                                    'type' => 'system_update',
+                                    'title' => 'New Occasion Available',
+                                    'message' => 'A new occasion "' . htmlspecialchars($events) . '" has been added to the system!',
+                                    'related_type' => 'occasion',
+                                    'related_id' => $newOccasionId
+                                ]);
+                            }
+                        }
+                    } catch (Exception $e) {
+                        error_log("Failed to create occasion notifications: " . $e->getMessage());
+                    }
+                    
                     echo json_encode(['success' => true, 'message' => 'Occasion created successfully']);
                     $stmt->close();
                 } else {

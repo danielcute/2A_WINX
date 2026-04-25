@@ -122,7 +122,14 @@ class User {
             return false;
         }
         
-        call_user_func_array([$stmt, 'bind_param'], array_merge([$types], $values));
+        // Create references for bind_param (required for pass-by-reference)
+        $refs = [];
+        $refs[] = &$types;
+        foreach ($values as $key => $value) {
+            $refs[] = &$values[$key];
+        }
+        
+        call_user_func_array([$stmt, 'bind_param'], $refs);
         
         $result = $stmt->execute();
         $stmt->close();

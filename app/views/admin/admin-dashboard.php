@@ -9,6 +9,7 @@ $page_title = 'Dashboard';
 
 // Get real data from database
 require_once ROOT_PATH . '/config/database.php';
+require_once ROOT_PATH . '/app/models/PlanAutoConfirmation.php';
 $db = Database::getInstance()->getConnection();
 
 // Get stats
@@ -16,7 +17,7 @@ $packages_result = $db->query("SELECT COUNT(*) as count FROM packages_tbl");
 $total_packages = $packages_result->fetch_assoc()['count'] ?? 0;
 
 // Use checkout_tbl instead of bookings_tbl
-$bookings_result = $db->query("SELECT COUNT(*) as count FROM checkout_tbl");
+$bookings_result = $db->query("SELECT COUNT(*) as count FROM plans_tbl");
 $total_bookings = $bookings_result->fetch_assoc()['count'] ?? 0;
 
 $testimonials_result = $db->query("SELECT COUNT(*) as count FROM testimonials_tbl");
@@ -25,8 +26,29 @@ $total_testimonials = $testimonials_result->fetch_assoc()['count'] ?? 0;
 $users_result = $db->query("SELECT COUNT(*) as count FROM users_tbl WHERE role = 'user'");
 $total_users = $users_result->fetch_assoc()['count'] ?? 0;
 
-// Get recent bookings from checkout_tbl
-$recent_bookings = $db->query("SELECT c.*, u.first_name, u.last_name, u.email FROM checkout_tbl c LEFT JOIN users_tbl u ON c.user_id = u.user_id ORDER BY c.checkout_id DESC LIMIT 5");
+// Get recent bookings from plans_tbl
+$recent_bookings = $db->query("SELECT p.plan_id as checkout_id, p.*, u.first_name, u.last_name, u.email
+                                FROM plans_tbl p 
+                                LEFT JOIN users_tbl u ON p.user_id = u.user_id
+                                ORDER BY p.plan_id DESC LIMIT 5");
+
+// Auto-confirm pending plans and update their status
+$autoConfirm = new PlanAutoConfirmation();
+if ($recent_bookings && $recent_bookings->num_rows > 0) {
+    $bookings_array = [];
+    while ($row = $recent_bookings->fetch_assoc()) {
+        $planStatusInfo = $autoConfirm->getPlanStatusInfo($row['plan_id']);
+        if ($planStatusInfo) {
+            $row['status'] = $planStatusInfo['status'];
+        }
+        $bookings_array[] = $row;
+    }
+    // Reset the result set by converting to array
+    $recent_bookings_processed = true;
+} else {
+    $bookings_array = [];
+    $recent_bookings_processed = false;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -38,6 +60,9 @@ $recent_bookings = $db->query("SELECT c.*, u.first_name, u.last_name, u.email FR
   <style>
     .dashboard-container {
       padding: 2rem 0;
+      max-width: 1300px;
+      margin: 0 auto;
+      width: 100%;
     }
 
     /* Stats Grid */
@@ -118,9 +143,11 @@ $recent_bookings = $db->query("SELECT c.*, u.first_name, u.last_name, u.email FR
 
     .section-header h2 {
       font-family: 'Cormorant Garamond', serif;
-      font-size: 1.8rem;
+      font-size: 2.2rem;
       color: #2C2820;
       margin: 0 0 0.5rem 0;
+      font-weight: 700;
+      letter-spacing: -0.03em;
     }
 
     .section-header p {
@@ -349,33 +376,35 @@ $recent_bookings = $db->query("SELECT c.*, u.first_name, u.last_name, u.email FR
         <tr>
           <th>Booking ID</th>
           <th>Customer</th>
+          <th>Event</th>
+          <th>Event Date</th>
           <th>Amount</th>
           <th>Status</th>
-          <th>Email</th>
         </tr>
       </thead>
       <tbody>
-        <?php if ($recent_bookings->num_rows === 0): ?>
+        <?php if (empty($bookings_array)): ?>
           <tr>
-            <td colspan="5" class="empty-state">
+            <td colspan="6" class="empty-state">
               <i class="fas fa-inbox"></i>
               <p>No bookings yet. Check back soon!</p>
             </td>
           </tr>
         <?php else: ?>
-          <?php while ($booking = $recent_bookings->fetch_assoc()): ?>
+          <?php foreach ($bookings_array as $booking): ?>
             <tr>
               <td class="booking-id">#<?= str_pad($booking['checkout_id'] ?? 0, 5, '0', STR_PAD_LEFT) ?></td>
               <td><?= htmlspecialchars(($booking['first_name'] ?? 'N/A') . ' ' . ($booking['last_name'] ?? '')) ?></td>
-              <td>₱<?= number_format($booking['total_amount'] ?? 0, 2) ?></td>
+              <td><?= htmlspecialchars($booking['event_name'] ?? 'Custom Event') ?></td>
+              <td><?= !empty($booking['event_date']) ? date('M d, Y', strtotime($booking['event_date'])) : 'TBD' ?></td>
+              <td>₱<?= number_format($booking['total_price'] ?? 0, 0) ?></td>
               <td>
                 <span class="status-badge status-<?= strtolower($booking['status'] ?? 'pending') ?>">
                   <?= htmlspecialchars($booking['status'] ?? 'pending') ?>
                 </span>
               </td>
-              <td><?= htmlspecialchars($booking['email'] ?? 'N/A') ?></td>
             </tr>
-          <?php endwhile; ?>
+          <?php endforeach; ?>
         <?php endif; ?>
       </tbody>
     </table>
@@ -387,10 +416,4 @@ document.getElementById('mobileToggle')?.addEventListener('click', function() {
   document.getElementById('adminSidebar').classList.toggle('open');
 });
 </script>
-</body>
-</html>
-
-</main>
-</div>
-</body>
-</html>
+<?php include 'admin-footer.php'; ?>

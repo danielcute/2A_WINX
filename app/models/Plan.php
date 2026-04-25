@@ -29,17 +29,20 @@ class Plan {
         $totalPrice = (float)$data['total_price'];
         $status = $data['status'] ?? 'pending';
         $events = isset($data['events']) ? $this->db->real_escape_string($data['events']) : null;
+        $paymentMethod = isset($data['payment_method']) ? $this->db->real_escape_string($data['payment_method']) : null;
+        $paymentDetails = isset($data['payment_details']) ? $this->db->real_escape_string($data['payment_details']) : null;
+        $paymentStatus = isset($data['payment_status']) ? $this->db->real_escape_string($data['payment_status']) : 'pending';
         
         $stmt = $this->db->prepare("INSERT INTO plans_tbl 
-        (user_id, occasion_id, package_id, customize_id, event_name, event_date, event_time, guest_count, venue, theme, total_price, status, events) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        (user_id, occasion_id, package_id, customize_id, event_name, event_date, event_time, guest_count, venue, theme, total_price, status, events, payment_method, payment_details, payment_status) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         
         if (!$stmt) {
             error_log("Plan create prepare failed: " . $this->db->error);
             return false;
         }
         
-        $stmt->bind_param("iiiisssisiiss", $userId, $occasionId, $packageId, $customizeId, $eventName, $eventDate, $eventTime, $guestCount, $venue, $theme, $totalPrice, $status, $events);
+        $stmt->bind_param("iiiisssississsss", $userId, $occasionId, $packageId, $customizeId, $eventName, $eventDate, $eventTime, $guestCount, $venue, $theme, $totalPrice, $status, $events, $paymentMethod, $paymentDetails, $paymentStatus);
         
         if ($stmt->execute()) {
             $result = $this->db->insert_id;
@@ -54,15 +57,17 @@ class Plan {
     
     public function getUserPlans($userId) {
         $userId = (int)$userId;
-        $sql = "SELECT p.*, o.events as occasion_name, pk.name as package_name,
-                (SELECT SUM(total_amount) FROM checkout_tbl WHERE plan_id = p.plan_id AND status = 'paid') as paid_amount
-                FROM plans_tbl p
-                LEFT JOIN occasions_tbl o ON p.occasion_id = o.occasion_id
-                LEFT JOIN packages_tbl pk ON p.package_id = pk.package_id
+        // Select directly from plans_tbl without joins to avoid duplication
+        // Join data is optional and can cause duplicate rows if not handled carefully
+        $sql = "SELECT p.* FROM plans_tbl p
                 WHERE p.user_id = $userId
                 ORDER BY p.event_date ASC";
         
         $result = $this->db->query($sql);
+        if (!$result) {
+            error_log("getUserPlans query failed: " . $this->db->error);
+            return [];
+        }
         $plans = [];
         while ($row = $result->fetch_assoc()) {
             $plans[] = $row;
@@ -72,7 +77,7 @@ class Plan {
     
     public function findById($id) {
         $id = (int)$id;
-        $sql = "SELECT p.*, o.events as occasion_name, pk.name as package_name,
+        $sql = "SELECT p.*, p.events as plan_events, o.events as occasion_name, pk.name as package_name,
                 u.first_name, u.last_name, u.email, u.phone
                 FROM plans_tbl p
                 LEFT JOIN occasions_tbl o ON p.occasion_id = o.occasion_id
@@ -81,7 +86,13 @@ class Plan {
                 WHERE p.plan_id = $id";
         
         $result = $this->db->query($sql);
-        return $result->fetch_assoc();
+        $row = $result->fetch_assoc();
+        // Restore the events column from plan_events
+        if ($row && isset($row['plan_events'])) {
+            $row['events'] = $row['plan_events'];
+            unset($row['plan_events']);
+        }
+        return $row;
     }
     
     public function update($id, $data) {
@@ -143,6 +154,12 @@ class Plan {
             FROM tbl_plans
         ");
         return $result->fetch_assoc();
+    }
+    
+    public function delete($id) {
+        $id = (int)$id;
+        $sql = "DELETE FROM plans_tbl WHERE plan_id = $id";
+        return $this->db->query($sql);
     }
 }
 ?>

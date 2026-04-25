@@ -145,6 +145,126 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     exit;
 }
 
+// Handle feedback and admin feedback POST requests (AJAX)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($route === 'feedback' || $route === 'admin-feedback')) {
+    header('Content-Type: application/json; charset=utf-8');
+    
+    require_once ROOT_PATH . '/app/models/Feedback.php';
+    $feedbackModel = new Feedback();
+    
+    try {
+        if ($route === 'feedback') {
+            // User feedback handling
+            if (!isset($_SESSION['user_logged_in']) || !isset($_SESSION['user_id'])) {
+                http_response_code(401);
+                echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+                exit;
+            }
+            
+            $action = $_POST['action'] ?? '';
+            $userId = $_SESSION['user_id'];
+            
+            if ($action === 'submit_feedback') {
+                $data = [
+                    'user_id' => $userId,
+                    'subject' => $_POST['subject'] ?? '',
+                    'message' => $_POST['message'] ?? '',
+                    'rating' => $_POST['rating'] ?? 0
+                ];
+                
+                if (empty($data['subject']) || empty($data['message'])) {
+                    echo json_encode(['success' => false, 'message' => 'Subject and message are required']);
+                } else {
+                    $feedbackId = $feedbackModel->create($data);
+                    if ($feedbackId) {
+                        echo json_encode(['success' => true, 'message' => 'Feedback submitted successfully', 'feedback_id' => $feedbackId]);
+                    } else {
+                        echo json_encode(['success' => false, 'message' => 'Failed to submit feedback']);
+                    }
+                }
+            } elseif ($action === 'add_reply') {
+                $feedbackId = (int)($_POST['feedback_id'] ?? 0);
+                $message = $_POST['message'] ?? '';
+                
+                if (!$feedbackId || empty($message)) {
+                    echo json_encode(['success' => false, 'message' => 'Invalid reply data']);
+                } else {
+                    $feedback = $feedbackModel->findById($feedbackId);
+                    if (!$feedback || $feedback['user_id'] != $userId) {
+                        echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+                    } else {
+                        $replyId = $feedbackModel->addUserReply($feedbackId, $userId, $message);
+                        if ($replyId) {
+                            echo json_encode(['success' => true, 'message' => 'Reply added successfully']);
+                        } else {
+                            echo json_encode(['success' => false, 'message' => 'Failed to add reply']);
+                        }
+                    }
+                }
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Invalid action']);
+            }
+        } elseif ($route === 'admin-feedback') {
+            // Admin feedback handling
+            if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
+                http_response_code(401);
+                echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+                exit;
+            }
+            
+            $action = $_POST['action'] ?? '';
+            $adminId = $_SESSION['user_id'];
+            
+            if ($action === 'add_reply') {
+                $feedbackId = (int)($_POST['feedback_id'] ?? 0);
+                $message = $_POST['message'] ?? '';
+                
+                if (!$feedbackId || empty($message)) {
+                    echo json_encode(['success' => false, 'message' => 'Invalid data']);
+                } else {
+                    $replyId = $feedbackModel->addAdminReply($feedbackId, $adminId, $message);
+                    if ($replyId) {
+                        echo json_encode(['success' => true, 'message' => 'Reply sent successfully']);
+                    } else {
+                        echo json_encode(['success' => false, 'message' => 'Failed to send reply']);
+                    }
+                }
+            } elseif ($action === 'update_status') {
+                $feedbackId = (int)($_POST['feedback_id'] ?? 0);
+                $status = $_POST['status'] ?? '';
+                
+                if (!$feedbackId || empty($status)) {
+                    echo json_encode(['success' => false, 'message' => 'Invalid data']);
+                } else {
+                    if ($feedbackModel->updateStatus($feedbackId, $status)) {
+                        echo json_encode(['success' => true, 'message' => 'Status updated successfully']);
+                    } else {
+                        echo json_encode(['success' => false, 'message' => 'Failed to update status']);
+                    }
+                }
+            } elseif ($action === 'delete') {
+                $feedbackId = (int)($_POST['feedback_id'] ?? 0);
+                
+                if (!$feedbackId) {
+                    echo json_encode(['success' => false, 'message' => 'Invalid feedback ID']);
+                } else {
+                    if ($feedbackModel->delete($feedbackId)) {
+                        echo json_encode(['success' => true, 'message' => 'Feedback deleted successfully']);
+                    } else {
+                        echo json_encode(['success' => false, 'message' => 'Failed to delete feedback']);
+                    }
+                }
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Invalid action']);
+            }
+        }
+    } catch (Exception $e) {
+        http_response_code(500);
+        echo json_encode(['success' => false, 'message' => 'Error: ' . $e->getMessage()]);
+    }
+    exit;
+}
+
 
 if ($route === 'admin-logout') {
     session_destroy();
@@ -196,14 +316,36 @@ switch($route) {
             header('Location: /SINTA/public/index.php?route=admin-dashboard');
             exit;
         }
-        include VIEW_PATH . '/user/checkout.php';
+        require_once ROOT_PATH . '/app/controllers/CheckoutController.php';
+        $controller = new CheckoutController();
+        $controller->index();
+        break;
+    case 'checkout-submit':
+        if (isset($_SESSION['admin_logged_in'])) {
+            header('Location: /SINTA/public/index.php?route=admin-dashboard');
+            exit;
+        }
+        require_once ROOT_PATH . '/app/controllers/CheckoutController.php';
+        $controller = new CheckoutController();
+        $controller->submit();
         break;
     case 'plans':
         if (isset($_SESSION['admin_logged_in'])) {
             header('Location: /SINTA/public/index.php?route=admin-dashboard');
             exit;
         }
-        include VIEW_PATH . '/user/plans.php';
+        require_once ROOT_PATH . '/app/controllers/PlanController.php';
+        $controller = new PlanController();
+        $controller->index();
+        break;
+    case 'delete-plan':
+        if (isset($_SESSION['admin_logged_in'])) {
+            header('Location: /SINTA/public/index.php?route=admin-dashboard');
+            exit;
+        }
+        require_once ROOT_PATH . '/app/controllers/PlanController.php';
+        $controller = new PlanController();
+        $controller->delete();
         break;
     case 'event-detail':
         if (isset($_SESSION['admin_logged_in'])) {
@@ -263,13 +405,6 @@ switch($route) {
             exit;
         }
         include VIEW_PATH . '/admin/admin-occasions.php';
-        break;
-    case 'admin-testimonials':
-        if (!isset($_SESSION['admin_logged_in'])) {
-            header('Location: /SINTA/public/index.php?route=signin');
-            exit;
-        }
-        include VIEW_PATH . '/admin/admin-testimonials.php';
         break;
    case 'admin-messages':
     if (!isset($_SESSION['admin_logged_in'])) {
@@ -331,6 +466,24 @@ switch($route) {
         require_once ROOT_PATH . '/app/controllers/CustomizeController.php';
         $controller = new CustomizeController();
         $controller->delete();
+        break;
+    case 'feedback':
+        if (isset($_SESSION['admin_logged_in'])) {
+            header('Location: /SINTA/public/index.php?route=admin-dashboard');
+            exit;
+        }
+        if (!isset($_SESSION['user_logged_in'])) {
+            header('Location: /SINTA/public/index.php?route=signin');
+            exit;
+        }
+        include VIEW_PATH . '/user/feedback.php';
+        break;
+    case 'admin-feedback':
+        if (!isset($_SESSION['admin_logged_in'])) {
+            header('Location: /SINTA/public/index.php?route=signin');
+            exit;
+        }
+        include VIEW_PATH . '/admin/admin-feedback.php';
         break;
     default:
         include VIEW_PATH . '/landing/landing.php';

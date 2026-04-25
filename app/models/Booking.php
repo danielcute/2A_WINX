@@ -1,4 +1,4 @@
-<?php
+in the<?php
 /**
  * Booking Model
  * Handles booking/checkout operations
@@ -16,11 +16,13 @@ class Booking {
     }
     
     public function getAll() {
-        // Simple query without plan_id (column may not exist in existing databases)
-        $sql = "SELECT b.*, u.first_name, u.last_name, u.email, u.phone
-                FROM checkout_tbl b
-                LEFT JOIN users_tbl u ON b.user_id = u.user_id
-                ORDER BY b.checkout_id DESC";
+        // Fetch all plans as bookings (from plans_tbl)
+        $sql = "SELECT p.plan_id as checkout_id, p.user_id, p.event_name, p.event_date, p.venue, 
+                p.guest_count, p.total_price as total_amount, p.status, p.theme, p.event_time,
+                u.first_name, u.last_name, u.email, u.phone
+                FROM plans_tbl p
+                LEFT JOIN users_tbl u ON p.user_id = u.user_id
+                ORDER BY p.plan_id DESC";
         
         $result = $this->db->query($sql);
         
@@ -38,7 +40,10 @@ class Booking {
     
     public function findById($id) {
         $id = (int)$id;
-        $result = $this->db->query("SELECT * FROM checkout_tbl WHERE checkout_id = $id");
+        $result = $this->db->query("SELECT p.*, u.first_name, u.last_name, u.email 
+                                    FROM plans_tbl p 
+                                    LEFT JOIN users_tbl u ON p.user_id = u.user_id 
+                                    WHERE p.plan_id = $id");
         return $result->fetch_assoc();
     }
     
@@ -60,22 +65,69 @@ class Booking {
         return false;
     }
     
-    public function updateStatus($checkoutId, $status, $transactionId = null) {
-        $checkoutId = (int)$checkoutId;
+    public function canUpdateStatus($planId) {
+        $planId = (int)$planId;
+        $result = $this->db->query("SELECT status FROM plans_tbl WHERE plan_id = $planId");
+        $booking = $result->fetch_assoc();
+        
+        if (!$booking) {
+            return ['can_update' => false, 'reason' => 'Booking not found'];
+        }
+        
+        // Cannot update if status is 'completed'
+        if ($booking['status'] === 'completed') {
+            return ['can_update' => false, 'reason' => 'Cannot modify completed bookings'];
+        }
+        
+        return ['can_update' => true];
+    }
+    
+    public function updateStatus($planId, $status, $transactionId = null) {
+        $planId = (int)$planId;
         $status = $this->db->real_escape_string($status);
         
-        $sql = "UPDATE checkout_tbl SET status = '$status'";
+        // Check if booking can be updated
+        $canUpdate = $this->canUpdateStatus($planId);
+        if (!$canUpdate['can_update']) {
+            return false;
+        }
+        
+        $sql = "UPDATE plans_tbl SET status = '$status'";
         if ($transactionId) {
             $sql .= ", transaction_id = '" . $this->db->real_escape_string($transactionId) . "'";
         }
-        $sql .= " WHERE checkout_id = $checkoutId";
+        $sql .= " WHERE plan_id = $planId";
         
         return $this->db->query($sql);
     }
     
+    public function canDelete($planId) {
+        $planId = (int)$planId;
+        $result = $this->db->query("SELECT status FROM plans_tbl WHERE plan_id = $planId");
+        $booking = $result->fetch_assoc();
+        
+        if (!$booking) {
+            return ['can_delete' => false, 'reason' => 'Booking not found'];
+        }
+        
+        // Cannot delete if status is 'completed'
+        if ($booking['status'] === 'completed') {
+            return ['can_delete' => false, 'reason' => 'Cannot delete completed bookings'];
+        }
+        
+        return ['can_delete' => true];
+    }
+    
     public function delete($id) {
         $id = (int)$id;
-        return $this->db->query("DELETE FROM checkout_tbl WHERE checkout_id = $id");
+        
+        // Check if booking can be deleted
+        $canDelete = $this->canDelete($id);
+        if (!$canDelete['can_delete']) {
+            return false;
+        }
+        
+        return $this->db->query("DELETE FROM plans_tbl WHERE plan_id = $id");
     }
     
     public function getStats() {
@@ -83,10 +135,11 @@ class Booking {
             SELECT 
                 COUNT(*) as total,
                 SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending,
-                SUM(CASE WHEN status = 'paid' THEN 1 ELSE 0 END) as paid,
+                SUM(CASE WHEN status = 'confirmed' THEN 1 ELSE 0 END) as confirmed,
+                SUM(CASE WHEN status = 'canceled' THEN 1 ELSE 0 END) as canceled,
                 SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed,
-                SUM(total_amount) as total_revenue
-            FROM checkout_tbl
+                SUM(total_price) as total_revenue
+            FROM plans_tbl
         ");
         return $result->fetch_assoc();
     }

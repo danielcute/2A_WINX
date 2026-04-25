@@ -8,6 +8,7 @@ if (!defined('ROOT_PATH')) {
     define('ROOT_PATH', dirname(dirname(__DIR__)));
 }
 require_once ROOT_PATH . '/config/database.php';
+require_once ROOT_PATH . '/app/models/Notification.php';
 
 class MessagingController {
     private $db;
@@ -305,6 +306,35 @@ class MessagingController {
                 $update_stmt->bind_param("i", $message_id);
                 $update_stmt->execute();
                 $update_stmt->close();
+            }
+            
+            // Create notification for the original message sender
+            try {
+                $notificationModel = new Notification();
+                $senderUserId = $message['sender_id'];
+                
+                // Get sender's name and message subject for notification
+                $senderStmt = $this->db->prepare("SELECT first_name, last_name FROM users_tbl WHERE user_id = ?");
+                if ($senderStmt) {
+                    $senderStmt->bind_param("i", $sender_id);
+                    $senderStmt->execute();
+                    $senderResult = $senderStmt->get_result();
+                    $senderInfo = $senderResult->fetch_assoc();
+                    $senderStmt->close();
+                    
+                    $senderName = $senderInfo ? ($senderInfo['first_name'] . ' ' . $senderInfo['last_name']) : 'Admin';
+                    
+                    $notificationModel->create([
+                        'user_id' => $senderUserId,
+                        'type' => 'message_reply',
+                        'title' => 'New Reply from ' . $senderName,
+                        'message' => 'You have a new reply to your message',
+                        'related_type' => 'message',
+                        'related_id' => $message_id
+                    ]);
+                }
+            } catch (Exception $e) {
+                error_log("Failed to create notification for message reply: " . $e->getMessage());
             }
             
             return ['success' => true, 'reply_id' => $reply_id];

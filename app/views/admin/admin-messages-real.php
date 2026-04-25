@@ -117,7 +117,7 @@ $users = $messagingController->getAllUsers();
         body { background: #f5f5f5; font-family: 'DM Sans', sans-serif; }
         .admin-container { max-width: 1400px; margin: 0 auto; padding: 20px; }
         .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .page-header h1 { font-family: 'Cormorant Garamond', serif; font-size: 2rem; color: #333; margin: 0; }
+        .page-header h1 { font-family: 'Cormorant Garamond', serif; font-size: 1.9rem; color: #2C2820; margin: 0; font-weight: 700; letter-spacing: -0.03em; display: inline-flex; align-items: center; gap: 0.75rem; }
         .badge { display: inline-block; background: #f44336; color: white; padding: 5px 10px; border-radius: 20px; font-size: 0.85rem; margin-left: 10px; }
         .messages-layout { display: grid; grid-template-columns: 350px 1fr; gap: 20px; }
         .messages-list { background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow: hidden; display: flex; flex-direction: column; height: 70vh; }
@@ -216,9 +216,9 @@ $users = $messagingController->getAllUsers();
 <body>
 <?php include __DIR__ . '/admin-nav.php'; ?>
 <div class="admin-container">
-    <div class="page-header">
-        <h1>💬 Messages <?php if ($unread_count > 0): ?><span class="badge"><?= $unread_count ?> New</span><?php endif; ?></h1>
-        <button class="btn btn--primary" id="adminNewMsgBtn"><i class="fas fa-plus"></i> New Message</button>
+    <div class="admin-page-header page-header messages-header">
+        <h1 class="admin-page-title"><i class="fas fa-envelope animated-icon"></i> Messages <?php if ($unread_count > 0): ?><span class="badge"><?= $unread_count ?> New</span><?php endif; ?></h1>
+        <button class="btn btn--primary btn--sm" id="adminNewMsgBtn"><i class="fas fa-plus"></i> New Message</button>
     </div>
     
     <?php if ($message): ?>
@@ -400,5 +400,4 @@ setInterval(() => {
         }).catch(console.log);
 }, 10000);
 </script>
-</body>
-</html>
+<?php include 'admin-footer.php'; ?>

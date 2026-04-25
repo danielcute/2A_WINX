@@ -5,9 +5,25 @@ $page_title = 'Occasions Management';
 
 require_once ROOT_PATH . '/config/database.php';
 require_once ROOT_PATH . '/app/controllers/OccasionController.php';
+require_once ROOT_PATH . '/app/models/Customization.php';
 
 $controller = new OccasionController();
 $occasions = $controller->getAll();
+$customizationModel = new Customization();
+$allCustomizationOptions = $customizationModel->getAllOptions();
+
+// Filter to only main categories
+$mainCategories = ['Theme', 'Venue', 'Catering', 'Extras'];
+$customizationOptions = array_filter($allCustomizationOptions, function($opt) use ($mainCategories) {
+    return in_array($opt['category'], $mainCategories);
+});
+$customizationOptions = array_values($customizationOptions);
+
+$categoryCounts = [];
+foreach ($customizationOptions as $option) {
+    $categoryCounts[$option['category']] = ($categoryCounts[$option['category']] ?? 0) + 1;
+}
+
 $success_message = $_SESSION['success_message'] ?? '';
 $error_message = $_SESSION['error_message'] ?? '';
 unset($_SESSION['success_message'], $_SESSION['error_message']);
@@ -23,6 +39,9 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
     <style>
         .occasions-container {
             padding: 2rem 0;
+            max-width: 1300px;
+            margin: 0 auto;
+            width: 100%;
         }
 
         .occasions-header {
@@ -32,32 +51,23 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
             margin-bottom: 2rem;
         }
 
-        .occasions-header h2 {
+        .occasions-header h1 {
             font-family: 'Cormorant Garamond', serif;
-            font-size: 1.8rem;
+            font-size: 1.9rem;
             color: #2C2820;
             margin: 0;
-        }
-
-        .btn-primary {
-            background: #8A7650;
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 25px;
-            cursor: pointer;
-            font-weight: 600;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            transition: all 0.3s ease;
+            gap: 1rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+        }
+        .occasions-header h1 em {
+            color: #8A7650;
+            font-style: italic;
+            font-weight: 400;
         }
 
-        .btn-primary:hover {
-            background: #6b5a3f;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(138, 118, 80, 0.3);
-        }
 
         /* Alert Messages */
         .alert {
@@ -83,6 +93,67 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
 
         .alert i {
             font-size: 1.2rem;
+        }
+
+        .category-summary {
+            margin-bottom: 1.75rem;
+            background: #fff9f1;
+            border: 1px solid #f1dfca;
+            border-radius: 18px;
+            padding: 1.25rem 1.5rem;
+        }
+
+        .category-summary h3 {
+            margin: 0 0 1rem;
+            color: #8A7650;
+            font-size: 1.1rem;
+            letter-spacing: 0.02em;
+            font-weight: 600;
+        }
+
+        .category-summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .category-card {
+            background: white;
+            border: 1px solid #E2D9C8;
+            border-radius: 16px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .category-card__title {
+            font-size: 0.95rem;
+            color: #2C2820;
+            font-weight: 700;
+        }
+
+        .category-card__count {
+            font-size: 1.2rem;
+            color: #8A7650;
+            font-weight: 700;
+        }
+
+        .category-summary-note {
+            margin: 0;
+            color: #6B6463;
+            font-size: 0.9rem;
+        }
+
+        .category-summary-note a {
+            color: #8A7650;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .category-summary-note a:hover {
+            text-decoration: underline;
         }
 
         /* Occasions Grid */
@@ -198,38 +269,38 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
             gap: 0.75rem;
         }
 
-        .btn-sm {
+        .occasion-actions .btn {
             flex: 1;
-            padding: 0.6rem 1rem;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            font-weight: 600;
-            transition: all 0.2s ease;
-            display: flex;
+            min-width: 130px;
+        }
+
+        .btn-animation {
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 0.4rem;
+            gap: 0.5rem;
         }
 
-        .btn-edit {
-            background: #8A7650;
-            color: white;
-        }
-
-        .btn-edit:hover {
-            background: #6b5a3f;
-        }
-
-        .btn-delete {
-            background: rgba(244, 67, 54, 0.1);
+        .btn-delete-custom {
             color: #f44336;
-            border: 2px solid #f44336;
+            border-color: #f44336;
         }
 
-        .btn-delete:hover {
-            background: rgba(244, 67, 54, 0.2);
+        .btn-delete-custom:hover {
+            background: rgba(244, 67, 54, 0.15);
+            color: #d32f2f;
+            border-color: #d32f2f;
+        }
+
+        .animated-icon {
+            display: inline-flex;
+            color: #8A7650;
+            animation: pulse 1.4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
         }
 
         /* Modal */
@@ -364,25 +435,6 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
             transition: all 0.2s ease;
         }
 
-        .btn-secondary:hover {
-            background: #d4cbc0;
-        }
-
-        .btn-submit {
-            background: #8A7650;
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.2s ease;
-        }
-
-        .btn-submit:hover {
-            background: #6b5a3f;
-        }
-
         /* Empty State */
         .empty-state {
             text-align: center;
@@ -408,11 +460,12 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
 <body>
 <?php include 'admin-nav.php'; ?>
 
-<div class="occasions-container">
+    <div class="admin-content-wrapper">
+    <div class="occasions-container">
     <!-- Header -->
-    <div class="occasions-header">
-        <h2>Manage Occasions</h2>
-        <button class="btn-primary" id="addOccasionBtn">
+    <div class="admin-page-header occasions-header">
+        <h1 class="admin-page-title"><i class="fas fa-calendar-day animated-icon"></i> Manage Occasions</h1>
+        <button class="btn btn--primary btn--sm" id="addOccasionBtn">
             <i class="fas fa-plus"></i> Add Occasion
         </button>
     </div>
@@ -429,6 +482,22 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
         <div class="alert alert-error">
             <i class="fas fa-exclamation-circle"></i>
             <span><?= htmlspecialchars($error_message) ?></span>
+        </div>
+    <?php endif; ?>
+
+    <!-- Customization Categories Overview -->
+    <?php if (!empty($categoryCounts)): ?>
+        <div class="category-summary">
+            <h3>Customization categories in database</h3>
+            <div class="category-summary-grid">
+                <?php foreach ($categoryCounts as $category => $count): ?>
+                    <div class="category-card">
+                        <div class="category-card__title"><?= htmlspecialchars($category) ?></div>
+                        <div class="category-card__count"><?= $count ?> option<?= $count !== 1 ? 's' : '' ?></div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+            <p class="category-summary-note">These categories are available for the Customize page and can be managed in <a href="<?= BASE_URL ?>/index.php?route=admin-customize">Customize management</a>.</p>
         </div>
     <?php endif; ?>
 
@@ -479,11 +548,11 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
                             </div>
                         </div>
 
-                        <div class="occasion-actions" style="display: flex; gap: 0.75rem; margin-top: 1rem; padding-bottom: 1.5rem;">
-                            <button class="btn-sm btn-edit" onclick="editOccasion(<?= $occasion['occasion_id'] ?>)">
+                        <div class="occasion-actions" style="margin-top: 1rem; padding-bottom: 1.5rem;">
+                            <button class="btn btn--primary btn--sm btn-animation" onclick="editOccasion(<?= $occasion['occasion_id'] ?>)">
                                 <i class="fas fa-edit"></i> Edit
                             </button>
-                            <button class="btn-sm btn-delete" onclick="deleteOccasion(<?= $occasion['occasion_id'] ?>)">
+                            <button class="btn btn--ghost btn--sm btn-animation btn-delete-custom" onclick="deleteOccasion(<?= $occasion['occasion_id'] ?>)">
                                 <i class="fas fa-trash"></i> Delete
                             </button>
                         </div>
@@ -525,13 +594,13 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
                 <small>Optional: Upload an image for this occasion</small>
                 <div id="imagePreview" style="margin-top: 10px; display: none;">
                     <img id="previewImg" src="" alt="Preview" style="max-width: 200px; max-height: 200px; border-radius: 8px;">
-                    <button type="button" onclick="clearImagePreview()" class="btn-sm btn-secondary" style="margin-left: 10px;">Clear</button>
+                    <button type="button" onclick="clearImagePreview()" class="btn btn--secondary btn--sm">Clear</button>
                 </div>
             </div>
 
             <div class="modal-footer">
-                <button type="button" class="btn-secondary" onclick="closeModal()">Cancel</button>
-                <button type="submit" class="btn-submit">Save Occasion</button>
+                <button type="button" class="btn btn--ghost" onclick="closeModal()">Cancel</button>
+                <button type="submit" class="btn btn--primary">Save Occasion</button>
             </div>
         </form>
     </div>
@@ -668,5 +737,9 @@ document.getElementById('mobileToggle')?.addEventListener('click', function() {
     document.getElementById('adminSidebar').classList.toggle('open');
 });
 </script>
-</body>
-</html>
+    </div>
+    </div>
+    </main>
+    </div>
+
+<?php include 'admin-footer.php'; ?>

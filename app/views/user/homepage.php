@@ -1,4 +1,35 @@
-<?php $page = 'homepage'; ?>
+<?php
+$page = 'homepage';
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+$homePlans = [];
+if (!empty($_SESSION['user_id'])) {
+    if (!defined('ROOT_PATH')) {
+        define('ROOT_PATH', dirname(dirname(__DIR__)));
+    }
+    require_once ROOT_PATH . '/app/models/Plan.php';
+    require_once ROOT_PATH . '/app/models/PlanAutoConfirmation.php';
+    $planModel = new Plan();
+    $autoConfirm = new PlanAutoConfirmation();
+    $allPlans = $planModel->getUserPlans($_SESSION['user_id']);
+    
+    // Update plan statuses with auto-confirmation and cancellation info
+    foreach ($allPlans as &$plan) {
+        $planStatusInfo = $autoConfirm->getPlanStatusInfo($plan['plan_id']);
+        if ($planStatusInfo) {
+            $plan['status'] = $planStatusInfo['status'];
+            $plan['can_cancel'] = $planStatusInfo['can_cancel'] ?? false;
+            $plan['minutes_remaining'] = $planStatusInfo['minutes_remaining'] ?? 0;
+        } else {
+            $plan['can_cancel'] = false;
+            $plan['minutes_remaining'] = 0;
+        }
+    }
+    
+    $homePlans = array_slice($allPlans, 0, 3);
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -301,92 +332,9 @@
       color: var(--text-light);
     }
     
-    /* Testimonials Grid */
-    .testimonials-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 1rem;
-    }
-    
-    .testimonial-card {
-      position: relative;
-      border-radius: var(--radius-xl);
-      overflow: hidden;
-      aspect-ratio: 3/4;
-    }
-    
-    .testimonial-card img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: transform 0.5s ease;
-    }
-    
-    .testimonial-card:hover img {
-      transform: scale(1.05);
-    }
-    
-    .testimonial-card__overlay {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(to top, rgba(44, 40, 32, 0.9) 0%, rgba(44, 40, 32, 0.2) 60%, transparent 100%);
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-      padding: 1.5rem;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-    
-    .testimonial-card:hover .testimonial-card__overlay {
-      opacity: 1;
-    }
-    
-    .testimonial-card__stars {
-      color: var(--primary);
-      font-size: 0.8rem;
-      margin-bottom: 0.5rem;
-    }
-    
-    .testimonial-card__quote {
-      font-family: var(--serif);
-      font-size: 0.85rem;
-      color: white;
-      font-style: italic;
-      margin-bottom: 1rem;
-      line-height: 1.5;
-    }
-    
-    .testimonial-card__author {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    
-    .testimonial-card__author img {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      object-fit: cover;
-    }
-    
-    .testimonial-card__author strong {
-      display: block;
-      font-size: 0.8rem;
-      color: white;
-    }
-    
-    .testimonial-card__author span {
-      font-size: 0.65rem;
-      color: var(--primary-light);
-    }
-    
     @media (max-width: 1024px) {
       .occasions-grid {
         grid-template-columns: repeat(3, 1fr);
-      }
-      .testimonials-grid {
-        grid-template-columns: repeat(2, 1fr);
       }
       .home-stats {
         grid-template-columns: repeat(2, 1fr);
@@ -407,9 +355,6 @@
       }
       .occasions-grid {
         grid-template-columns: repeat(2, 1fr);
-      }
-      .testimonials-grid {
-        grid-template-columns: 1fr;
       }
       .home-stats {
         grid-template-columns: 1fr;
@@ -537,110 +482,141 @@
         <a href="/SINTA/public/index.php?route=plans" class="btn btn--ghost btn--sm">View All <i class="fas fa-arrow-right"></i></a>
       </div>
       <div class="events-list stagger">
-        <a href="event-detail.php?id=1" class="event-card">
-          <div class="event-card__image" style="background-image: url('/SINTA/public/assets/img/wedding.jpg')"></div>
-          <div class="event-card__info">
-            <h4>Santos Wedding</h4>
-            <div class="event-card__meta">
-              <span><i class="fas fa-location-dot"></i> Bacolod City</span>
-              <span><i class="fas fa-calendar"></i> Aug 12, 2025</span>
+        <?php if (!empty($homePlans)): ?>
+          <?php
+            $homeBadgeMap = [
+              'confirmed' => 'badge--success',
+              'approved' => 'badge--success',
+              'planning' => 'badge--primary',
+              'pending' => 'badge--warning',
+              'completed' => 'badge--info',
+              'rejected' => 'badge--danger'
+            ];
+            $homeLabelMap = [
+              'confirmed' => 'Confirmed',
+              'approved' => 'Confirmed',
+              'planning' => 'Planning',
+              'pending' => 'Pending',
+              'completed' => 'Completed',
+              'rejected' => 'Rejected'
+            ];
+          ?>
+          <?php foreach ($homePlans as $plan): ?>
+            <?php
+              $planStatus = $plan['status'] ?? 'pending';
+              $planStatus = isset($homeLabelMap[$planStatus]) ? $planStatus : 'pending';
+              $label = $homeLabelMap[$planStatus] ?? 'Pending';
+              $badgeClass = $homeBadgeMap[$planStatus] ?? 'badge--warning';
+              $eventTitle = htmlspecialchars($plan['event_name'] ?: ($plan['occasion_name'] ?: 'Your Event'));
+              $eventDate = $plan['event_date'] ? date('M j, Y', strtotime($plan['event_date'])) : 'TBD';
+              $eventLocation = htmlspecialchars($plan['venue'] ?: 'TBD');
+              $eventLink = '/SINTA/public/index.php?route=event-detail&id=' . urlencode($plan['plan_id']);
+              $eventText = strtolower(trim(($plan['occasion_name'] ?? '') . ' ' . ($plan['package_name'] ?? '') . ' ' . ($plan['event_name'] ?? '')));
+              $eventImageMap = [
+                  'wedding' => '/SINTA/public/assets/img/wedding3.jpg',
+                  'debut' => '/SINTA/public/assets/img/debut.jpg',
+                  'birthday' => '/SINTA/public/assets/img/birthday2.jpg',
+                  'corporate' => '/SINTA/public/assets/img/corporate2.jpg',
+                  'anniversary' => '/SINTA/public/assets/img/anniversary.jpg',
+                  'beach' => '/SINTA/public/assets/img/beach.jpg',
+                  'garden' => '/SINTA/public/assets/img/garden.jpg',
+              ];
+              $imageUrl = '/SINTA/public/assets/img/event-placeholder.jpg';
+              foreach ($eventImageMap as $keyword => $url) {
+                  if ($keyword && strpos($eventText, $keyword) !== false) {
+                      $imageUrl = $url;
+                      break;
+                  }
+              }
+            ?>
+            <a href="<?= $eventLink ?>" class="event-card">
+              <div class="event-card__image" style="background-image: url('<?= $imageUrl ?>')"></div>
+              <div class="event-card__info">
+                <h4><?= $eventTitle ?></h4>
+                <div class="event-card__meta">
+                  <span><i class="fas fa-location-dot"></i> <?= $eventLocation ?></span>
+                  <span><i class="fas fa-calendar"></i> <?= $eventDate ?></span>
+                </div>
+              </div>
+              <span class="badge <?= $badgeClass ?>"><?= $label ?></span>
+              <i class="fas fa-chevron-right event-card__arrow"></i>
+            </a>
+          <?php endforeach; ?>
+        <?php else: ?>
+          <a href="event-detail.php?id=1" class="event-card">
+            <div class="event-card__image" style="background-image: url('/SINTA/public/assets/img/wedding.jpg')"></div>
+            <div class="event-card__info">
+              <h4>Santos Wedding</h4>
+              <div class="event-card__meta">
+                <span><i class="fas fa-location-dot"></i> Bacolod City</span>
+                <span><i class="fas fa-calendar"></i> Aug 12, 2025</span>
+              </div>
             </div>
-          </div>
-          <span class="badge badge--success">Confirmed</span>
-          <i class="fas fa-chevron-right event-card__arrow"></i>
-        </a>
-        <a href="event-detail.php?id=2" class="event-card">
-          <div class="event-card__image" style="background-image: url('/SINTA/public/assets/img/70.jpg')"></div>
-          <div class="event-card__info">
-            <h4>Mom's 70th Birthday</h4>
-            <div class="event-card__meta">
-              <span><i class="fas fa-location-dot"></i> Iloilo City</span>
-              <span><i class="fas fa-calendar"></i> Oct 3, 2025</span>
+            <span class="badge badge--success">Confirmed</span>
+            <i class="fas fa-chevron-right event-card__arrow"></i>
+          </a>
+          <a href="event-detail.php?id=2" class="event-card">
+            <div class="event-card__image" style="background-image: url('/SINTA/public/assets/img/70.jpg')"></div>
+            <div class="event-card__info">
+              <h4>Mom's 70th Birthday</h4>
+              <div class="event-card__meta">
+                <span><i class="fas fa-location-dot"></i> Iloilo City</span>
+                <span><i class="fas fa-calendar"></i> Oct 3, 2025</span>
+              </div>
             </div>
-          </div>
-          <span class="badge badge--primary">Planning</span>
-          <i class="fas fa-chevron-right event-card__arrow"></i>
-        </a>
-        <a href="event-detail.php?id=3" class="event-card">
-          <div class="event-card__image" style="background-image: url('/SINTA/public/assets/img/ayala.jpg')"></div>
-          <div class="event-card__info">
-            <h4>Ayala Gala Night</h4>
-            <div class="event-card__meta">
-              <span><i class="fas fa-location-dot"></i> Bacolod City</span>
-              <span><i class="fas fa-calendar"></i> Nov 28, 2025</span>
+            <span class="badge badge--primary">Planning</span>
+            <i class="fas fa-chevron-right event-card__arrow"></i>
+          </a>
+          <a href="event-detail.php?id=3" class="event-card">
+            <div class="event-card__image" style="background-image: url('/SINTA/public/assets/img/ayala.jpg')"></div>
+            <div class="event-card__info">
+              <h4>Ayala Gala Night</h4>
+              <div class="event-card__meta">
+                <span><i class="fas fa-location-dot"></i> Bacolod City</span>
+                <span><i class="fas fa-calendar"></i> Nov 28, 2025</span>
+              </div>
             </div>
-          </div>
-          <span class="badge badge--warning">Pending</span>
-          <i class="fas fa-chevron-right event-card__arrow"></i>
-        </a>
+            <span class="badge badge--warning">Pending</span>
+            <i class="fas fa-chevron-right event-card__arrow"></i>
+          </a>
+        <?php endif; ?>
       </div>
     </section>
     
-    <!-- Testimonials Section -->
+    <!-- Feedback Section -->
     <section class="home-section">
       <div class="home-section__head">
         <div>
-          <div class="eyebrow"><span class="rule"></span> Love Notes</div>
-          <h2>What our <em>clients</em> say</h2>
+          <div class="eyebrow"><span class="rule"></span> Your Feedback</div>
+          <h2>Share your <em>thoughts</em> with us</h2>
         </div>
       </div>
-      <div class="testimonials-grid stagger">
-        <div class="testimonial-card">
-          <img src="/SINTA/public/assets/img/wedding2.jpg" alt="Wedding">
-          <div class="testimonial-card__overlay">
-            <div class="testimonial-card__stars">★★★★★</div>
-            <p class="testimonial-card__quote">"The most magical day of our lives. Sinta made every detail absolutely perfect."</p>
-            <div class="testimonial-card__author">
-              <img src="https://randomuser.me/api/portraits/women/68.jpg" alt="Isabella">
-              <div>
-                <strong>Isabella R.</strong>
-                <span>Wedding · 2024</span>
-              </div>
-            </div>
+      <div style="background: var(--bg-card); border-radius: var(--radius-2xl); padding: 2rem; box-shadow: var(--shadow-md); border: 1px solid var(--border);">
+        <form id="homepageFeedbackForm" style="display: flex; flex-direction: column; gap: 1rem;">
+          <div>
+            <label for="home-feedback-subject" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text-primary); font-size: 0.95rem;"><strong>Subject</strong></label>
+            <input type="text" id="home-feedback-subject" name="subject" placeholder="Brief summary of your feedback" required style="width: 100%; padding: 0.75rem 1rem; border: 2px solid var(--border); border-radius: var(--radius-lg); font-family: inherit; font-size: 1rem; background: var(--bg-secondary);">
           </div>
-        </div>
-        <div class="testimonial-card">
-          <img src="/SINTA/public/assets/img/corporate2.jpg" alt="Corporate">
-          <div class="testimonial-card__overlay">
-            <div class="testimonial-card__stars">★★★★★</div>
-            <p class="testimonial-card__quote">"Professional, creative, and handled every detail without a hitch."</p>
-            <div class="testimonial-card__author">
-              <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Marcus">
-              <div>
-                <strong>Marcus T.</strong>
-                <span>Corporate · 2024</span>
-              </div>
+          
+          <div>
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text-primary); font-size: 0.95rem;"><strong>Rating</strong></label>
+            <div style="display: flex; gap: 0.5rem;" id="home-feedback-rating">
+              <button type="button" class="star-btn" data-rating="1" style="background: none; border: none; font-size: 1.8rem; cursor: pointer; color: #ccc; transition: all 0.2s;">★</button>
+              <button type="button" class="star-btn" data-rating="2" style="background: none; border: none; font-size: 1.8rem; cursor: pointer; color: #ccc; transition: all 0.2s;">★</button>
+              <button type="button" class="star-btn" data-rating="3" style="background: none; border: none; font-size: 1.8rem; cursor: pointer; color: #ccc; transition: all 0.2s;">★</button>
+              <button type="button" class="star-btn" data-rating="4" style="background: none; border: none; font-size: 1.8rem; cursor: pointer; color: #ccc; transition: all 0.2s;">★</button>
+              <button type="button" class="star-btn" data-rating="5" style="background: none; border: none; font-size: 1.8rem; cursor: pointer; color: #ccc; transition: all 0.2s;">★</button>
             </div>
+            <input type="hidden" id="home-feedback-rating-value" name="rating" value="0">
           </div>
-        </div>
-        <div class="testimonial-card">
-          <img src="/SINTA/public/assets/img/birthday2.jpg" alt="Birthday">
-          <div class="testimonial-card__overlay">
-            <div class="testimonial-card__stars">★★★★★</div>
-            <p class="testimonial-card__quote">"Planning from abroad was effortless with Sinta. The surprise was perfection!"</p>
-            <div class="testimonial-card__author">
-              <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Chloe">
-              <div>
-                <strong>Chloe S.</strong>
-                <span>Birthday · 2024</span>
-              </div>
-            </div>
+          
+          <div>
+            <label for="home-feedback-message" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text-primary); font-size: 0.95rem;"><strong>Message</strong></label>
+            <textarea id="home-feedback-message" name="message" placeholder="Describe your feedback in detail..." required style="width: 100%; padding: 0.75rem 1rem; border: 2px solid var(--border); border-radius: var(--radius-lg); font-family: inherit; font-size: 1rem; background: var(--bg-secondary); min-height: 120px; resize: vertical;"></textarea>
           </div>
-        </div>
-        <div class="testimonial-card">
-          <img src="/SINTA/public/assets/img/anniversary2.jpg" alt="Anniversary">
-          <div class="testimonial-card__overlay">
-            <div class="testimonial-card__stars">★★★★★</div>
-            <p class="testimonial-card__quote">"50 years celebrated in the most elegant way possible. Thank you, Sinta!"</p>
-            <div class="testimonial-card__author">
-              <img src="https://randomuser.me/api/portraits/men/55.jpg" alt="Ramon">
-              <div>
-                <strong>Ramon & Luz V.</strong>
-                <span>Anniversary · 2024</span>
-              </div>
-            </div>
-          </div>
-        </div>
+          
+          <button type="submit" style="background: var(--primary); color: white; border: none; padding: 0.875rem 2rem; border-radius: var(--radius-lg); font-weight: 600; cursor: pointer; transition: all 0.3s; align-self: flex-start;"><i class="fas fa-paper-plane"></i> Submit Feedback</button>
+        </form>
       </div>
     </section>
     
@@ -657,6 +633,71 @@
     });
   }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
   document.querySelectorAll('.stagger').forEach(el => observer.observe(el));
+
+  // Star rating system
+  const starButtons = document.querySelectorAll('#home-feedback-rating .star-btn');
+  starButtons.forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      const rating = this.dataset.rating;
+      document.getElementById('home-feedback-rating-value').value = rating;
+      starButtons.forEach(b => b.style.color = '#ccc');
+      for (let i = 0; i < rating; i++) {
+        starButtons[i].style.color = '#8A7650';
+      }
+    });
+  });
+
+  // Feedback form submission
+  document.getElementById('homepageFeedbackForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData();
+    formData.append('action', 'submit_feedback');
+    formData.append('subject', document.getElementById('home-feedback-subject').value);
+    formData.append('message', document.getElementById('home-feedback-message').value);
+    formData.append('rating', document.getElementById('home-feedback-rating-value').value);
+    
+    fetch('/SINTA/public/index.php?route=feedback', {
+      method: 'POST',
+      body: formData,
+      credentials: 'same-origin'
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        showHomeFeedbackToast('Thank you! Your feedback has been submitted.', 'success');
+        document.getElementById('homepageFeedbackForm').reset();
+        document.querySelectorAll('#home-feedback-rating .star-btn').forEach(b => b.style.color = '#ccc');
+        document.getElementById('home-feedback-rating-value').value = '0';
+      } else {
+        showHomeFeedbackToast(data.message || 'Error submitting feedback', 'error');
+      }
+    })
+    .catch(err => {
+      showHomeFeedbackToast('Error: ' + err.message, 'error');
+    });
+  });
+
+  function showHomeFeedbackToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+    toast.style.cssText = `
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      color: white;
+      font-weight: 600;
+      z-index: 9999;
+      animation: slideIn 0.3s ease;
+      background: ${type === 'success' ? '#2e7d32' : '#c62828'};
+    `;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+  }
 </script>
 </body>
 </html>

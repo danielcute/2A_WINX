@@ -10,8 +10,10 @@ if (!isset($_SESSION['user_id'])) {
 // Fetch full user data from database
 define('ROOT_PATH', dirname(dirname(dirname(__FILE__))));
 require_once ROOT_PATH . '/app/models/User.php';
+require_once ROOT_PATH . '/app/models/Feedback.php';
 
 $userModel = new User();
+$feedbackModel = new Feedback();
 $user = $userModel->findById($_SESSION['user_id']);
 
 if (!$user) {
@@ -77,6 +79,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['avatar'])) {
                 $_SESSION['user_avatar'] = $relative_path;
                 $user['image'] = $relative_path;
                 $avatar_upload_success = 'Profile picture updated successfully!';
+                
+                // Redirect to prevent form resubmission and the page reload loop
+                header('Location: ' . $_SERVER['REQUEST_URI']);
+                exit;
             } else {
                 $avatar_upload_error = 'Failed to upload image. Please try again.';
             }
@@ -169,9 +175,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Check if avatar exists, otherwise use default
-$avatar_path = !empty($user['image']) && file_exists(ROOT_PATH . $user['image']) 
-    ? $user['image'] 
-    : '/SINTA/public/assets/img/default-avatar.jpg';
+$avatar_path = !empty($user['image']) ? $user['image'] : '/SINTA/public/assets/img/default-avatar.jpg';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -365,6 +369,9 @@ $avatar_path = !empty($user['image']) && file_exists(ROOT_PATH . $user['image'])
             </button>
             <button class="profile-tab" data-tab="notifications">
                 <i class="fas fa-bell"></i> Notifications
+            </button>
+            <button class="profile-tab" data-tab="feedback">
+                <i class="fas fa-comments"></i> Feedback
             </button>
         </div>
         
@@ -574,7 +581,129 @@ $avatar_path = !empty($user['image']) && file_exists(ROOT_PATH . $user['image'])
             </div>
         </div>
         
+        <!-- Tab: Feedback -->
+        <div id="tab-feedback" class="profile-pane">
+            <div class="pane-card">
+                <div class="pane-card__head">
+                    <h3 class="pane-card__title">My Feedback</h3>
+                    <span class="pane-card__hint">Your feedback and admin responses</span>
+                </div>
+                <?php 
+                $userFeedbacks = $feedbackModel->getUserFeedback($_SESSION['user_id']);
+                if (empty($userFeedbacks)): 
+                ?>
+                    <div class="pane-card__body" style="text-align: center; padding: 2rem;">
+                        <i class="fas fa-inbox" style="font-size: 2.5rem; color: var(--border); margin-bottom: 1rem;"></i>
+                        <p style="color: #8B7355;">No feedback yet. Your feedback helps us improve!</p>
+                        <button type="button" class="btn btn--gold" onclick="openFeedbackModal()" style="margin-top: 1rem;">
+                            <i class="fas fa-plus"></i> Submit Feedback
+                        </button>
+                    </div>
+                <?php else: ?>
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        <?php foreach ($userFeedbacks as $feedback): ?>
+                            <div style="background: #f9f9f9; border-radius: 8px; padding: 1.5rem; border-left: 4px solid #8A7650;">
+                                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                                    <div>
+                                        <h4 style="margin: 0 0 0.25rem 0; color: #2C2820;"><?php echo htmlspecialchars($feedback['subject']); ?></h4>
+                                        <div style="font-size: 0.85rem; color: #8B7355;">
+                                            <span><?php echo date('M d, Y', strtotime($feedback['created_at'])); ?></span>
+                                            <span class="feedback-status" style="display: inline-block; padding: 0.3rem 0.6rem; border-radius: 4px; font-size: 0.75rem; margin-left: 0.5rem; background: #D1ECF1; color: #0c5460;">
+                                                <?php echo ucfirst(str_replace('_', ' ', $feedback['status'])); ?>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div style="text-align: center; padding: 0.5rem 1rem; background: white; border-radius: 4px; font-size: 0.85rem; color: #8B7355;">
+                                        <?php 
+                                        echo ($feedback['reply_count'] > 0) ? $feedback['reply_count'] . ' response' . ($feedback['reply_count'] > 1 ? 's' : '') : 'No responses';
+                                        ?>
+                                    </div>
+                                </div>
+                                <p style="margin: 1rem 0; color: #555; line-height: 1.6;"><?php echo nl2br(htmlspecialchars(substr($feedback['message'], 0, 200))); ?><?php echo strlen($feedback['message']) > 200 ? '...' : ''; ?></p>
+                                
+                                <!-- Replies -->
+                                <?php 
+                                $replies = $feedbackModel->getReplies($feedback['feedback_id']);
+                                if (!empty($replies)): 
+                                ?>
+                                    <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #E2D9C8;">
+                                        <h5 style="margin: 0 0 0.75rem 0; color: #2C2820; font-size: 0.95rem;">Conversation:</h5>
+                                        <?php foreach ($replies as $reply): ?>
+                                            <div style="margin-bottom: 0.75rem; padding: 0.75rem; background: white; border-radius: 4px; border-left: 3px solid #8A7650;">
+                                                <div style="font-weight: 600; color: #2C2820; margin-bottom: 0.25rem;">
+                                                    <?php echo htmlspecialchars($reply['sender_name']); ?>
+                                                    <span style="font-weight: normal; color: #8B7355; font-size: 0.8rem; margin-left: 0.5rem;">
+                                                        <?php echo date('M d, Y H:i', strtotime($reply['created_at'])); ?>
+                                                    </span>
+                                                </div>
+                                                <p style="margin: 0; color: #555; font-size: 0.95rem;"><?php echo nl2br(htmlspecialchars($reply['message'])); ?></p>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                <?php endif; ?>
+                                
+                                <!-- Add Reply -->
+                                <?php if ($feedback['status'] !== 'closed'): ?>
+                                    <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #E2D9C8;">
+                                        <textarea id="reply-<?php echo $feedback['feedback_id']; ?>" placeholder="Add your response..." style="width: 100%; padding: 0.75rem; border: 2px solid #E2D9C8; border-radius: 4px; font-family: inherit; min-height: 80px; display: none;"></textarea>
+                                        <button type="button" class="btn btn--sm btn--gold" onclick="showReplyField(<?php echo $feedback['feedback_id']; ?>)" style="margin-top: 0.5rem;">
+                                            <i class="fas fa-reply"></i> Reply
+                                        </button>
+                                        <button type="button" class="btn btn--sm btn--ghost" id="send-reply-btn-<?php echo $feedback['feedback_id']; ?>" onclick="sendReplyFromProfile(<?php echo $feedback['feedback_id']; ?>)" style="margin-top: 0.5rem; display: none;">
+                                            <i class="fas fa-check"></i> Send
+                                        </button>
+                                        <button type="button" class="btn btn--sm btn--ghost" id="cancel-reply-btn-<?php echo $feedback['feedback_id']; ?>" onclick="hideReplyField(<?php echo $feedback['feedback_id']; ?>)" style="margin-top: 0.5rem; display: none;">
+                                            Cancel
+                                        </button>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                    <div style="margin-top: 1.5rem; text-align: center;">
+                        <button type="button" class="btn btn--gold" onclick="openFeedbackModal()">
+                            <i class="fas fa-plus"></i> Submit New Feedback
+                        </button>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
     </main>
+</div>
+
+<!-- Feedback Submission Modal -->
+<div id="feedbackModal" class="avatar-upload-modal">
+    <div class="avatar-upload-content" style="max-width: 500px;">
+        <h3 style="margin: 0 0 1rem 0; color: #2C2820;">Submit Feedback</h3>
+        <form id="profileFeedbackForm">
+            <input type="hidden" name="action" value="submit_feedback">
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #2C2820;">Subject *</label>
+                <input type="text" name="subject" placeholder="Brief summary" required style="width: 100%; padding: 0.75rem; border: 2px solid #E2D9C8; border-radius: 4px; font-family: inherit;">
+            </div>
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #2C2820;">Rating</label>
+                <div style="display: flex; gap: 0.5rem;" id="profileFeedbackRating">
+                    <button type="button" class="star-btn" data-rating="1" style="background: none; border: none; font-size: 2rem; cursor: pointer; color: #ddd;">★</button>
+                    <button type="button" class="star-btn" data-rating="2" style="background: none; border: none; font-size: 2rem; cursor: pointer; color: #ddd;">★</button>
+                    <button type="button" class="star-btn" data-rating="3" style="background: none; border: none; font-size: 2rem; cursor: pointer; color: #ddd;">★</button>
+                    <button type="button" class="star-btn" data-rating="4" style="background: none; border: none; font-size: 2rem; cursor: pointer; color: #ddd;">★</button>
+                    <button type="button" class="star-btn" data-rating="5" style="background: none; border: none; font-size: 2rem; cursor: pointer; color: #ddd;">★</button>
+                </div>
+                <input type="hidden" name="rating" id="profileFeedbackRatingValue" value="0">
+            </div>
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #2C2820;">Message *</label>
+                <textarea name="message" placeholder="Describe your feedback in detail..." required style="width: 100%; padding: 0.75rem; border: 2px solid #E2D9C8; border-radius: 4px; font-family: inherit; min-height: 120px;"></textarea>
+            </div>
+            <div class="modal-buttons">
+                <button type="submit" class="btn btn--gold">
+                    <i class="fas fa-paper-plane"></i> Submit
+                </button>
+                <button type="button" class="btn btn--ghost" onclick="closeFeedbackModal()">Cancel</button>
+            </div>
+        </form>
+    </div>
 </div>
 
 <!-- Avatar Upload Modal -->
@@ -757,12 +886,122 @@ document.getElementById('avatarModal').addEventListener('click', function(e) {
     }
 });
 
-// Refresh avatar after upload (iframe or AJAX handling)
-<?php if ($avatar_upload_success): ?>
-setTimeout(() => {
-    location.reload();
-}, 2000);
-<?php endif; ?>
+// Feedback Modal Functions
+function openFeedbackModal() {
+    document.getElementById('feedbackModal').classList.add('active');
+}
+
+function closeFeedbackModal() {
+    document.getElementById('feedbackModal').classList.remove('active');
+}
+
+// Close feedback modal when clicking outside
+document.getElementById('feedbackModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeFeedbackModal();
+    }
+});
+
+// Star rating for profile feedback
+const profileStarButtons = document.querySelectorAll('#profileFeedbackRating .star-btn');
+profileStarButtons.forEach(btn => {
+    btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        const rating = this.dataset.rating;
+        document.getElementById('profileFeedbackRatingValue').value = rating;
+        profileStarButtons.forEach(b => b.style.color = '#ddd');
+        for (let i = 0; i < rating; i++) {
+            profileStarButtons[i].style.color = '#8A7650';
+        }
+    });
+});
+
+// Profile feedback form submission
+document.getElementById('profileFeedbackForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData();
+    formData.append('action', 'submit_feedback');
+    formData.append('subject', this.querySelector('[name="subject"]').value);
+    formData.append('message', this.querySelector('[name="message"]').value);
+    formData.append('rating', document.getElementById('profileFeedbackRatingValue').value);
+    
+    fetch('/SINTA/public/index.php?route=feedback', {
+        method: 'POST',
+        body: formData,
+        credentials: 'same-origin'
+    })
+    .then(r => r.json())
+    .then(data => {
+        showToast(data.message, data.success ? 'success' : 'error');
+        if (data.success) {
+            document.getElementById('profileFeedbackForm').reset();
+            closeFeedbackModal();
+            setTimeout(() => location.reload(), 1500);
+        }
+    })
+    .catch(err => showToast('Error: ' + err.message, 'error'));
+});
+
+// Show reply field
+function showReplyField(feedbackId) {
+    const textarea = document.getElementById(`reply-${feedbackId}`);
+    const replyBtn = document.querySelector(`[onclick="showReplyField(${feedbackId})"]`);
+    const sendBtn = document.getElementById(`send-reply-btn-${feedbackId}`);
+    const cancelBtn = document.getElementById(`cancel-reply-btn-${feedbackId}`);
+    
+    textarea.style.display = 'block';
+    replyBtn.style.display = 'none';
+    sendBtn.style.display = 'inline-block';
+    cancelBtn.style.display = 'inline-block';
+    textarea.focus();
+}
+
+// Hide reply field
+function hideReplyField(feedbackId) {
+    const textarea = document.getElementById(`reply-${feedbackId}`);
+    const replyBtn = document.querySelector(`[onclick="showReplyField(${feedbackId})"]`);
+    const sendBtn = document.getElementById(`send-reply-btn-${feedbackId}`);
+    const cancelBtn = document.getElementById(`cancel-reply-btn-${feedbackId}`);
+    
+    textarea.style.display = 'none';
+    textarea.value = '';
+    replyBtn.style.display = 'inline-block';
+    sendBtn.style.display = 'none';
+    cancelBtn.style.display = 'none';
+}
+
+// Send reply from profile
+function sendReplyFromProfile(feedbackId) {
+    const textarea = document.getElementById(`reply-${feedbackId}`);
+    const message = textarea.value.trim();
+    
+    if (!message) {
+        showToast('Please enter your reply', 'error');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('action', 'add_reply');
+    formData.append('feedback_id', feedbackId);
+    formData.append('message', message);
+    
+    fetch('/SINTA/public/index.php?route=feedback', {
+        method: 'POST',
+        body: formData,
+        credentials: 'same-origin'
+    })
+    .then(r => r.json())
+    .then(data => {
+        showToast(data.message, data.success ? 'success' : 'error');
+        if (data.success) {
+            textarea.value = '';
+            hideReplyField(feedbackId);
+            setTimeout(() => location.reload(), 1500);
+        }
+    })
+    .catch(err => showToast('Error: ' + err.message, 'error'));
+}
 </script>
 </body>
 </html>

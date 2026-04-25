@@ -13,6 +13,7 @@ if (!defined('ROOT_PATH')) {
     define('ROOT_PATH', dirname(dirname(__DIR__)));
 }
 require_once ROOT_PATH . '/config/database.php';
+require_once ROOT_PATH . '/app/models/Notification.php';
 
 class AdminPackageController
 {
@@ -99,6 +100,41 @@ class AdminPackageController
             if ($stmt->execute()) {
                 $package_id = (int) $this->db->insert_id;
                 $stmt->close();
+                
+                // Create notifications for all users about the new package
+                try {
+                    $notificationModel = new Notification();
+                    
+                    // Get occasion name for the notification
+                    $occasionStmt = $this->db->prepare("SELECT events FROM occasions_tbl WHERE occasion_id = ?");
+                    if ($occasionStmt) {
+                        $occasionStmt->bind_param('i', $occasion_id);
+                        $occasionStmt->execute();
+                        $occasionResult = $occasionStmt->get_result()->fetch_assoc();
+                        $occasionStmt->close();
+                        $occasionName = $occasionResult ? $occasionResult['events'] : 'Event';
+                    } else {
+                        $occasionName = 'Event';
+                    }
+                    
+                    // Get all user IDs
+                    $userResult = $this->db->query("SELECT user_id FROM users_tbl WHERE role = 'user'");
+                    if ($userResult) {
+                        while ($userRow = $userResult->fetch_assoc()) {
+                            $notificationModel->create([
+                                'user_id' => $userRow['user_id'],
+                                'type' => 'system_update',
+                                'title' => 'New Package Available',
+                                'message' => 'A new package "' . htmlspecialchars($package_name) . '" for ' . htmlspecialchars($occasionName) . ' has been added!',
+                                'related_type' => 'package',
+                                'related_id' => $package_id
+                            ]);
+                        }
+                    }
+                } catch (Exception $e) {
+                    error_log("Failed to create package notifications: " . $e->getMessage());
+                }
+                
                 return ['success' => true, 'package_id' => $package_id];
             } else {
                 $error = $stmt->error;

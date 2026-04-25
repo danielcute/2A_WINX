@@ -1,6 +1,10 @@
-<?php 
+<?php
+error_reporting(E_ALL);
+ini_set('display_errors', 0);
+
 require_once dirname(__DIR__, 2) . '/models/Booking.php';
 require_once dirname(__DIR__, 2) . '/models/User.php';
+require_once dirname(__DIR__, 2) . '/models/PlanAutoConfirmation.php';
 
 if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
     header('Location: /SINTA/public/index.php?route=signin');
@@ -8,38 +12,96 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
 }
 
 $page_title = 'Booking Management';
-$bookingModel = new Booking();
 
-// Handle AJAX requests
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    header('Content-Type: application/json');
+// Handle AJAX requests BEFORE doing any output
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['action'])) {
+    // Set JSON header and send response
+    header('Content-Type: application/json; charset=utf-8');
     
-    $action = $_POST['action'] ?? '';
-    $response = ['success' => false, 'message' => 'Invalid action'];
-    
-    switch ($action) {
-        case 'update_status':
-            if ($bookingModel->updateStatus((int)$_POST['id'], $_POST['status'])) {
-                $response = ['success' => true, 'message' => 'Status updated successfully'];
-            } else {
-                $response = ['success' => false, 'message' => 'Failed to update status'];
-            }
-            break;
-            
-        case 'delete':
-            if ($bookingModel->delete((int)$_POST['id'])) {
-                $response = ['success' => true, 'message' => 'Booking deleted successfully'];
-            } else {
-                $response = ['success' => false, 'message' => 'Failed to delete booking'];
-            }
-            break;
+    try {
+        $bookingModel = new Booking();
+        $action = $_POST['action'] ?? '';
+        $response = ['success' => false, 'message' => 'Invalid action'];
+        
+        switch ($action) {
+            case 'update_status':
+                $bookingId = (int)($_POST['id'] ?? 0);
+                $status = $_POST['status'] ?? '';
+                
+                if (!$bookingId) {
+                    $response = ['success' => false, 'message' => 'Invalid booking ID'];
+                } elseif (!$status) {
+                    $response = ['success' => false, 'message' => 'Invalid status'];
+                } else {
+                    $canUpdate = $bookingModel->canUpdateStatus($bookingId);
+                    
+                    if (!$canUpdate['can_update']) {
+                        $response = ['success' => false, 'message' => $canUpdate['reason']];
+                    } else {
+                        $updateResult = $bookingModel->updateStatus($bookingId, $status);
+                        if ($updateResult) {
+                            $response = ['success' => true, 'message' => 'Status updated successfully'];
+                        } else {
+                            error_log("Booking update failed for ID $bookingId");
+                            $response = ['success' => false, 'message' => 'Failed to update status. Please try again.'];
+                        }
+                    }
+                }
+                break;
+                
+            case 'delete':
+                $bookingId = (int)($_POST['id'] ?? 0);
+                
+                if (!$bookingId) {
+                    $response = ['success' => false, 'message' => 'Invalid booking ID'];
+                } else {
+                    $canDelete = $bookingModel->canDelete($bookingId);
+                    
+                    if (!$canDelete['can_delete']) {
+                        $response = ['success' => false, 'message' => $canDelete['reason']];
+                    } else {
+                        $deleteResult = $bookingModel->delete($bookingId);
+                        if ($deleteResult) {
+                            $response = ['success' => true, 'message' => 'Booking deleted successfully'];
+                        } else {
+                            error_log("Booking delete failed for ID $bookingId");
+                            $response = ['success' => false, 'message' => 'Failed to delete booking. Please try again.'];
+                        }
+                    }
+                }
+                break;
+        }
+        
+        // Clear any buffered output before sending JSON
+        if (ob_get_level()) {
+            ob_clean();
+        }
+        echo json_encode($response);
+    } catch (Exception $e) {
+        error_log("Admin bookings error: " . $e->getMessage());
+        http_response_code(500);
+        if (ob_get_level()) {
+            ob_clean();
+        }
+        echo json_encode(['success' => false, 'message' => 'Server error occurred']);
     }
-    
-    echo json_encode($response);
     exit;
 }
 
+// Only load these for page display
+$bookingModel = new Booking();
+$autoConfirm = new PlanAutoConfirmation();
+
 $bookings = $bookingModel->getAll();
+
+// Auto-confirm pending plans and update their status
+foreach ($bookings as &$booking) {
+    $planStatusInfo = $autoConfirm->getPlanStatusInfo($booking['checkout_id']);
+    if ($planStatusInfo) {
+        $booking['status'] = $planStatusInfo['status'];
+    }
+}
+
 $stats = $bookingModel->getStats();
 ?>
 <!DOCTYPE html>
@@ -51,13 +113,31 @@ $stats = $bookingModel->getStats();
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         .admin-container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+        .bookings-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+        .bookings-header h1 { font-family: 'Cormorant Garamond', serif; font-size: 1.9rem; color: #2C2820; margin: 0; display: flex; align-items: center; gap: 1rem; letter-spacing: -0.03em; font-weight: 700; }
+        .bookings-header h1 em { color: #8A7650; font-style: italic; font-weight: 400; }
+        .animated-icon { display: inline-flex; color: #8A7650; animation: pulse 1.4s ease-in-out infinite; font-size: 1.6rem; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
         .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem; }
-        .stat-card { background: white; border-radius: 20px; padding: 1rem; text-align: center; border: 1px solid var(--border); }
-        .stat-card h3 { font-size: 1.8rem; margin: 0; color: var(--primary); }
-        .admin-table { width: 100%; border-collapse: collapse; background: white; border-radius: 24px; overflow: hidden; }
-        .admin-table th, .admin-table td { padding: 1rem; text-align: left; border-bottom: 1px solid var(--border); }
-        .admin-table th { background: var(--cream); }
-        .status-select { padding: 0.3rem 0.6rem; border-radius: 20px; border: 1px solid var(--border); }
+        .stat-card { background: white; border-radius: 20px; padding: 1.5rem; text-align: center; border: 2px solid #E2D9C8; transition: all 0.3s ease; }
+        .stat-card:hover { border-color: #8A7650; box-shadow: 0 10px 30px rgba(138, 118, 80, 0.15); }
+        .stat-card h3 { font-size: 1.8rem; margin: 0 0 0.5rem; color: #8A7650; font-weight: 700; }
+        .stat-card p { color: #8B7355; margin: 0; font-weight: 600; }
+        .admin-table { width: 100%; border-collapse: collapse; background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+        .admin-table th, .admin-table td { padding: 1.25rem; text-align: left; border-bottom: 1px solid #E2D9C8; }
+        .admin-table th { background: #F5F0E8; font-weight: 600; color: #2C2820; }
+        .booking-actions { display: flex; gap: 0.5rem; }
+        .booking-actions .btn { flex: 1; min-width: 120px; }
+        .btn-delete-custom { color: #f44336; border-color: #f44336; }
+        .btn-delete-custom:hover { background: rgba(244, 67, 54, 0.15); color: #d32f2f; border-color: #d32f2f; }
+        .status-select { padding: 0.6rem 1rem; border-radius: 12px; border: 2px solid #E2D9C8; background: white; color: #2C2820; font-weight: 600; cursor: pointer; transition: all 0.2s ease; }
+        .status-select:hover { border-color: #8A7650; }
+        .status-select:focus { outline: none; border-color: #8A7650; box-shadow: 0 0 0 3px rgba(138, 118, 80, 0.1); }
+        .status-select:disabled { background: #F5F0E8; color: #A39B8B; border-color: #D4CAB8; cursor: not-allowed; opacity: 0.7; }
+        .status-select:disabled:hover { border-color: #D4CAB8; }
+        .completed-indicator { display: block; color: #8A7650; margin-top: 0.25rem; font-weight: 600; font-size: 0.85rem; }
+        .btn-delete-custom:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-delete-custom:disabled:hover { background: transparent; color: #f44336; border-color: #f44336; }
         .toast { position: fixed; bottom: 2rem; right: 2rem; background: #333; color: white; padding: 0.75rem 1.5rem; border-radius: 8px; z-index: 3000; animation: slideIn 0.3s ease; }
         .toast.success { background: #2e7d32; }
         .toast.error { background: #c62828; }
@@ -70,7 +150,6 @@ $stats = $bookingModel->getStats();
 <body>
 <?php include 'admin-nav.php'; ?>
 
-<div class="admin-container">
     <div class="stats-grid">
         <div class="stat-card">
             <h3><?= $stats['total'] ?? 0 ?></h3>
@@ -81,8 +160,8 @@ $stats = $bookingModel->getStats();
             <p>Pending</p>
         </div>
         <div class="stat-card">
-            <h3><?= $stats['paid'] ?? 0 ?></h3>
-            <p>Paid</p>
+            <h3><?= $stats['confirmed'] ?? 0 ?></h3>
+            <p>Confirmed</p>
         </div>
         <div class="stat-card">
             <h3>₱<?= number_format($stats['total_revenue'] ?? 0, 0) ?></h3>
@@ -90,8 +169,8 @@ $stats = $bookingModel->getStats();
         </div>
     </div>
     
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-        <h1>📋 Booking <em>Management</em></h1>
+    <div class="admin-page-header bookings-header">
+        <h1 class="admin-page-title"><i class="fas fa-calendar-check animated-icon"></i> Booking <em>Management</em></h1>
     </div>
     
     <table class="admin-table">
@@ -100,10 +179,10 @@ $stats = $bookingModel->getStats();
                 <th>ID</th>
                 <th>Customer</th>
                 <th>Email</th>
-                <th>Package</th>
+                <th>Event</th>
+                <th>Event Date</th>
                 <th>Total (₱)</th>
                 <th>Status</th>
-                <th>Date</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -118,19 +197,37 @@ $stats = $bookingModel->getStats();
                         <td><?= $book['checkout_id'] ?></td>
                         <td><?= htmlspecialchars($book['first_name'] . ' ' . ($book['last_name'] ?? '')) ?></td>
                         <td><?= htmlspecialchars($book['email'] ?? 'N/A') ?></td>
-                        <td><?= htmlspecialchars($book['package_name'] ?? 'Custom Package') ?></td>
+                        <td><?= htmlspecialchars($book['event_name'] ?? 'Custom Event') ?></td>
+                        <td><?= !empty($book['event_date']) ? date('M d, Y', strtotime($book['event_date'])) : 'TBD' ?></td>
                         <td><?= number_format($book['total_amount'], 0) ?></td>
                         <td>
-                            <select class="status-select" onchange="updateStatus(<?= $book['checkout_id'] ?>, this.value)">
+                            <select class="status-select" 
+                                    id="status-select-<?= $book['checkout_id'] ?>"
+                                    onchange="updateStatus(<?= $book['checkout_id'] ?>, this.value)" 
+                                    <?= $book['status'] == 'completed' ? 'disabled' : '' ?> 
+                                    title="<?= $book['status'] == 'completed' ? 'This booking is completed and cannot be changed' : '' ?>">
                                 <option value="pending" <?= $book['status'] == 'pending' ? 'selected' : '' ?>>Pending</option>
-                                <option value="paid" <?= $book['status'] == 'paid' ? 'selected' : '' ?>>Paid</option>
+                                <option value="confirmed" <?= $book['status'] == 'confirmed' ? 'selected' : '' ?>>Confirmed</option>
                                 <option value="completed" <?= $book['status'] == 'completed' ? 'selected' : '' ?>>Completed</option>
-                                <option value="failed" <?= $book['status'] == 'failed' ? 'selected' : '' ?>>Failed</option>
+                                <option value="canceled" <?= $book['status'] == 'canceled' ? 'selected' : '' ?>>Canceled</option>
                             </select>
+                            <?php if ($book['status'] == 'completed'): ?>
+                                <small style="display: block; color: #8A7650; margin-top: 0.25rem; font-weight: 600;">
+                                    <i class="fas fa-lock"></i> Settled
+                                </small>
+                            <?php endif; ?>
                         </td>
-                        <td><?= date('M d, Y', strtotime($book['date'])) ?></td>
                         <td>
-                            <button class="btn btn--ghost btn-sm" onclick="deleteBooking(<?= $book['checkout_id'] ?>)">Delete</button>
+                            <div class="booking-actions">
+                                <button class="btn btn--ghost btn--sm btn-delete-custom" 
+                                        id="delete-btn-<?= $book['checkout_id'] ?>"
+                                        onclick="deleteBooking(<?= $book['checkout_id'] ?>)"
+                                        <?= $book['status'] == 'completed' ? 'disabled' : '' ?>
+                                        title="<?= $book['status'] == 'completed' ? 'Cannot delete completed bookings' : '' ?>"
+                                        style="<?= $book['status'] == 'completed' ? 'opacity: 0.5; cursor: not-allowed;' : '' ?>">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </div>
                         </td>
                     </tr>
                 <?php endforeach; ?>
@@ -149,36 +246,99 @@ function showToast(message, type = 'success') {
 }
 
 function updateStatus(id, status) {
+    // Get current status from the select element
+    const selectElement = document.getElementById(`status-select-${id}`);
+    const currentStatus = selectElement.getAttribute('data-previous-status') || selectElement.value;
+    
+    // Check if the booking is already completed
+    if (selectElement.disabled) {
+        showToast('This booking is completed and cannot be changed', 'error');
+        selectElement.value = currentStatus;
+        return;
+    }
+    
     fetch('', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        credentials: 'same-origin',
         body: `action=update_status&id=${id}&status=${status}`
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
     .then(data => {
         showToast(data.message, data.success ? 'success' : 'error');
-        if (!data.success) {
-            location.reload();
+        if (data.success) {
+            // If status changed to completed, disable the select and delete button
+            if (status === 'completed') {
+                selectElement.disabled = true;
+                selectElement.title = 'This booking is completed and cannot be changed';
+                const deleteBtn = document.getElementById(`delete-btn-${id}`);
+                if (deleteBtn) {
+                    deleteBtn.disabled = true;
+                    deleteBtn.style.opacity = '0.5';
+                    deleteBtn.style.cursor = 'not-allowed';
+                    deleteBtn.title = 'Cannot delete completed bookings';
+                }
+                // Add the settled indicator
+                const smallTag = selectElement.nextElementSibling;
+                if (!smallTag || !smallTag.textContent.includes('Settled')) {
+                    const settledIndicator = document.createElement('small');
+                    settledIndicator.style.display = 'block';
+                    settledIndicator.style.color = '#8A7650';
+                    settledIndicator.style.marginTop = '0.25rem';
+                    settledIndicator.style.fontWeight = '600';
+                    settledIndicator.innerHTML = '<i class="fas fa-lock"></i> Settled';
+                    selectElement.parentNode.insertBefore(settledIndicator, selectElement.nextSibling);
+                }
+            }
+            // Reload page to reflect the updated status
+            setTimeout(() => location.reload(), 500);
         }
+    })
+    .catch(error => {
+        showToast('An error occurred: ' + error.message, 'error');
+        console.error('Error:', error);
+        selectElement.value = currentStatus;
     });
 }
 
 function deleteBooking(id) {
+    const deleteBtn = document.getElementById(`delete-btn-${id}`);
+    
+    // Check if booking is completed
+    if (deleteBtn && deleteBtn.disabled) {
+        showToast('Cannot delete completed bookings', 'error');
+        return;
+    }
+    
     if (confirm('Delete this booking?')) {
         fetch('', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            credentials: 'same-origin',
             body: `action=delete&id=${id}`
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
             showToast(data.message, data.success ? 'success' : 'error');
             if (data.success) {
                 document.getElementById(`booking-row-${id}`)?.remove();
             }
+        })
+        .catch(error => {
+            showToast('An error occurred: ' + error.message, 'error');
+            console.error('Error:', error);
         });
     }
 }
 </script>
-</body>
-</html>
+<?php include 'admin-footer.php'; ?>

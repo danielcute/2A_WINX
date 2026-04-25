@@ -1,15 +1,21 @@
 <?php
+session_start();
 $page = 'checkout';
 
 // Retrieve cart data from session storage (passed via GET or POST)
 $cartItems = [];
 $cartTotal = 0;
 $cartSubtotal = 0;
+$userData = [];
+$packageDetails = [];
 
 // Check if data was passed via POST (from customize page)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_data'])) {
     $cartItems = json_decode($_POST['cart_data'], true);
     $_SESSION['checkout_cart'] = $cartItems;
+    if (is_array($cartItems) && isset($cartItems['programFlow'])) {
+        $_SESSION['checkout_program_flow'] = $cartItems['programFlow'];
+    }
 } 
 // Check if data exists in session
 else if (isset($_SESSION['checkout_cart'])) {
@@ -20,14 +26,37 @@ else if (isset($_GET['cart'])) {
     $cartItems = json_decode(urldecode($_GET['cart']), true);
 }
 
+// Normalize cart items if payload contains items
+if (is_array($cartItems) && isset($cartItems['items']) && is_array($cartItems['items'])) {
+    $cartItems = $cartItems['items'];
+}
+
 // Ensure cartItems is an array
 if (!is_array($cartItems)) {
     $cartItems = [];
 }
 
-// Calculate totals
+// Retrieve logged-in user information
+if (isset($_SESSION['user_id'])) {
+    if (!defined('ROOT_PATH')) {
+        define('ROOT_PATH', dirname(dirname(dirname(__DIR__))));
+    }
+    require_once ROOT_PATH . '/config/database.php';
+    require_once ROOT_PATH . '/app/models/User.php';
+    
+    $userModel = new User();
+    $userData = $userModel->findById($_SESSION['user_id']);
+}
+
+// Calculate totals and extract package details
 foreach ($cartItems as $item) {
-    $cartSubtotal += $item['price'];
+    if (is_array($item) && isset($item['price'])) {
+        $cartSubtotal += $item['price'];
+        // Store package details for display
+        if (isset($item['name']) && empty($packageDetails)) {
+            $packageDetails = $item;
+        }
+    }
 }
 $serviceFee = round($cartSubtotal * 0.05);
 $cartTotal = $cartSubtotal + $serviceFee;
@@ -338,7 +367,22 @@ $depositRequired = round($cartTotal * 0.5);
         }
         .btn--primary { background: var(--primary); color: white; }
         .btn--primary:hover { background: var(--primary-dark); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+        .btn--primary:disabled { 
+            background: var(--gray-light); 
+            color: white; 
+            cursor: not-allowed; 
+            transform: none;
+            opacity: 0.7;
+        }
         .btn--full { width: 100%; }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .fa-spin {
+            animation: spin 1s linear infinite;
+        }
 
         /* Modal */
         .modal {
@@ -409,6 +453,48 @@ $depositRequired = round($cartTotal * 0.5);
             .full-width { grid-column: span 1; }
             .payment-methods { flex-direction: column; }
         }
+
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            z-index: 3000;
+            animation: slideIn 0.3s ease;
+            max-width: 300px;
+            box-shadow: var(--shadow-lg);
+        }
+        .toast.success {
+            background: #2e7d32;
+        }
+        .toast.error {
+            background: #c62828;
+        }
+        .toast.info {
+            background: var(--primary);
+        }
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        @media (max-width: 640px) {
+            .toast {
+                bottom: 1rem;
+                right: 1rem;
+                left: 1rem;
+                max-width: none;
+            }
+        }
     </style>
 </head>
 <body>
@@ -428,6 +514,18 @@ $depositRequired = round($cartTotal * 0.5);
         <p>Please review your selections and fill in your details to confirm the booking.</p>
     </div>
 
+    <?php if ($userData): ?>
+    <div style="background: var(--success-pale); border: 1px solid var(--success); border-radius: var(--radius-lg); padding: 1rem 1.5rem; margin-bottom: 2rem; display: flex; align-items: center; gap: 1rem;">
+        <i class="fas fa-check-circle" style="color: var(--success); font-size: 1.3rem;"></i>
+        <div>
+            <p style="font-size: 0.9rem; color: var(--success); margin: 0;">
+                <strong>Logged in as:</strong> <?php echo htmlspecialchars($userData['first_name'] . ' ' . $userData['last_name']); ?> (<?php echo htmlspecialchars($userData['email']); ?>)
+            </p>
+            <p style="font-size: 0.75rem; color: var(--gray); margin: 0.25rem 0 0;">Your contact information has been pre-filled below. You can edit it if needed.</p>
+        </div>
+    </div>
+    <?php endif; ?>
+
     <div class="checkout-grid">
         <!-- Left: Form Section -->
         <div>
@@ -440,30 +538,35 @@ $depositRequired = round($cartTotal * 0.5);
                 <div class="form-row">
                     <div class="form-group">
                         <label>Event Name</label>
-                        <input type="text" id="eventName" placeholder="e.g., Santos Wedding" value="Santos Wedding">
+                        <input type="text" id="eventName" placeholder="e.g., Santos Wedding" value="">
                     </div>
                     <div class="form-group">
                         <label>Event Date</label>
-                        <input type="date" id="eventDate" value="2025-08-12">
+                        <input type="date" id="eventDate" value="">
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label>Event Time</label>
-                        <input type="time" id="eventTime" value="16:00">
+                        <input type="time" id="eventTime" value="">
                     </div>
                     <div class="form-group">
                         <label>Guest Count</label>
-                        <input type="number" id="guestCount" placeholder="Number of guests" value="120">
+                        <input type="number" id="guestCount" placeholder="Number of guests" value="">
                     </div>
                 </div>
                 <div class="form-group full-width">
                     <label>Venue / Location</label>
-                    <input type="text" id="venueLocation" placeholder="Venue name or address" value="The Ruins, Talisay City">
+                    <input type="text" id="venueLocation" placeholder="Venue name or address" value="">
                 </div>
                 <div class="form-group full-width">
                     <label>Special Requests</label>
                     <textarea id="specialRequests" placeholder="Any notes or special instructions for our team…"></textarea>
+                </div>
+                <div class="form-group full-width">
+                    <label>Program Flow</label>
+                    <textarea id="programFlow" placeholder="Add your event program schedule here. Example:\n4:00 PM - Guest Arrival\n5:00 PM - Ceremony\n6:00 PM - Reception" rows="5"><?= htmlspecialchars($_SESSION['checkout_program_flow'] ?? '') ?></textarea>
+                    <small style="font-size:0.8rem; color: var(--gray);">Write each item on a new line for the event timeline.</small>
                 </div>
             </div>
 
@@ -476,17 +579,17 @@ $depositRequired = round($cartTotal * 0.5);
                 <div class="form-row">
                     <div class="form-group">
                         <label>Full Name</label>
-                        <input type="text" id="fullName" placeholder="Your full name" value="Maria Santos">
+                        <input type="text" id="fullName" placeholder="Your full name" value="<?php echo htmlspecialchars($userData ? ($userData['first_name'] . ' ' . $userData['last_name']) : 'Maria Santos'); ?>">
                     </div>
                     <div class="form-group">
                         <label>Email Address</label>
-                        <input type="email" id="email" placeholder="you@example.com" value="maria@email.com">
+                        <input type="email" id="email" placeholder="you@example.com" value="<?php echo htmlspecialchars($userData ? $userData['email'] : 'maria@email.com'); ?>">
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label>Phone Number</label>
-                        <input type="tel" id="phone" placeholder="+63 XXX XXX XXXX" value="+63 917 123 4567">
+                        <input type="tel" id="phone" placeholder="+63 XXX XXX XXXX" value="<?php echo htmlspecialchars($userData ? $userData['phone'] : '+63 917 123 4567'); ?>">
                     </div>
                     <div class="form-group">
                         <label>Preferred Contact Method</label>
@@ -507,22 +610,23 @@ $depositRequired = round($cartTotal * 0.5);
                 </div>
                 <p style="font-size: 0.8rem; color: var(--gray); margin-bottom: 1rem;">A 50% deposit is required to confirm your booking. Balance is due 2 weeks before the event.</p>
                 <div class="payment-methods">
-                    <label class="payment-method selected" onclick="selectPayment(this)">
-                        <input type="radio" name="payment" checked>
+                    <label class="payment-method selected" onclick="selectPayment(this, 'bank')">
+                        <input type="radio" name="payment" value="bank" checked>
                         <i class="fas fa-building-columns"></i>
                         <span>Bank Transfer</span>
                     </label>
-                    <label class="payment-method" onclick="selectPayment(this)">
-                        <input type="radio" name="payment">
+                    <label class="payment-method" onclick="selectPayment(this, 'gcash')">
+                        <input type="radio" name="payment" value="gcash">
                         <i class="fas fa-mobile-alt"></i>
                         <span>GCash / Maya</span>
                     </label>
-                    <label class="payment-method" onclick="selectPayment(this)">
-                        <input type="radio" name="payment">
+                    <label class="payment-method" onclick="selectPayment(this, 'credit')">
+                        <input type="radio" name="payment" value="credit">
                         <i class="fas fa-credit-card"></i>
                         <span>Credit Card</span>
                     </label>
                 </div>
+                <p style="font-size: 0.75rem; color: var(--primary); margin-top: 1rem;"><i class="fas fa-info-circle"></i> Click on a payment method to enter your payment details</p>
             </div>
         </div>
 
@@ -544,7 +648,15 @@ $depositRequired = round($cartTotal * 0.5);
                             <div class="cart-item__details">
                                 <div class="cart-item__name"><?= htmlspecialchars($item['name']) ?></div>
                                 <div class="cart-item__type"><?= $item['type'] === 'custom' ? 'Custom Package' : 'Pre-made Package' ?></div>
-                                <?php if (!empty($item['details'])): ?>
+                                <?php if (!empty($item['features'])): ?>
+                                    <div class="cart-item__details-list">
+                                        <?php 
+                                            $featureList = is_string($item['features']) ? explode("\n", $item['features']) : $item['features'];
+                                            $firstThree = array_slice($featureList, 0, 3);
+                                            echo implode(', ', array_map('trim', array_filter($firstThree)));
+                                        ?>
+                                    </div>
+                                <?php elseif (!empty($item['details'])): ?>
                                     <div class="cart-item__details-list"><?= htmlspecialchars($item['details']) ?></div>
                                 <?php endif; ?>
                             </div>
@@ -584,6 +696,105 @@ $depositRequired = round($cartTotal * 0.5);
     </div>
 </main>
 
+<!-- Payment Method Modals -->
+
+<!-- Bank Transfer Modal -->
+<div id="bankTransferModal" class="modal">
+    <div class="modal__content" style="max-width: 500px;">
+        <div class="modal__header" style="text-align: left; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h2 style="margin: 0;"><i class="fas fa-building-columns"></i> Bank Transfer</h2>
+            <button type="button" onclick="closePaymentModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--gray-light);">×</button>
+        </div>
+        <form id="bankForm" class="payment-form">
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label style="font-size: 0.85rem; font-weight: 600;">Bank Name <span style="color: var(--success);">*</span></label>
+                <input type="text" id="bankName" placeholder="e.g., BDO, BPI, Metrobank" required style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: var(--sans);">
+            </div>
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label style="font-size: 0.85rem; font-weight: 600;">Account Number <span style="color: var(--success);">*</span></label>
+                <input type="text" id="bankAccount" placeholder="Your bank account number" required style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: var(--sans);">
+            </div>
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label style="font-size: 0.85rem; font-weight: 600;">Account Holder Name <span style="color: var(--success);">*</span></label>
+                <input type="text" id="bankHolder" placeholder="Name on the account" required style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: var(--sans);">
+            </div>
+            <p style="font-size: 0.8rem; color: var(--gray); background: var(--primary-pale); padding: 0.75rem; border-radius: var(--radius-sm); margin-bottom: 1.5rem;"><i class="fas fa-info-circle"></i> Your account information is secure and will only be used for payment verification.</p>
+            <div style="display: flex; gap: 1rem;">
+                <button type="button" onclick="closePaymentModal()" class="btn btn--ghost" style="flex: 1; background: white; border: 1px solid var(--border);">Cancel</button>
+                <button type="submit" class="btn btn--primary" style="flex: 1;">Save Details</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- GCash/Maya Modal -->
+<div id="gcashModal" class="modal">
+    <div class="modal__content" style="max-width: 500px;">
+        <div class="modal__header" style="text-align: left; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h2 style="margin: 0;"><i class="fas fa-mobile-alt"></i> GCash / Maya</h2>
+            <button type="button" onclick="closePaymentModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--gray-light);">×</button>
+        </div>
+        <form id="gcashForm" class="payment-form">
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label style="font-size: 0.85rem; font-weight: 600;">Mobile Number <span style="color: var(--success);">*</span></label>
+                <input type="tel" id="gcashNumber" placeholder="+63 XXX XXX XXXX" required style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: var(--sans);">
+            </div>
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label style="font-size: 0.85rem; font-weight: 600;">Account Holder Name <span style="color: var(--success);">*</span></label>
+                <input type="text" id="gcashHolder" placeholder="Your full name" required style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: var(--sans);">
+            </div>
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label style="font-size: 0.85rem; font-weight: 600;">Account Type <span style="color: var(--success);">*</span></label>
+                <select id="gcashType" required style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: var(--sans);">
+                    <option value="">Select account type</option>
+                    <option value="GCash">GCash</option>
+                    <option value="Maya">Maya</option>
+                </select>
+            </div>
+            <p style="font-size: 0.8rem; color: var(--gray); background: var(--primary-pale); padding: 0.75rem; border-radius: var(--radius-sm); margin-bottom: 1.5rem;"><i class="fas fa-info-circle"></i> Our team will send payment instructions to your registered number.</p>
+            <div style="display: flex; gap: 1rem;">
+                <button type="button" onclick="closePaymentModal()" class="btn btn--ghost" style="flex: 1; background: white; border: 1px solid var(--border);">Cancel</button>
+                <button type="submit" class="btn btn--primary" style="flex: 1;">Save Details</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Credit Card Modal -->
+<div id="creditCardModal" class="modal">
+    <div class="modal__content" style="max-width: 500px;">
+        <div class="modal__header" style="text-align: left; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h2 style="margin: 0;"><i class="fas fa-credit-card"></i> Credit Card</h2>
+            <button type="button" onclick="closePaymentModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--gray-light);">×</button>
+        </div>
+        <form id="creditForm" class="payment-form">
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label style="font-size: 0.85rem; font-weight: 600;">Card Holder Name <span style="color: var(--success);">*</span></label>
+                <input type="text" id="cardHolder" placeholder="Name on your card" required style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: var(--sans);">
+            </div>
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label style="font-size: 0.85rem; font-weight: 600;">Card Number <span style="color: var(--success);">*</span></label>
+                <input type="text" id="cardNumber" placeholder="XXXX XXXX XXXX XXXX" required maxlength="19" style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: var(--sans); letter-spacing: 2px;">
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div class="form-group">
+                    <label style="font-size: 0.85rem; font-weight: 600;">Expiry Date <span style="color: var(--success);">*</span></label>
+                    <input type="text" id="cardExpiry" placeholder="MM/YY" required maxlength="5" style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: var(--sans);">
+                </div>
+                <div class="form-group">
+                    <label style="font-size: 0.85rem; font-weight: 600;">CVV <span style="color: var(--success);">*</span></label>
+                    <input type="text" id="cardCVV" placeholder="XXX" required maxlength="4" style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: var(--sans);">
+                </div>
+            </div>
+            <p style="font-size: 0.8rem; color: var(--gray); background: var(--primary-pale); padding: 0.75rem; border-radius: var(--radius-sm); margin-bottom: 1.5rem;"><i class="fas fa-lock"></i> Your card information is encrypted and secure.</p>
+            <div style="display: flex; gap: 1rem;">
+                <button type="button" onclick="closePaymentModal()" class="btn btn--ghost" style="flex: 1; background: white; border: 1px solid var(--border);">Cancel</button>
+                <button type="submit" class="btn btn--primary" style="flex: 1;">Save Details</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <!-- Confirmation Modal -->
 <div class="modal" id="confirmationModal">
     <div class="modal__content">
@@ -600,16 +811,145 @@ $depositRequired = round($cartTotal * 0.5);
 </div>
 
 <script>
-// Payment method selection
-function selectPayment(element) {
+// Global variable to store payment details
+let paymentDetails = {
+    method: 'bank',
+    data: {}
+};
+
+// Payment method selection with modal opening
+function selectPayment(element, method) {
     document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('selected'));
     element.classList.add('selected');
     const radio = element.querySelector('input');
     if (radio) radio.checked = true;
+    
+    paymentDetails.method = method;
+    
+    // Open the appropriate modal
+    closeAllPaymentModals();
+    
+    if (method === 'bank') {
+        document.getElementById('bankTransferModal').classList.add('active');
+        document.body.style.overflow = 'hidden';
+    } else if (method === 'gcash') {
+        document.getElementById('gcashModal').classList.add('active');
+        document.body.style.overflow = 'hidden';
+    } else if (method === 'credit') {
+        document.getElementById('creditCardModal').classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
 }
+
+// Close all payment modals
+function closeAllPaymentModals() {
+    document.getElementById('bankTransferModal').classList.remove('active');
+    document.getElementById('gcashModal').classList.remove('active');
+    document.getElementById('creditCardModal').classList.remove('active');
+}
+
+// Close payment modal
+function closePaymentModal() {
+    closeAllPaymentModals();
+    document.body.style.overflow = '';
+}
+
+// Format card number with spaces
+document.addEventListener('DOMContentLoaded', function() {
+    const cardNumberInput = document.getElementById('cardNumber');
+    if (cardNumberInput) {
+        cardNumberInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\s/g, '');
+            let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
+            e.target.value = formattedValue;
+        });
+    }
+    
+    const expiryInput = document.getElementById('cardExpiry');
+    if (expiryInput) {
+        expiryInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 2) {
+                value = value.substring(0, 2) + '/' + value.substring(2, 4);
+            }
+            e.target.value = value;
+        });
+    }
+    
+    const cvvInput = document.getElementById('cardCVV');
+    if (cvvInput) {
+        cvvInput.addEventListener('input', function(e) {
+            e.target.value = e.target.value.replace(/\D/g, '').substring(0, 4);
+        });
+    }
+    
+    // Bank form submission
+    const bankForm = document.getElementById('bankForm');
+    if (bankForm) {
+        bankForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            paymentDetails.data = {
+                bankName: document.getElementById('bankName').value,
+                bankAccount: document.getElementById('bankAccount').value,
+                bankHolder: document.getElementById('bankHolder').value
+            };
+            showToast('Bank transfer details saved!', 'success');
+            closePaymentModal();
+        });
+    }
+    
+    // GCash form submission
+    const gcashForm = document.getElementById('gcashForm');
+    if (gcashForm) {
+        gcashForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            paymentDetails.data = {
+                gcashNumber: document.getElementById('gcashNumber').value,
+                gcashHolder: document.getElementById('gcashHolder').value,
+                gcashType: document.getElementById('gcashType').value
+            };
+            showToast('GCash/Maya details saved!', 'success');
+            closePaymentModal();
+        });
+    }
+    
+    // Credit card form submission
+    const creditForm = document.getElementById('creditForm');
+    if (creditForm) {
+        creditForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            paymentDetails.data = {
+                cardHolder: document.getElementById('cardHolder').value,
+                cardNumber: document.getElementById('cardNumber').value.replace(/\s/g, ''),
+                cardExpiry: document.getElementById('cardExpiry').value,
+                cardCVV: document.getElementById('cardCVV').value
+            };
+            showToast('Credit card details saved!', 'success');
+            closePaymentModal();
+        });
+    }
+});
+
+// Toast notification function
+function showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
+
+// Global flag to prevent double submissions
+let isBookingInProgress = false;
 
 // Confirm booking function
 function confirmBooking() {
+    // Prevent double submission
+    if (isBookingInProgress) {
+        showToast('Your booking is already being processed...', 'info');
+        return;
+    }
+    
     // Validate form
     const eventName = document.getElementById('eventName')?.value;
     const eventDate = document.getElementById('eventDate')?.value;
@@ -617,11 +957,29 @@ function confirmBooking() {
     const email = document.getElementById('email')?.value;
     
     if (!eventName || !eventDate || !fullName || !email) {
-        alert('Please fill in all required fields');
+        showToast('Please fill in all required fields', 'error');
         return;
     }
     
+    // Validate payment details are filled
+    if (!paymentDetails.data || Object.keys(paymentDetails.data).length === 0) {
+        showToast('Please click on a payment method and fill in the required details', 'error');
+        return;
+    }
+    
+    // Set flag to prevent double submission
+    isBookingInProgress = true;
+    
+    // Get the button and disable it
+    const confirmBtn = document.querySelector('.checkout-btn');
+    const originalBtnText = confirmBtn.innerHTML;
+    confirmBtn.disabled = true;
+    confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+    
     // Get all form data
+    const urlParams = new URLSearchParams(window.location.search);
+    const occasionParam = urlParams.get('occasion') || 'Event';
+    
     const bookingData = {
         eventName: eventName,
         eventDate: eventDate,
@@ -629,27 +987,57 @@ function confirmBooking() {
         guestCount: document.getElementById('guestCount')?.value,
         venueLocation: document.getElementById('venueLocation')?.value,
         specialRequests: document.getElementById('specialRequests')?.value,
+        programFlow: document.getElementById('programFlow')?.value,
+        packageName: occasionParam,
         fullName: fullName,
         email: email,
         phone: document.getElementById('phone')?.value,
         contactMethod: document.getElementById('contactMethod')?.value,
-        paymentMethod: document.querySelector('input[name="payment"]:checked')?.parentElement?.querySelector('span')?.innerText || 'Bank Transfer',
+        paymentMethod: paymentDetails.method,
+        paymentDetails: JSON.stringify(paymentDetails.data),
         cartItems: <?= json_encode($cartItems) ?>,
         subtotal: <?= $cartSubtotal ?>,
         serviceFee: <?= $serviceFee ?>,
         total: <?= $cartTotal ?>,
         deposit: <?= $depositRequired ?>
     };
-    
-    // Store in session for event detail page
-    sessionStorage.setItem('bookingData', JSON.stringify(bookingData));
-    
-    // Show modal
-    const modal = document.getElementById('confirmationModal');
-    modal.classList.add('active');
-    
-    // Prevent body scroll
-    document.body.style.overflow = 'hidden';
+
+    fetch('/SINTA/public/index.php?route=checkout-submit', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(bookingData),
+        credentials: 'same-origin'
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(result => {
+        if (result.success) {
+            showToast('Booking confirmed! Redirecting...', 'success');
+            setTimeout(() => {
+                window.location.href = '/SINTA/public/index.php?route=plans';
+            }, 1500);
+        } else {
+            showToast(result.message || 'Failed to save your booking.', 'error');
+            // Re-enable button on error so user can retry
+            isBookingInProgress = false;
+            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = originalBtnText;
+        }
+    })
+    .catch(error => {
+        console.error('Booking save error:', error);
+        showToast('Unable to save booking. Please try again.', 'error');
+        // Re-enable button on error so user can retry
+        isBookingInProgress = false;
+        confirmBtn.disabled = false;
+        confirmBtn.innerHTML = originalBtnText;
+    });
 }
 
 // Close modal when clicking outside
@@ -660,12 +1048,33 @@ document.getElementById('confirmationModal')?.addEventListener('click', function
     }
 });
 
+// Close payment modals when clicking outside
+document.getElementById('bankTransferModal')?.addEventListener('click', function(e) {
+    if (e.target === this) {
+        closePaymentModal();
+    }
+});
+
+document.getElementById('gcashModal')?.addEventListener('click', function(e) {
+    if (e.target === this) {
+        closePaymentModal();
+    }
+});
+
+document.getElementById('creditCardModal')?.addEventListener('click', function(e) {
+    if (e.target === this) {
+        closePaymentModal();
+    }
+});
+
 // If cart is empty, show warning and prevent checkout
 <?php if (empty($cartItems)): ?>
 document.querySelector('.checkout-btn')?.addEventListener('click', function(e) {
     e.preventDefault();
-    alert('Your cart is empty. Please go back and select a package or customize your event first.');
-    window.location.href = 'packages.php';
+    showToast('Your cart is empty. Please go back and select a package or customize your event first.', 'error');
+    setTimeout(() => {
+        window.location.href = 'packages.php';
+    }, 1500);
 });
 <?php endif; ?>
 </script>

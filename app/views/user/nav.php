@@ -39,26 +39,9 @@
             <span>Notifications</span>
             <a href="#">Mark all read</a>
           </div>
-          <div class="notif-dropdown__item unread">
-            <div class="notif-dot"></div>
-            <div>
-              <div class="notif-title">New Promo — 15% off</div>
-              <div class="notif-time">2 hours ago</div>
-            </div>
-          </div>
-          <div class="notif-dropdown__item unread">
-            <div class="notif-dot"></div>
-            <div>
-              <div class="notif-title">Your booking is confirmed!</div>
-              <div class="notif-time">Yesterday</div>
-            </div>
-          </div>
-          <div class="notif-dropdown__item">
-            <div class="notif-dot read"></div>
-            <div>
-              <div class="notif-title">Payment received</div>
-              <div class="notif-time">3 days ago</div>
-            </div>
+          <div class="notif-dropdown__container">
+            <!-- Notifications will be loaded here by JavaScript -->
+            <div class="notif-loading"><i class="fas fa-spinner fa-spin"></i></div>
           </div>
         </div>
       </div>
@@ -80,7 +63,7 @@
             <i class="fas fa-user"></i> Profile
           </a>
           <hr class="profile-dropdown__divider">
-          <a href="/SINTA/public/index.php?route=logout" class="profile-dropdown__item profile-dropdown__item--danger">
+          <a href="#" class="profile-dropdown__item profile-dropdown__item--danger" onclick="openLogoutModal(event);">
             <i class="fas fa-sign-out-alt"></i> Logout
           </a>
         </div>
@@ -114,7 +97,7 @@
       <a href="/SINTA/public/index.php?route=profile" class="mobile-menu__link">Profile</a>
     </div>
     <div class="mobile-menu__footer">
-      <a href="/SINTA/public/index.php?route=logout" class="mobile-menu__logout">
+      <a href="#" class="mobile-menu__logout" onclick="openLogoutModal(event);">
         <i class="fas fa-sign-out-alt"></i> Logout
       </a>
     </div>
@@ -716,5 +699,209 @@
     if (profileDropdown) profileDropdown.classList.remove('active');
     if (notifDropdown) notifDropdown.classList.remove('active');
   });
+
+  // Search functionality
+  const searchInput = document.querySelector('.app-nav__search input');
+  if (searchInput) {
+    searchInput.addEventListener('input', function(e) {
+      const searchTerm = e.target.value.toLowerCase().trim();
+      
+      // Get all package cards from current page
+      const packageCards = document.querySelectorAll('.pkg-card');
+      let visibleCount = 0;
+      
+      packageCards.forEach(card => {
+        // Get package name from h3
+        const nameElement = card.querySelector('h3');
+        const descElement = card.querySelector('.pkg-card__desc');
+        
+        const packageName = nameElement ? nameElement.textContent.toLowerCase() : '';
+        const packageDesc = descElement ? descElement.textContent.toLowerCase() : '';
+        
+        // Check if search term matches package name or description
+        const matches = searchTerm === '' || 
+                       packageName.includes(searchTerm) || 
+                       packageDesc.includes(searchTerm);
+        
+        // Show or hide the card
+        if (matches) {
+          card.style.display = '';
+          visibleCount++;
+        } else {
+          card.style.display = 'none';
+        }
+      });
+      
+      // Show "no results" message if needed
+      const grid = document.querySelector('.pkg-grid');
+      if (grid) {
+        let noResultsMsg = grid.querySelector('.search-no-results');
+        
+        if (visibleCount === 0 && searchTerm !== '') {
+          if (!noResultsMsg) {
+            noResultsMsg = document.createElement('div');
+            noResultsMsg.className = 'search-no-results';
+            noResultsMsg.style.cssText = 'grid-column: 1/-1; text-align: center; padding: 3rem; color: #8A8475;';
+            noResultsMsg.innerHTML = `<i class="fas fa-search" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></i>
+                                      <p style="margin: 0;">No packages found matching "<strong>${searchTerm}</strong>"</p>`;
+            grid.appendChild(noResultsMsg);
+          }
+        } else if (noResultsMsg) {
+          noResultsMsg.remove();
+        }
+      }
+    });
+  }
 })();
+
+// Logout Modal Functions
+function openLogoutModal(event) {
+  event.preventDefault();
+  document.getElementById('logoutModal').style.display = 'flex';
+}
+
+function closeLogoutModal() {
+  document.getElementById('logoutModal').style.display = 'none';
+}
+
+function confirmLogout() {
+  window.location.href = '/SINTA/public/index.php?route=logout';
+}
+
+// Close modal when clicking outside of it
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('logoutModal').addEventListener('click', function(event) {
+    if (event.target === this) {
+      closeLogoutModal();
+    }
+  });
+});
 </script>
+
+<!-- Logout Confirmation Modal -->
+<div id="logoutModal" class="modal" style="display: none;">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Confirm Logout</h2>
+      <button class="modal-close" onclick="closeLogoutModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <p>Are you sure you want to logout?</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-cancel" onclick="closeLogoutModal()">Cancel</button>
+      <button class="btn btn-confirm" onclick="confirmLogout()">Logout</button>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Modal Styles */
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+
+  .modal-content {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    min-width: 350px;
+    animation: slideIn 0.3s ease;
+  }
+
+  @keyframes slideIn {
+    from {
+      transform: translateY(-50px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #E2D9C8;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .modal-header h2 {
+    margin: 0;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.8rem;
+    color: #2C2820;
+  }
+
+  .modal-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: #8B7355;
+    cursor: pointer;
+    padding: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+  }
+
+  .modal-close:hover {
+    color: #2C2820;
+  }
+
+  .modal-body {
+    padding: 1.5rem;
+    color: #555;
+    font-size: 1rem;
+  }
+
+  .modal-footer {
+    padding: 1.5rem;
+    border-top: 1px solid #E2D9C8;
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+  }
+
+  .btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.95rem;
+  }
+
+  .btn-cancel {
+    background: #E2D9C8;
+    color: #2C2820;
+  }
+
+  .btn-cancel:hover {
+    background: #D4CCC0;
+  }
+
+  .btn-confirm {
+    background: #C62828;
+    color: white;
+  }
+
+  .btn-confirm:hover {
+    background: #A02020;
+  }
+</style>

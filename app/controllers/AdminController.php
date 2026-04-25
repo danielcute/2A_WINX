@@ -19,7 +19,7 @@ class AdminController {
         $packages_result = $db->query("SELECT COUNT(*) as count FROM packages_tbl");
         $packages_count = $packages_result->fetch_assoc()['count'] ?? 0;
         
-        $bookings_result = $db->query("SELECT COUNT(*) as count FROM checkout_tbl");
+        $bookings_result = $db->query("SELECT COUNT(*) as count FROM plans_tbl");
         $bookings_count = $bookings_result->fetch_assoc()['count'] ?? 0;
         
         $testimonials_result = $db->query("SELECT COUNT(*) as count FROM testimonials_tbl");
