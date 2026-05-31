@@ -24,6 +24,10 @@ $unread = $_SESSION['admin_unread_count'] ?? 0;
   --transition: all 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1);
 }
 
+.admin-mobile-toggle {
+  display: none;
+}
+
 /* Base & Typography */
 body {
   background: var(--sand);
@@ -263,49 +267,46 @@ body {
   }
 
   .admin-sidebar {
-    transform: translate3d(-100%, 0, 0);
+    transform: translateX(-100%);
     width: 280px;
-    max-width: 85%;
+    max-width: 80%;
     height: 100vh;
     position: fixed;
-    z-index: 3100;
+    z-index: 4100;
     top: 0;
     left: 0;
     box-shadow: var(--shadow-lg);
-    border-right: none  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), visibility 0s linear 0.4s;
+    border-right: none;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), visibility 0s linear 0.4s;
     will-change: transform;
     visibility: hidden;
   }
   
   .admin-sidebar.open {
-    transform: translate3d(0, 0, 0);
+    transform: translateX(0);
     visibility: visible;
     transition-delay: 0s;
   }
   
-  .admin-sidebar::before {
-    content: '';
+  .admin-overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0,0,0,0.3);
+    inset: 0;
+    background: rgba(0,0,0,0.4);
     backdrop-filter: blur(4px);
+    z-index: 4050;
     opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s;
-    z-index: 3050;
+    visibility: hidden;
+    transition: all 0.3s ease;
   }
-  
-  .admin-sidebar.open::before {
+
+  .admin-overlay.active {
     opacity: 1;
-    pointer-events: all;
+    visibility: visible;
   }
 
   .admin-main {
     margin-left: 0;
-    padding: calc(76px + 1rem) 1rem 2rem;
+    padding: calc(70px + 1.5rem) 1rem 2rem;
     min-height: calc(100vh - 60px);
     width: 100%;
     box-sizing: border-box;
@@ -316,29 +317,53 @@ body {
     top: 0;
     left: 0;
     right: 0;
-    z-index: 3000;
+    z-index: 4000;
     border-radius: 0;
     margin-bottom: 0;
     background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(15px) saturate(180%);
     -webkit-backdrop-filter: blur(15px) saturate(180%);
     border-bottom: 1px solid var(--gray-light);
-    padding: 0 1.25rem;
-    height: 76px;
+    padding: 0 1rem;
+    height: 70px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
 
   .admin-mobile-toggle {
     display: flex;
-    position: fixed;
-    top: 15px;
-    left: 15px;
-    z-index: 4000; /* Ensure it stays above topbar */
-    background: var(--gold);
-    color: white;
-    border: none;
-    padding: 10px;
-    border-radius: 8px;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    background: white;
+    color: var(--gold);
+    border: 1px solid var(--gray-light);
+    border-radius: 10px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    margin-right: 0.5rem;
+    flex-shrink: 0;
+  }
+
+  .admin-topbar__title {
+    flex: 1;
+    min-width: 0;
+    padding-right: 0.5rem;
+  }
+
+  .admin-topbar__title h2 {
+    font-size: 1.15rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: 0;
+  }
+
+  .admin-topbar__title p {
+    display: none;
   }
   
   .admin-sidebar__header {
@@ -659,7 +684,7 @@ body {
 }
 </style>
 <div class="admin-wrapper">
-<button class="admin-mobile-toggle" id="mobileToggle"><i class="fas fa-bars"></i></button>
+<div class="admin-overlay" id="adminOverlay"></div>
 <aside class="admin-sidebar" id="adminSidebar">
 <div class="admin-sidebar__header"><a href="<?php echo BASE_URL; ?>/index.php?route=admin-dashboard" class="admin-sidebar__logo"><img src="<?php echo BASE_URL; ?>/assets/img/logo.png" alt="Sinta" class="admin-sidebar__logo-img"><span class="admin-sidebar__logo-text">Sinta</span></a><span class="admin-sidebar__sub">Admin Panel</span></div>
 <nav class="admin-sidebar__nav">
@@ -676,6 +701,7 @@ body {
 </aside>
 <main class="admin-main">
 <div class="admin-topbar">
+<button class="admin-mobile-toggle" id="mobileToggle"><i class="fas fa-bars"></i></button>
 <div class="admin-topbar__title"><h2 id="pageTitle"><?php echo $page_title ?? 'Dashboard'; ?></h2><p>Welcome back, <?php echo htmlspecialchars($_SESSION['user_name'] ?? 'Admin'); ?></p></div>
 <div class="admin-topbar__user">
   <div class="admin-notif-wrapper" style="position: relative;">
@@ -693,7 +719,7 @@ body {
       </div>
     </div>
   </div>
-  <span style="font-size: 0.9rem;">Administrator</span>
+  <span class="admin-topbar__user-name" style="font-size: 0.9rem;">Administrator</span>
   <div class="admin-avatar" onclick="window.location.href='<?php echo BASE_URL; ?>/index.php?route=admin-profile'">
     <?php if (!empty($_SESSION['user_avatar'])): ?>
         <?php $avatar_url = (strpos($_SESSION['user_avatar'], 'http') === 0) ? $_SESSION['user_avatar'] : BASE_URL . $_SESSION['user_avatar']; ?>
@@ -912,10 +938,27 @@ const adminNotificationTypes = {
 // Mobile sidebar toggle
 const mobileToggle = document.getElementById('mobileToggle');
 const adminSidebar = document.getElementById('adminSidebar');
+const adminOverlay = document.getElementById('adminOverlay');
 
-if (mobileToggle && adminSidebar) {
-  mobileToggle.addEventListener('click', function() {
-    adminSidebar.classList.toggle('open');
+if (mobileToggle && adminSidebar && adminOverlay) {
+  const toggleMenu = () => {
+    const isOpen = adminSidebar.classList.toggle('open');
+    adminOverlay.classList.toggle('active', isOpen);
+    document.body.style.overflow = isOpen ? 'hidden' : '';
+  };
+
+  mobileToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleMenu();
+  });
+
+  adminOverlay.addEventListener('click', toggleMenu);
+  
+  // Close on link click
+  adminSidebar.querySelectorAll('.admin-sidebar__link').forEach(link => {
+    link.addEventListener('click', () => {
+      if (adminSidebar.classList.contains('open')) toggleMenu();
+    });
   });
 }
 </script>
