@@ -116,13 +116,14 @@ if (!empty($_GET['id'])) {
     <style>
         /* Your existing styles (same as previous improved version) */
         body { background: #F5F0E8; }
-        .admin-container { width: 100%; margin: 0; padding: 1rem; }
-        .page-header { margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; }
-        .page-header h1 { font-family: 'Cormorant Garamond', serif; font-size: 2rem; color: #2C2820; margin: 0; font-weight: 700; }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
-        .stat-card { background: white; padding: 1.25rem; border-radius: 18px; border: 1.5px solid var(--border); text-align: center; }
-        .stat-card h3 { font-size: 1.8rem; color: #8A7650; margin: 0; font-weight: 800; }
-        .stat-card p { color: #8B7355; margin: 0.5rem 0 0; }
+        .admin-container { width: 100%; margin: 0; padding: 1.5rem; }
+        .page-header { margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between; background: white; padding: 1.5rem 2rem; border-radius: 24px; border: 1px solid var(--border); }
+        .page-header h1 { font-family: var(--serif); font-size: 2.2rem; color: var(--dark); margin: 0; font-weight: 700; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem; }
+        .stat-card { background: white; padding: 1.5rem; border-radius: 24px; border: 2px solid var(--border); text-align: center; transition: all 0.3s; }
+        .stat-card:hover { border-color: var(--primary); transform: translateY(-4px); }
+        .stat-card h3 { font-size: 2rem; color: var(--primary); margin: 0; font-weight: 800; }
+        .stat-card p { color: var(--text-secondary); margin: 0.5rem 0 0; font-weight: 600; text-transform: uppercase; font-size: 0.8rem; }
 
         /* Unified Content Container */
         .content-wrapper { 

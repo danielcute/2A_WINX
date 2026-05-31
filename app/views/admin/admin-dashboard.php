@@ -50,12 +50,12 @@ if ($recent_bookings && $recent_bookings->num_rows > 0) {
     <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css' rel='stylesheet' />
     <style>
         /* Your existing dashboard specific styles (stats-grid, etc.) */
-        .dashboard-container { width: 100%; padding: 0.5rem 0; }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.25rem; margin-bottom: 2rem; }
-        .stat-card { background: white; border: 2px solid #E2D9C8; border-radius: 20px; padding: 1.5rem; transition: all 0.3s; }
-        .stat-card:hover { border-color: #8A7650; transform: translateY(-5px); }
-        .stat-card h3 { font-size: 1.8rem; margin: 0; color: #8A7650; font-weight: 800; }
-        .stat-card p { color: #8B7355; font-weight: 600; margin-top: 0.25rem; }
+        .dashboard-container { width: 100%; padding: 1rem; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem; }
+        .stat-card { background: white; border: 2px solid var(--border); border-radius: 24px; padding: 1.8rem; transition: all 0.3s; box-shadow: var(--shadow-sm); }
+        .stat-card:hover { border-color: var(--primary); transform: translateY(-5px); box-shadow: var(--shadow-md); }
+        .stat-card h3 { font-size: 2.2rem; margin: 0; color: var(--primary); font-weight: 800; font-family: var(--sans); }
+        .stat-card p { color: var(--text-secondary); font-weight: 600; margin-top: 0.4rem; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; }
         
         .quick-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin: 2rem 0; }
         .action-btn { background: white; border: 2px solid #E2D9C8; border-radius: 15px; padding: 1.25rem 1rem; text-align: center; text-decoration: none; color: #2C2820; transition: all 0.3s; font-size: 0.9rem; font-weight: 600; }
@@ -191,10 +191,10 @@ if ($recent_bookings && $recent_bookings->num_rows > 0) {
             }
         }
         
-        .recent-bookings { background: white; border-radius: 20px; overflow: hidden; border: 1px solid #E2D9C8; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 2rem; }
+        .recent-bookings { background: white; border-radius: 24px; overflow: hidden; border: 2px solid var(--border); box-shadow: var(--shadow-sm); margin-bottom: 2rem; }
         .recent-bookings table { width: 100%; border-collapse: collapse; }
-        .recent-bookings th, .recent-bookings td { padding: 1rem; text-align: left; border-bottom: 1px solid #E2D9C8; }
-        .recent-bookings th { background-color: #F5F0E8; font-weight: 600; color: #8A7650; }
+        .recent-bookings th, .recent-bookings td { padding: 1.2rem 1rem; text-align: left; border-bottom: 1px solid var(--border); }
+        .recent-bookings th { background-color: #F9F7F3; font-weight: 700; color: var(--primary); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; }
 
         @media (max-width: 768px) {
             .stats-grid { 
@@ -205,23 +205,21 @@ if ($recent_bookings && $recent_bookings->num_rows > 0) {
             .stat-card h3 { font-size: 1.5rem; }
             
             .recent-bookings thead { display: none; }
-            .recent-bookings table, .recent-bookings tbody, .recent-bookings tr, .recent-bookings td { 
-                display: block; width: 100%; 
-            }
-            .recent-bookings tr { border-bottom: 2px solid #F5F0E8; padding: 1rem 0; }
+            .recent-bookings table, .recent-bookings tbody, .recent-bookings tr, .recent-bookings td { display: block; width: 100%; }
+            .recent-bookings tr { border-bottom: 2px solid var(--border); padding: 1rem; }
             .recent-bookings td { 
                 text-align: right; 
-                padding: 0.5rem 1rem; 
+                padding: 0.6rem 0; 
                 border: none; 
                 position: relative; 
                 display: flex;
                 justify-content: space-between;
-                font-size: 0.9rem;
+                font-size: 0.95rem;
             }
             .recent-bookings td::before { 
                 content: attr(data-label); 
                 font-weight: 700; 
-                color: #8A7650;
+                color: var(--primary);
             }
         }
         .status-badge { padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
