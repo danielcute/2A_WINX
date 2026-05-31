@@ -1026,9 +1026,9 @@ $page_title = 'Manage Wardrobes';
             form.innerHTML = '<p style="text-align: center; padding: 20px;"><i class="fas fa-spinner fa-spin"></i> Loading...</p>';
             modal.classList.add('active');
             
-            // Fetch wardrobe data
+// Fetch wardrobe data
             console.log('Fetching wardrobe data for ID:', wardrobeId);
-fetch('<?php echo BASE_URL; ?>/public/api-wardrobe.php?action=get&id=' + wardrobeId, 
+            fetch('<?php echo BASE_URL; ?>/public/api-wardrobe.php?action=get&id=' + wardrobeId, {
                 credentials: 'same-origin'
             })
                 .then(response => {
