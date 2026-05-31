@@ -219,16 +219,15 @@ $sectionOrder = ['Wedding', 'Birthday', 'Big Events / Gala', 'Other Events'];
     <style>
         body { background: #f5f5f5; font-family: 'DM Sans', sans-serif; }
         body.modal-open { overflow: hidden; }
-        .admin-container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        .page-header h1 { font-family: 'Cormorant Garamond', serif; font-size: 1.9rem; color: #2C2820; margin: 0; font-weight: 700; letter-spacing: -0.03em; display: inline-flex; align-items: center; gap: 0.75rem; }
+        .admin-container { width: 100%; margin: 0; padding: 1.5rem; }
+        .page-header { margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between; background: white; padding: 1.5rem 2rem; border-radius: 24px; border: 1px solid var(--border); }
+        .page-header h1 { font-family: var(--serif); font-size: 2.2rem; color: var(--dark); margin: 0; font-weight: 700; display: inline-flex; align-items: center; gap: 1rem; }
         .page-header h1 em { color: #8A7650; font-style: italic; font-weight: 400; }
         .btn {
             background: none;
             color: inherit;
             padding: 0.75rem 1.2rem;
-            border: none;
-            border-radius: 25px;
+            border-radius: 99px;
             cursor: pointer;
             font-size: 0.85rem;
             font-weight: 600;
@@ -243,42 +242,40 @@ $sectionOrder = ['Wedding', 'Birthday', 'Big Events / Gala', 'Other Events'];
         }
         .btn--primary { background: var(--primary); color: white; }
         .btn--primary:hover { background: var(--primary-dark); transform: translateY(-2px); box-shadow: 0 10px 30px rgba(138, 118, 80, 0.15); }
-        .btn--ghost { background: transparent; color: var(--text-secondary); border: 1.5px solid var(--border); }
+        .btn--ghost { background: white; color: var(--text-secondary); border: 1.5px solid var(--border); }
         .btn--ghost:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-2px); }
-        .btn-danger { background: #f44336; color: white; border: none; }
-        .btn-danger:hover { background: #d32f2f; }
         .btn-animation { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; }
         .msg-success { background: #d4edda; color: #155724; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
         .msg-error { background: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
-        .section-filter { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 1.5rem; }
-        .filter-pill { padding: 0.75rem 1.2rem; border-radius: 999px; border: 1px solid transparent; background: #f2efe8; color: #5f4b2f; cursor: pointer; transition: all 0.2s ease; }
-        .filter-pill.active { background: #8A7650; border-color: #7e6b4c; color: white; }
-        .section-title { font-size: 1.4rem; margin: 2rem 0 1rem; color: #333; border-bottom: 1px solid #e6e1d8; padding-bottom: 0.75rem; }
-        .package-section { display: none; }
-        .package-section.active { display: block; }
-        .section-filter { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 1.5rem; }
-        .filter-pill { padding: 0.75rem 1.2rem; border-radius: 999px; border: 1px solid transparent; background: #f2efe8; color: #5f4b2f; cursor: pointer; transition: all 0.2s ease; }
-        .filter-pill.active { background: #8A7650; border-color: #7e6b4c; color: white; }
+
+        .section-filter { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 2.5rem; }
+        .filter-pill { padding: 0.75rem 1.5rem; border-radius: 999px; border: 1px solid var(--border); background: white; color: var(--text-secondary); cursor: pointer; transition: all 0.2s ease; font-weight: 600; font-size: 0.9rem; }
+        .filter-pill.active { background: var(--primary); border-color: var(--primary); color: white; box-shadow: var(--shadow-sm); }
+
         .section-title { font-size: 1.4rem; margin: 2rem 0 1rem; color: #333; border-bottom: 1px solid #e6e1d8; padding-bottom: 0.75rem; }
         .package-section { display: none; }
         .package-section.active { display: block; }
         .packages-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
-        .package-card { background: white; border: 2px solid #E2D9C8; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); transition: all 0.3s ease; display: flex; flex-direction: column; }
-        .package-card:hover { border-color: #8A7650; box-shadow: 0 15px 40px rgba(138, 118, 80, 0.2); transform: translateY(-8px); }
+        .package-card { background: white; border: 2.5px solid var(--border); border-radius: 24px; overflow: hidden; box-shadow: var(--shadow-sm); transition: all 0.3s ease; display: flex; flex-direction: column; }
+        .package-card:hover { border-color: var(--primary); box-shadow: var(--shadow-lg); transform: translateY(-8px); }
         .package-image { width: 100%; height: 200px; object-fit: cover; background: linear-gradient(135deg, #E2D9C8 0%, #D4C7B1 100%); }
         .package-info { padding: 1.5rem; display: flex; flex-direction: column; flex: 1; }
-        .package-name { font-size: 1.2rem; font-weight: 600; color: #2C2820; margin-bottom: 0.5rem; }
-        .package-price { color: #8A7650; font-size: 1.4rem; font-weight: 700; margin: 0.5rem 0; }
+        .package-name { font-family: var(--serif); font-size: 1.5rem; font-weight: 700; color: #2C2820; margin-bottom: 0.25rem; }
+        .package-price { color: var(--primary); font-size: 1.6rem; font-weight: 800; margin: 0.5rem 0; font-family: var(--sans); }
         .package-desc { color: #6B6463; font-size: 0.9rem; line-height: 1.5; margin-bottom: 1rem; }
         .package-tag { font-size: 0.85rem; color: #8B7355; margin-bottom: 1rem; }
-        .package-actions { display: flex; gap: 0.75rem; margin-top: auto; justify-content: center; align-items: center; }
-        .package-actions .btn { flex: 0 1 auto; min-width: 120px; padding: 0.6rem 1.2rem; }
+        .package-actions { display: flex; gap: 0.75rem; margin-top: auto; justify-content: space-between; }
+        .package-actions .btn { flex: 1; padding: 0.75rem 1rem; }
         .btn-delete-custom { color: #f44336; border-color: #f44336; }
         .btn-delete-custom:hover { background: rgba(244, 67, 54, 0.15); color: #d32f2f; border-color: #d32f2f; }
-        .animated-icon { display: inline-flex; color: #8A7650; animation: pulse 1.4s ease-in-out infinite; font-size: 1.5rem; }
-        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
-        .btn-danger { background: #f44336; color: white; border: none; }
-        .btn-danger:hover { background: #d32f2f; }
+
+        @media (max-width: 768px) {
+            .admin-container { padding: 1rem; }
+            .page-header { flex-direction: column; gap: 1rem; align-items: flex-start; padding: 1.5rem; }
+            .page-header .btn { width: 100%; }
+            .packages-grid { grid-template-columns: 1fr; }
+            .filter-pill { flex: 1; text-align: center; font-size: 0.8rem; padding: 0.6rem 1rem; }
+        }
         
         /* Modal */
         .modal { 
@@ -289,7 +286,7 @@ $sectionOrder = ['Wedding', 'Birthday', 'Big Events / Gala', 'Other Events'];
             width: 100%; 
             height: 100%; 
             background: rgba(0, 0, 0, 0.7); 
-            z-index: 500; 
+            z-index: 99999; 
             align-items: center; 
             justify-content: center; 
             backdrop-filter: blur(3px);
@@ -480,7 +477,8 @@ function openAddModal() {
 
 function editPackage(packageId) {
     // Fetch package data via AJAX
-    fetch('<?= BASE_URL ?>/api-package.php?action=get_package&id=' + packageId, {
+    // FIX: target the public/ folder where API files reside
+    fetch('<?= BASE_URL ?>/public/api-package.php?action=get_package&id=' + packageId, {
       credentials: 'same-origin'
     })
         .then(response => response.json())

@@ -949,7 +949,7 @@ function addToCart(packageData) {
   // Store in session via POST for server-side access
   const form = document.createElement('form');
   form.method = 'POST';
-  form.action = '/index.php?route=checkout';
+  form.action = 'index.php?route=checkout';
   const cartInput = document.createElement('input');
   cartInput.type = 'hidden';
   cartInput.name = 'cart_data';

@@ -640,20 +640,45 @@
 
     // Proceed to payment processing (this will be called after agreement is accepted)
     function proceedToPayment() {
-        // This function will be called to process the payment
-        // You can customize this based on your payment flow
-        const cartTotal = document.querySelector('.breakdown-total span:last-child')?.textContent || '0';
-        const depositAmount = parseInt(cartTotal.replace(/[^\d]/g, '')) / 2;
-
         // Show payment processing message
         showToast('Redirecting to payment gateway...', 'info');
 
-        // Here you would submit the booking data and initiate payment
-        // For now, we'll log the data
-        console.log('Booking confirmed and ready for payment');
-        console.log('Deposit amount:', depositAmount);
-        
-        document.getElementById('bookingForm').submit();
+        // Use the global bookingData for payload
+        const payload = window.bookingData;
+
+        // Submit via AJAX
+        fetch('index.php?route=checkout-submit', {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify(payload)
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                showToast('Booking saved! Opening payment...', 'success');
+                
+                // Trigger the payment gateway modal
+                if (typeof openPaymentModal === 'function') {
+                    openPaymentModal({
+                        plan_id: result.plan_id,
+                        total: payload.total || 0,
+                        deposit: (payload.total || 0) / 2
+                    });
+                } else {
+                    window.location.href = 'index.php?route=plans';
+                }
+            } else {
+                showToast(result.message || 'Error saving booking', 'error');
+            }
+        })
+        .catch(err => {
+            console.error('Submission error:', err);
+            showToast('Connection error. Please try again.', 'error');
+        });
     }
 
     // Toast notification helper
@@ -667,27 +692,5 @@
             toast.style.animation = 'slideIn 0.3s ease reverse';
             setTimeout(() => toast.remove(), 300);
         }, 3000);
-    }
-
-    // Modified confirmBooking function to open agreement first
-    function confirmBooking() {
-        // Validate form data before opening agreement
-        const eventDate = document.getElementById('eventDate').value;
-        const eventTime = document.getElementById('eventTime').value;
-        const fullName = document.getElementById('fullName').value.trim();
-        const email = document.getElementById('email').value.trim();
-
-        if (!eventDate || !eventTime) {
-            showToast('Please select an event date and time', 'error');
-            return;
-        }
-
-        if (!fullName || !email) {
-            showToast('Please fill in your contact information', 'error');
-            return;
-        }
-
-        // Open the agreement modal instead of directly confirming
-        openAgreementModal();
     }
 </script>

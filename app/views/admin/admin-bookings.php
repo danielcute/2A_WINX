@@ -117,18 +117,18 @@ $stats = $bookingModel->getStats();
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         .admin-container { width: 100%; margin: 0; padding: 0; }
-        .bookings-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+        .bookings-header { margin-bottom: 2.5rem; }
         .bookings-header h1 { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; color: #2C2820; margin: 0; display: flex; align-items: center; gap: 1rem; letter-spacing: -0.03em; font-weight: 200; }
         .bookings-header h1 em { color: #8A7650; font-style: italic; font-weight: 400; }
         .animated-icon { display: inline-flex; color: #8A7650; animation: pulse 1.4s ease-in-out infinite; font-size: 1.6rem; }
         @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
-        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem; }
-        .stat-card { background: white; border-radius: 20px; padding: 1.5rem; text-align: center; border: 2px solid #E2D9C8; transition: all 0.3s ease; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 2.5rem; }
+        .stat-card { background: white; border-radius: 24px; padding: 1.5rem; text-align: center; border: 2.5px solid #E2D9C8; transition: all 0.3s ease; }
         .stat-card:hover { border-color: #8A7650; box-shadow: 0 10px 30px rgba(138, 118, 80, 0.15); }
-        .stat-card h3 { font-size: 1.rem; margin: 0 0 0.5rem; color: #8A7650; font-weight: 700; }
+        .stat-card h3 { font-size: 1.8rem; margin: 0 0 0.5rem; color: #8A7650; font-weight: 800; }
         .stat-card p { color: #8B7355; margin: 0; font-weight: 600; }
-        .table-wrapper { overflow-x: auto; border-radius: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); max-width: 100%; }
-        .admin-table { width: 100%; border-collapse: collapse; background: white; min-width: 1100px; }
+        .table-wrapper { width: 100%; border-radius: 24px; overflow: visible; }
+        .admin-table { width: 100%; border-collapse: collapse; background: transparent; }
         .admin-table th, .admin-table td { padding: 0.7rem 0.6rem; text-align: left; border-bottom: 1px solid #827660; font-size: 0.85rem; }
         .admin-table th { background: #b5a584; font-weight: 600; color: #2C2820; white-space: nowrap; }
         .admin-table td { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -162,6 +162,7 @@ $stats = $bookingModel->getStats();
 <body>
 <?php include 'admin-nav.php'; ?>
 
+<div class="admin-content">
 <div class="admin-container">
     <div class="bookings-header">
         <h1><i class="fas fa-calendar-check animated-icon"></i> Booking <em>Management</em></h1>
@@ -254,6 +255,11 @@ $stats = $bookingModel->getStats();
                         </td>
                         <td>
                             <div class="booking-actions">
+                                <button class="btn btn--primary btn--sm" 
+                                        onclick="viewReceipt(<?= $book['checkout_id'] ?>)"
+                                        title="View Receipt">
+                                    <i class="fas fa-file-invoice-dollar"></i> Receipt
+                                </button>
                                 <button class="btn btn--ghost btn--sm btn-delete-custom" 
                                         id="delete-btn-<?= $book['checkout_id'] ?>"
                                         onclick="deleteBooking(<?= $book['checkout_id'] ?>)"
@@ -376,6 +382,14 @@ function deleteBooking(id) {
             console.error('Error:', error);
         });
     }
+}
+
+function viewReceipt(id) {
+    // Mock receipt view - opens in a new tab
+    showToast('Generating receipt for Booking #' + id + '...', 'info');
+    setTimeout(() => {
+        window.open('index.php?route=receipt&id=' + id, '_blank');
+    }, 800);
 }
 </script>
 <?php include 'admin-footer.php'; ?>

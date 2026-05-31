@@ -1567,6 +1567,7 @@ function showToast(message, type = 'success') {
 
 // Global flag to prevent double submissions
 let isBookingInProgress = false;
+window.bookingData = {}; // Global storage for modal access
 
 // Confirm booking function
 function confirmBooking() {
@@ -1612,7 +1613,7 @@ function confirmBooking() {
     const startDateTime = eventDate + ' ' + eventStartTime;
     const endDateTime = eventDate + ' ' + eventEndTime;
     
-    const bookingData = {
+    window.bookingData = {
         eventName: eventName,
         eventDate: eventDate,
         eventStartTime: eventStartTime,
