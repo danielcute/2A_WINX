@@ -3,8 +3,8 @@ if (!defined('ROOT_PATH')) {
     define('ROOT_PATH', dirname(dirname(dirname(__DIR__))));
 }
 require_once ROOT_PATH . '/app/models/Testimonial.php';
-if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-    header('Location: /index.php?route=signin');
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+    header('Location: ' . BASE_URL . '/index.php?route=signin');
     exit;
 }
 
@@ -192,6 +192,7 @@ function closeAddModal() {
 function updateStatus(id, status) {
     fetch('', {
         method: 'POST',
+        credentials: 'same-origin',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: `action=update_status&id=${id}&status=${status}`
     })
@@ -208,6 +209,7 @@ function deleteTestimonial(id) {
     if (confirm('Delete this testimonial?')) {
         fetch('', {
             method: 'POST',
+            credentials: 'same-origin',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: `action=delete&id=${id}`
         })
@@ -232,6 +234,7 @@ document.getElementById('addTestimonialForm')?.addEventListener('submit', functi
     
     fetch('', {
         method: 'POST',
+        credentials: 'same-origin',
         body: formData
     })
     .then(response => response.json())

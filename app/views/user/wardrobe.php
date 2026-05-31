@@ -1276,6 +1276,14 @@ $wardrobesByCategory = $wardrobeModel->getAllByCategory();
     function loadWardrobes() {
       fetch('/api-wardrobe.php?action=getAll')
         .then(response => response.json())
+        .then(response => {
+          if (!response.ok) throw new Error('HTTP ' + response.status);
+          const contentType = response.headers.get('content-type');
+          if (!contentType || !contentType.includes('application/json')) {
+            throw new TypeError("Oops, we haven't got JSON!");
+          }
+          return response.json();
+        })
         .then(data => {
           if (data.success) {
             allWardrobes = data.data;
@@ -1296,7 +1304,16 @@ $wardrobesByCategory = $wardrobeModel->getAllByCategory();
 
     function searchWardrobes(query) {
       fetch('/api-wardrobe.php?action=search&q=' + encodeURIComponent(query))
-        .then(response => response.json())
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok: ' + response.statusText);
+          }
+          const contentType = response.headers.get('content-type');
+          if (!contentType || !contentType.includes('application/json')) {
+            throw new TypeError("Expected JSON but received " + contentType);
+          }
+          return response.json();
+        })
         .then(data => {
           if (data.success) {
             displayWardrobes(data.data);

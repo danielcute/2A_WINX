@@ -1,10 +1,15 @@
 <?php
-/**
- * Database Health Check API
- * Checks connectivity and status of all critical database tables
- */
+declare(strict_types=1);
 
-session_start();
+error_reporting(E_ALL);
+ini_set('display_errors', 0);
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+header('Content-Type: application/json; charset=utf-8');
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
 if (!defined('ROOT_PATH')) {
     define('ROOT_PATH', dirname(__DIR__));
@@ -12,120 +17,42 @@ if (!defined('ROOT_PATH')) {
 
 require_once ROOT_PATH . '/config/database.php';
 
-header('Content-Type: application/json');
-header('Cache-Control: no-cache, max-age=60'); // Cache for 60 seconds
+$response = [
+    'success' => false,
+    'environment' => getenv('ENV') ?: null,
+    'php_sapi' => PHP_SAPI,
+    'db' => [
+        'host' => defined('DB_HOST') ? DB_HOST : null,
+        'port' => defined('DB_PORT') ? DB_PORT : null,
+        'name' => defined('DB_NAME') ? DB_NAME : null,
+        'user' => defined('DB_USER') ? DB_USER : null,
+    ],
+    'result' => null,
+];
 
 try {
-    $db = Database::getInstance()->getConnection();
-    
-    if (!$db) {
-        http_response_code(503);
-        echo json_encode([
-            'success' => false,
-            'status' => 'offline',
-            'message' => 'Database connection failed',
-            'timestamp' => date('Y-m-d H:i:s')
-        ]);
-        exit;
-    }
-    
-    // Test basic connection
-    if (!$db->ping()) {
-        http_response_code(503);
-        echo json_encode([
-            'success' => false,
-            'status' => 'offline',
-            'message' => 'Database ping failed',
-            'timestamp' => date('Y-m-d H:i:s')
-        ]);
-        exit;
-    }
-    
-    // Check critical tables
-    $criticalTables = [
-        'users_tbl' => 'Users Database',
-        'wardrobes_tbl' => 'Wardrobes Database',
-        'plans_tbl' => 'Bookings/Events Database',
-        'packages_tbl' => 'Packages Database',
-        'customizations_tbl' => 'Customizations Database',
-        'occasions_tbl' => 'Occasions Database',
-        'messages_tbl' => 'Messages Database',
-        'payments_tbl' => 'Payments Database'
-    ];
-    
-    $tablesStatus = [];
-    $allTablesHealthy = true;
-    
-    foreach ($criticalTables as $table => $label) {
-        $result = $db->query("SELECT COUNT(*) as count FROM `$table`");
-        
-        if ($result) {
-            $row = $result->fetch_assoc();
-            $tablesStatus[$table] = [
-                'name' => $label,
-                'status' => 'healthy',
-                'records' => (int)$row['count'],
-                'accessible' => true
-            ];
-        } else {
-            $allTablesHealthy = false;
-            $tablesStatus[$table] = [
-                'name' => $label,
-                'status' => 'error',
-                'error' => $db->error,
-                'accessible' => false
-            ];
-        }
-    }
-    
-    // Get database statistics
-    $dbStats = [];
-    $result = $db->query("SELECT 
-        table_name, 
-        table_rows,
-        data_length,
-        index_length
-        FROM information_schema.TABLES 
-        WHERE table_schema = DATABASE()");
-    
-    $totalSize = 0;
-    $totalRows = 0;
-    
-    if ($result) {
-        while ($row = $result->fetch_assoc()) {
-            $totalSize += ($row['data_length'] + $row['index_length']);
-            $totalRows += $row['table_rows'];
-        }
-    }
-    
-    // Build response
-    $response = [
-        'success' => true,
-        'status' => $allTablesHealthy ? 'online' : 'degraded',
-        'database' => [
+    // Attempt connection
+    $mysqli = Database::getInstance()->getConnection();
+
+    if ($mysqli instanceof mysqli) {
+        $response['success'] = true;
+        $response['result'] = [
             'connected' => true,
-            'server_version' => $db->server_info,
-            'database_name' => $db->select_db(substr($db->select_db(''), 1)) ? $db->select_db('') : 'unknown'
-        ],
-        'tables' => $tablesStatus,
-        'statistics' => [
-            'total_records' => $totalRows,
-            'total_size_mb' => round($totalSize / 1024 / 1024, 2),
-            'check_timestamp' => date('Y-m-d H:i:s'),
-            'all_tables_healthy' => $allTablesHealthy
-        ]
+            'server_info' => $mysqli->server_info ?? null,
+            'server_version' => $mysqli->server_version ?? null,
+        ];
+    } else {
+        $response['result'] = [
+            'connected' => false,
+            'error' => 'Database connection did not return mysqli instance',
+        ];
+    }
+} catch (Throwable $e) {
+    $response['result'] = [
+        'connected' => false,
+        'error' => $e->getMessage(),
     ];
-    
-    http_response_code(200);
-    echo json_encode($response);
-    
-} catch (Exception $e) {
-    http_response_code(503);
-    echo json_encode([
-        'success' => false,
-        'status' => 'error',
-        'message' => $e->getMessage(),
-        'timestamp' => date('Y-m-d H:i:s')
-    ]);
 }
-?>
+
+echo json_encode($response);
+

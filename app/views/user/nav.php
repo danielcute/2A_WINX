@@ -777,7 +777,16 @@ const notificationTypes = {
     if (!notifContainer) return;
 
     fetch('/public/api-notification.php?action=get_unread&limit=10')
-      .then(response => response.json())
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok: ' + response.statusText);
+        }
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          throw new TypeError("Expected JSON but received " + contentType);
+        }
+        return response.json();
+      })
       .then(data => {
         if (data.success && data.notifications) {
           // Update badge

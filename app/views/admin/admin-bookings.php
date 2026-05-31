@@ -9,8 +9,8 @@ require_once ROOT_PATH . '/app/models/Booking.php';
 require_once ROOT_PATH . '/app/models/User.php';
 require_once ROOT_PATH . '/app/models/PlanAutoConfirmation.php';
 
-if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-    header('Location: /index.php?route=signin');
+if (!isset($_SESSION['user_id']) || (($_SESSION['role'] ?? null) !== 'admin' && empty($_SESSION['admin_logged_in']))) {
+    header('Location: ' . BASE_URL . '/index.php?route=signin');
     exit;
 }
 

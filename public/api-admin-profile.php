@@ -26,7 +26,8 @@ require_once ROOT_PATH . '/config/database.php';
 require_once ROOT_PATH . '/app/models/User.php';
 
 // Require admin authentication
-if (!isset($_SESSION['admin_logged_in']) || !isset($_SESSION['user_id'])) {
+// Accept both role-based and admin_logged_in-based session flags.
+if (!isset($_SESSION['user_id']) || (($_SESSION['role'] ?? null) !== 'admin' && empty($_SESSION['admin_logged_in']))) {
     http_response_code(401);
     echo json_encode([
         'success' => false,

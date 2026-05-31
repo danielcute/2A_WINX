@@ -1,7 +1,7 @@
 <?php
 // Check admin authentication
-if (!isset($_SESSION['user_id'])) {
-    header("Location: " . BASE_URL . "/index.php?route=admin-login");
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+    header('Location: ' . BASE_URL . '/index.php?route=signin');
     exit;
 }
 

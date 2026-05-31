@@ -1,7 +1,7 @@
 <?php
 // Session already started in index.php
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    header('Location: /index.php?route=signin');
+if (!isset($_SESSION['user_id']) || $_SESSION['admin_logged_in'] !== true) {
+    header('Location: ' . BASE_URL . '/index.php?route=signin');
     exit;
 }
 
@@ -320,7 +320,9 @@ function updateWeatherDisplay(weatherData) {
 function fetchWeatherForDate(dateStr) {
     console.log('Fetching weather for date:', dateStr);
     
-    fetch(`/api-weather.php?action=getForecast&date=${dateStr}`)
+    fetch(`<?= BASE_URL ?>/api-weather.php?action=getForecast&date=${dateStr}`, {
+      credentials: 'same-origin'
+    })
       .then(response => response.json())
       .then(data => {
         console.log('Weather API response:', data);
@@ -405,7 +407,9 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         events: function(info, successCallback, failureCallback) {
             console.log('Fetching calendar events...');
-            fetch('/api-calendar.php?action=getAll')
+            fetch('<?= BASE_URL ?>/api-calendar.php?action=getAll', {
+              credentials: 'same-origin'
+            })
                 .then(response => response.json())
                 .then(data => {
                     console.log('Calendar events loaded:', data);

@@ -528,11 +528,15 @@ if (!isset($_SESSION['user_id'])) {
                 if (search) params.append('search', search);
 
                 const response = await fetch('<?php echo APP_URL; ?>/app/controllers/WardrobeSelectionController.php?action=getByCategory&' + params);
-                const data = await response.json();
-
-                if (data.success) {
-                    displayWardrobes(data.wardrobes);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok: ' + response.statusText);
                 }
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new TypeError("Expected JSON but received " + contentType);
+                }
+                const data = await response.json();
+                if (data.success) { displayWardrobes(data.wardrobes); }
             } catch (error) {
                 console.error('Error loading wardrobes:', error);
             }

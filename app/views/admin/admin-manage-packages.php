@@ -4,8 +4,8 @@
  */
 
 // Check if admin
-if (!isset($_SESSION['admin_logged_in'])) {
-    header('Location: /index.php?route=signin');
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+    header('Location: ' . BASE_URL . '/index.php?route=signin');
     exit;
 }
 
@@ -480,7 +480,9 @@ function openAddModal() {
 
 function editPackage(packageId) {
     // Fetch package data via AJAX
-    fetch('/api-package.php?action=get_package&id=' + packageId)
+    fetch('<?= BASE_URL ?>/api-package.php?action=get_package&id=' + packageId, {
+      credentials: 'same-origin'
+    })
         .then(response => response.json())
         .then(data => {
             if (data.success) {

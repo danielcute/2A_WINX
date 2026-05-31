@@ -115,6 +115,7 @@ if ($route === 'verify-2fa' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     
     // Verify the 2FA code
     if ($userModel->verify2FA($_SESSION['temp_user_id'], $code)) {
+
         // Code verified - complete the login
         $_SESSION['user_id'] = $_SESSION['temp_user_id'];
         $_SESSION['user_name'] = $_SESSION['temp_user_name'];
@@ -261,7 +262,8 @@ switch ($route) {
     
     // ── ADMIN PROTECTED ROUTES ──
     case 'admin-dashboard':
-        if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+        if (!isset($_SESSION['user_id']) || (($_SESSION['role'] ?? null) !== 'admin' && empty($_SESSION['admin_logged_in']))) {
+
             header('Location: ' . BASE_URL . '/index.php?route=signin');
             exit;
         }
@@ -269,7 +271,8 @@ switch ($route) {
         break;
     
     case 'admin-profile':
-        if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+        if (!isset($_SESSION['user_id']) || (($_SESSION['role'] ?? null) !== 'admin' && empty($_SESSION['admin_logged_in']))) {
+
             header('Location: ' . BASE_URL . '/index.php?route=signin');
             exit;
         }
@@ -281,7 +284,7 @@ switch ($route) {
         break;
     
     case 'admin-packages':
-        if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+        if (!isset($_SESSION['user_id']) || (($_SESSION['role'] ?? null) !== 'admin' && empty($_SESSION['admin_logged_in']))) {
             header('Location: ' . BASE_URL . '/index.php?route=signin');
             exit;
         }
@@ -289,7 +292,7 @@ switch ($route) {
         break;
     
     case 'admin-manage-packages':
-        if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+        if (!isset($_SESSION['user_id']) || (($_SESSION['role'] ?? null) !== 'admin' && empty($_SESSION['admin_logged_in']))) {
             header('Location: ' . BASE_URL . '/index.php?route=signin');
             exit;
         }

@@ -23,7 +23,7 @@ $userId = $_SESSION['user_id'] ?? 0;
 // Normalize auth for both admin + user areas.
 // If you're admin-logged-in but user_id isn't set, try common variants.
 if ($userId <= 0) {
-    if (!empty($_SESSION['admin_logged_in']) && !empty($_SESSION['user_id'])) {
+    if (!empty($_SESSION['user_id']) && $_SESSION['role'] === 'admin') {
         $userId = (int)$_SESSION['user_id'];
     }
 }

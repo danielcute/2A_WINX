@@ -11,8 +11,8 @@ if (!defined('ROOT_PATH')) {
 
 require_once ROOT_PATH . '/app/models/Feedback.php';
 
-if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-    header('Location: /index.php?route=signin');
+if (!isset($_SESSION['user_id']) || (($_SESSION['role'] ?? null) !== 'admin' && empty($_SESSION['admin_logged_in']))) {
+    header('Location: ' . BASE_URL . '/index.php?route=signin');
     exit;
 }
 

@@ -4,6 +4,10 @@
  * Handles wardrobe updates via AJAX
  */
 
+// Hardening: prevent any non-JSON output from breaking frontend JSON parsing
+ini_set('display_errors', '0');
+error_reporting(0);
+
 if (!defined('ROOT_PATH')) {
     // Check if app folder exists at current level (production) or parent level (local)
     if (is_dir(__DIR__ . '/app')) {
@@ -30,6 +34,7 @@ try {
         echo json_encode(['success' => false, 'message' => 'Unauthorized']);
         exit;
     }
+
 
     require_once ROOT_PATH . '/app/models/User.php';
     $userModel = new User();

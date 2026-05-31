@@ -9,13 +9,21 @@
  */
 
 // Detect environment
+// Force LOCAL when running under XAMPP / localhost.
+// (Your current app requests are being treated as PRODUCTION, causing DB port 3307 failures.)
+$host = strtolower(trim($_SERVER['HTTP_HOST'] ?? ''));
 $is_localhost = (
-    $_SERVER['HTTP_HOST'] === 'localhost' ||
-    $_SERVER['HTTP_HOST'] === '127.0.0.1' ||
-    $_SERVER['HTTP_HOST'] === 'localhost:8080' ||
-    $_SERVER['HTTP_HOST'] === 'localhost:80' ||
-    strpos($_SERVER['HTTP_HOST'], 'localhost') === 0 ||
-    strpos($_SERVER['HTTP_HOST'], '127.0.0.1') === 0
+    $host === 'localhost' ||
+    $host === '127.0.0.1' ||
+    $host === 'localhost:8080' ||
+    $host === 'localhost:80' ||
+    str_starts_with($host, 'localhost') ||
+    str_starts_with($host, '127.0.0.1') ||
+    // CLI / internal script runs
+    PHP_SAPI === 'cli' ||
+    // Common local XAMPP variables
+    getenv('XAMPP') !== false ||
+    getenv('ENV') === 'local'
 );
 
 // Environment-based configuration
@@ -45,11 +53,19 @@ class Database {
         $this->connection = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME, DB_PORT);
 
         if ($this->connection->connect_error) {
+            // Return JSON only (no warnings/HTML) for API consumers
+            if (PHP_SAPI !== 'cli') {
+                if (!headers_sent()) {
+                    header('Content-Type: application/json; charset=utf-8');
+                }
+            }
             error_log('Database connection failed: ' . $this->connection->connect_error);
-            die(json_encode([
+            http_response_code(500);
+            echo json_encode([
                 'error' => true,
                 'message' => 'Database connection failed. Please check your configuration.'
-            ]));
+            ], JSON_UNESCAPED_SLASHES);
+            exit;
         }
 
         $this->connection->set_charset('utf8mb4');

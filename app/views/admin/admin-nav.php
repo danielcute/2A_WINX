@@ -632,16 +632,16 @@ body {
 <div class="admin-wrapper">
 <button class="admin-mobile-toggle" id="mobileToggle"><i class="fas fa-bars"></i></button>
 <aside class="admin-sidebar" id="adminSidebar">
-<div class="admin-sidebar__header"><a href="/index.php?route=admin-dashboard" class="admin-sidebar__logo"><img src="/assets/img/logo.png" alt="Sinta" class="admin-sidebar__logo-img"><span class="admin-sidebar__logo-text">Sinta</span></a><span class="admin-sidebar__sub">Admin Panel</span></div>
+<div class="admin-sidebar__header"><a href="<?php echo BASE_URL; ?>/index.php?route=admin-dashboard" class="admin-sidebar__logo"><img src="<?php echo BASE_URL; ?>/assets/img/logo.png" alt="Sinta" class="admin-sidebar__logo-img"><span class="admin-sidebar__logo-text">Sinta</span></a><span class="admin-sidebar__sub">Admin Panel</span></div>
 <nav class="admin-sidebar__nav">
-<a href="/index.php?route=admin-dashboard" class="admin-sidebar__link<?php echo isset($page) && $page === 'admin-dashboard' ? ' active' : ''; ?>"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a>
-<a href="/index.php?route=admin-packages" class="admin-sidebar__link<?php echo isset($page) && $page === 'admin-packages' ? ' active' : ''; ?>"><i class="fas fa-box"></i><span>Package Management</span></a>
-<a href="/index.php?route=admin-occasions" class="admin-sidebar__link<?php echo isset($page) && $page === 'admin-occasions' ? ' active' : ''; ?>"><i class="fas fa-calendar-alt"></i><span>Occasions</span></a>
-<a href="/index.php?route=admin-bookings" class="admin-sidebar__link<?php echo isset($page) && $page === 'admin-bookings' ? ' active' : ''; ?>"><i class="fas fa-calendar-check"></i><span>Booking Management</span></a>
-<a href="/index.php?route=admin-feedback" class="admin-sidebar__link<?php echo isset($page) && $page === 'admin-feedback' ? ' active' : ''; ?>"><i class="fas fa-comments"></i><span>Feedback Management</span></a>
-<a href="/index.php?route=admin-customize" class="admin-sidebar__link<?php echo isset($page) && $page === 'admin-customize' ? ' active' : ''; ?>"><i class="fas fa-palette"></i><span>Customizations</span></a>
-<a href="/index.php?route=admin-wardrobe" class="admin-sidebar__link<?php echo isset($page) && $page === 'admin-wardrobe' || isset($page) && strpos($page, 'admin-wardrobe') === 0 && strpos($page, 'admin-wardrobe-selections') === false ? ' active' : ''; ?>"><i class="fas fa-tuxedo"></i><span>Wardrobe Management</span></a>
-<a href="/index.php?route=admin-messages" class="admin-sidebar__link<?php echo isset($page) && $page === 'admin-messages' ? ' active' : ''; ?>"><i class="fas fa-envelope"></i><span>Messages</span><?php if($unread>0): ?><span class="admin-sidebar__badge"><?= $unread ?></span><?php endif; ?></a>
+<a href="<?php echo BASE_URL; ?>/index.php?route=admin-dashboard" class="admin-sidebar__link<?php echo isset($page) && $page === 'admin-dashboard' ? ' active' : ''; ?>"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a>
+<a href="<?php echo BASE_URL; ?>/index.php?route=admin-packages" class="admin-sidebar__link<?php echo isset($page) && $page === 'admin-packages' ? ' active' : ''; ?>"><i class="fas fa-box"></i><span>Package Management</span></a>
+<a href="<?php echo BASE_URL; ?>/index.php?route=admin-occasions" class="admin-sidebar__link<?php echo isset($page) && $page === 'admin-occasions' ? ' active' : ''; ?>"><i class="fas fa-calendar-alt"></i><span>Occasions</span></a>
+<a href="<?php echo BASE_URL; ?>/index.php?route=admin-bookings" class="admin-sidebar__link<?php echo isset($page) && $page === 'admin-bookings' ? ' active' : ''; ?>"><i class="fas fa-calendar-check"></i><span>Booking Management</span></a>
+<a href="<?php echo BASE_URL; ?>/index.php?route=admin-feedback" class="admin-sidebar__link<?php echo isset($page) && $page === 'admin-feedback' ? ' active' : ''; ?>"><i class="fas fa-comments"></i><span>Feedback Management</span></a>
+<a href="<?php echo BASE_URL; ?>/index.php?route=admin-customize" class="admin-sidebar__link<?php echo isset($page) && $page === 'admin-customize' ? ' active' : ''; ?>"><i class="fas fa-palette"></i><span>Customizations</span></a>
+<a href="<?php echo BASE_URL; ?>/index.php?route=admin-wardrobe" class="admin-sidebar__link<?php echo isset($page) && $page === 'admin-wardrobe' || isset($page) && strpos($page, 'admin-wardrobe') === 0 && strpos($page, 'admin-wardrobe-selections') === false ? ' active' : ''; ?>"><i class="fas fa-hanger"></i><span>Wardrobe Management</span></a>
+<a href="<?php echo BASE_URL; ?>/index.php?route=admin-messages" class="admin-sidebar__link<?php echo isset($page) && $page === 'admin-messages' ? ' active' : ''; ?>"><i class="fas fa-envelope"></i><span>Messages</span><?php if($unread>0): ?><span class="admin-sidebar__badge"><?= $unread ?></span><?php endif; ?></a>
 </nav>
 <div class="admin-sidebar__footer"><a href="#" class="admin-sidebar__logout" onclick="openLogoutModal(event);"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a></div>
 </aside>
@@ -665,12 +665,15 @@ body {
     </div>
   </div>
   <span style="font-size: 0.9rem;">Administrator</span>
-  <div class="admin-avatar" onclick="window.location.href='/index.php?route=admin-profile'"><i class="fas fa-user-cog"></i></div>
+  <div class="admin-avatar" onclick="window.location.href='<?php echo BASE_URL; ?>/index.php?route=admin-profile'"><i class="fas fa-user-cog"></i></div>
 </div>
 </div>
 <div class="admin-content">
 
 <script>
+// Base URL for API calls
+const baseUrl = '<?php echo BASE_URL; ?>';
+
 // Admin Notification Type Configuration
 const adminNotificationTypes = {
   'realtime': { icon: 'fa-clock', label: 'Real-time Update', color: '#8A7650' },
@@ -715,7 +718,9 @@ const adminNotificationTypes = {
   function loadAdminNotifications() {
     if (!adminNotifContainer) return;
 
-    fetch('/index.php?route=admin-notifications&action=get_unread&limit=15')
+    fetch(baseUrl + '/index.php?route=admin-notifications&action=get_unread&limit=15', {
+      credentials: 'same-origin'
+    })
       .then(response => response.json())
       .then(data => {
         if (data.success && data.notifications) {
@@ -783,9 +788,10 @@ const adminNotificationTypes = {
 
   // Mark admin notification as read
   window.markAdminNotificationAsRead = function(notificationId) {
-    fetch('/index.php?route=admin-notifications&action=mark_as_read', {
+    fetch(baseUrl + '/index.php?route=admin-notifications&action=mark_as_read', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      credentials: 'same-origin',
       body: 'notification_id=' + notificationId
     })
     .then(response => response.json())
@@ -799,9 +805,10 @@ const adminNotificationTypes = {
 
   // Delete admin notification
   window.deleteAdminNotification = function(notificationId) {
-    fetch('/index.php?route=admin-notifications&action=delete', {
+    fetch(baseUrl + '/index.php?route=admin-notifications&action=delete', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      credentials: 'same-origin',
       body: 'notification_id=' + notificationId
     })
     .then(response => response.json())
@@ -816,7 +823,10 @@ const adminNotificationTypes = {
   // Mark all as read
   window.markAllAdminNotificationsAsRead = function(e) {
     e.preventDefault();
-    fetch('/index.php?route=admin-notifications&action=mark_all_as_read', { method: 'POST' })
+    fetch(baseUrl + '/index.php?route=admin-notifications&action=mark_all_as_read', { 
+      method: 'POST',
+      credentials: 'same-origin'
+    })
       .then(response => response.json())
       .then(data => {
         if (data.success) {

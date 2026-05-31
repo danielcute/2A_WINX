@@ -999,6 +999,7 @@ $page_title = 'Manage Wardrobes';
 
                 fetch('<?php echo BASE_URL; ?>/index.php?route=admin-wardrobe-delete', {
                     method: 'POST',
+                    credentials: 'same-origin',
                     body: formData
                 })
                 .then(response => response.json())
@@ -1250,6 +1251,7 @@ $page_title = 'Manage Wardrobes';
 
                 fetch('<?php echo BASE_URL; ?>/index.php?route=admin-wardrobe-delete', {
                     method: 'POST',
+                    credentials: 'same-origin',
                     body: formData
                 })
                 .then(response => response.json())

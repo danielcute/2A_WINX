@@ -44,56 +44,6 @@ $user_data = [
 
 $user = $user_data;
 
-// Handle avatar upload
-$avatar_upload_error = '';
-$avatar_upload_success = '';
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['avatar'])) {
-    $upload_dir = ROOT_PATH . '/public/assets/img/';
-    
-    // Create directory if it doesn't exist
-    if (!file_exists($upload_dir)) {
-        mkdir($upload_dir, 0777, true);
-    }
-    
-    $file = $_FILES['avatar'];
-    $file_name = 'user_' . $user['id'] . '_' . time() . '.' . pathinfo($file['name'], PATHINFO_EXTENSION);
-    $target_file = $upload_dir . $file_name;
-    $relative_path = '/assets/img/' . $file_name;
-    
-    // Allowed file types
-    $allowed_types = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'image/webp'];
-    $max_size = 2 * 1024 * 1024; // 2MB
-    
-    if ($file['error'] === UPLOAD_ERR_OK) {
-        if (!in_array($file['type'], $allowed_types)) {
-            $avatar_upload_error = 'Only JPG, PNG, GIF, and WEBP images are allowed.';
-        } elseif ($file['size'] > $max_size) {
-            $avatar_upload_error = 'Image size must be less than 2MB.';
-        } else {
-            if (move_uploaded_file($file['tmp_name'], $target_file)) {
-                // Delete old avatar if it exists
-                if (!empty($user['image']) && file_exists(ROOT_PATH . $user['image'])) {
-                    unlink(ROOT_PATH . $user['image']);
-                }
-                // Update database with new image
-                $userModel->update($user['id'], ['image' => $relative_path]);
-                $_SESSION['user_avatar'] = $relative_path;
-                $user['image'] = $relative_path;
-                $avatar_upload_success = 'Profile picture updated successfully!';
-                
-                // Redirect to prevent form resubmission and the page reload loop
-                header('Location: ' . $_SERVER['REQUEST_URI']);
-                exit;
-            } else {
-                $avatar_upload_error = 'Failed to upload image. Please try again.';
-            }
-        }
-    } elseif ($file['error'] !== UPLOAD_ERR_NO_FILE) {
-        $avatar_upload_error = 'An error occurred during upload.';
-    }
-}
-
 // Handle form submissions
 $success_message = '';
 $error_message = '';
@@ -382,20 +332,6 @@ $avatar_path = !empty($user['image']) ? $user['image'] : '/assets/img/default-av
             <div class="alert alert--error animate-fade-up">
                 <i class="fas fa-exclamation-triangle"></i>
                 <?php echo htmlspecialchars($error_message); ?>
-            </div>
-        <?php endif; ?>
-        
-        <?php if ($avatar_upload_success): ?>
-            <div class="alert alert--success animate-fade-up">
-                <i class="fas fa-check-circle"></i>
-                <?php echo htmlspecialchars($avatar_upload_success); ?>
-            </div>
-        <?php endif; ?>
-        
-        <?php if ($avatar_upload_error): ?>
-            <div class="alert alert--error animate-fade-up">
-                <i class="fas fa-exclamation-triangle"></i>
-                <?php echo htmlspecialchars($avatar_upload_error); ?>
             </div>
         <?php endif; ?>
         
@@ -863,7 +799,7 @@ $avatar_path = !empty($user['image']) ? $user['image'] : '/assets/img/default-av
             <img src="/assets/images/aelarie.jpg" class="default-avatar" onclick="selectDefaultAvatar('/assets/images/avatars/default-avatar.jpg')">
             <img src="/assets/images/elarie.jpg" class="default-avatar" onclick="selectDefaultAvatar('/assets/images/avatars/avatar-2.jpg')">
             <img src="/assets/images/elarie.jpg" class="default-avatar" onclick="selectDefaultAvatar('/assets/images/avatars/avatar-3.jpg')">
-            <img src="/assets/images/elarie.jpg" class="default-avatar" onclick="selectDefaultAvatar('assets/images/avatars/avatar-4.jpg')">
+            <img src="/assets/images/elarie.jpg" class="default-avatar" onclick="selectDefaultAvatar('/assets/images/avatars/avatar-4.jpg')">
         </div>
         
         <div class="modal-buttons">
@@ -875,23 +811,59 @@ $avatar_path = !empty($user['image']) ? $user['image'] : '/assets/img/default-av
 
 <script>
 // Avatar Modal Functions
+const profileAvatar = document.getElementById('profileAvatar');
+const avatarPreview = document.getElementById('avatarPreview');
+
 function openAvatarModal() {
     document.getElementById('avatarModal').classList.add('active');
+    // Ensure preview matches current profile avatar
+    avatarPreview.src = profileAvatar.src;
 }
 
 function closeAvatarModal() {
     document.getElementById('avatarModal').classList.remove('active');
 }
 
-function previewImage(input) {
+async function previewImage(input) {
     if (input.files && input.files[0]) {
         const reader = new FileReader();
         reader.onload = function(e) {
-            document.getElementById('avatarPreview').src = e.target.result;
+            avatarPreview.src = e.target.result;
         };
         reader.readAsDataURL(input.files[0]);
+
+        // Automatically upload when a file is selected
+        const formData = new FormData();
+        formData.append('action', 'upload_avatar');
+        formData.append('avatar', input.files[0]);
+
+        try {
+            const response = await fetch('/public/api-user-profile.php', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                showToast('Profile picture updated successfully!', 'success');
+                profileAvatar.src = data.image_url; // Update main avatar
+                closeAvatarModal();
+                // Optionally, reload the page to update session and other elements
+                // setTimeout(() => location.reload(), 1000);
+            } else {
+                showToast(data.message || 'Failed to upload image.', 'error');
+            }
+        } catch (error) {
+            console.error('Error uploading avatar:', error);
+            showToast('An error occurred during upload.', 'error');
+        }
     }
 }
+
+// Intercept form submission for avatar upload
+document.getElementById('avatarUploadForm').addEventListener('submit', function(e) {
+    e.preventDefault(); // Prevent default form submission as we handle with JS
+});
 
 function selectDefaultAvatar(src) {
     // Highlight selected
@@ -900,12 +872,32 @@ function selectDefaultAvatar(src) {
     });
     event.target.classList.add('selected');
     
-    // Preview
-    document.getElementById('avatarPreview').src = src;
-    
-    // You would need to handle default avatar selection via AJAX or form submission
-    // For now, show a message
-    showToast('Default avatar selected. Click Upload to save.', 'info');
+    // Submit default avatar selection to API
+    const formData = new FormData();
+    formData.append('action', 'upload_avatar_default'); // New action for default avatars
+    formData.append('avatar_path', src);
+
+    fetch('/public/api-user-profile.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast('Default avatar selected successfully!', 'success');
+            profileAvatar.src = data.image_url; // Update main avatar
+            avatarPreview.src = data.image_url; // Update modal preview
+            closeAvatarModal();
+            // Optionally, reload the page to update session and other elements
+            // setTimeout(() => location.reload(), 1000);
+        } else {
+            showToast(data.message || 'Failed to set default avatar.', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error setting default avatar:', error);
+        showToast('An error occurred while setting default avatar.', 'error');
+    });
 }
 
 // Tab switching

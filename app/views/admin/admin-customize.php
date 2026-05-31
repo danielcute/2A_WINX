@@ -1,7 +1,7 @@
 <?php
 // Check admin authentication
-if (!isset($_SESSION['user_id'])) {
-    header("Location: " . BASE_URL . "/index.php?route=admin-login");
+if (!isset($_SESSION['user_id']) || (($_SESSION['role'] ?? null) !== 'admin' && empty($_SESSION['admin_logged_in']))) {
+    header('Location: ' . BASE_URL . '/index.php?route=signin');
     exit;
 }
 
@@ -1445,6 +1445,7 @@ $page_title = 'Manage Customizations';
             
             fetch('<?php echo BASE_URL; ?>/index.php?route=admin-customize-update', {
                 method: 'POST',
+                credentials: 'same-origin',
                 body: formData
             })
             .then(response => response.json())

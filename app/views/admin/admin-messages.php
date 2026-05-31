@@ -5,8 +5,8 @@
 $page = 'admin-messages';
 $page_title = 'Messages';
 
-if (!isset($_SESSION['admin_logged_in'])) {
-    header('Location: /index.php?route=signin');
+if (!isset($_SESSION['user_id']) || empty($_SESSION['admin_logged_in'])) {
+    header('Location: ' . BASE_URL . '/index.php?route=signin');
     exit;
 }
 
@@ -273,7 +273,9 @@ window.onclick = function(e) { if (e.target === modal) modal.style.display = 'no
 // Auto-refresh (optional, keep from original)
 let lastMessageCount = <?= count($messages) ?>;
 setInterval(() => {
-    fetch('/api-messages.php?action=get-count')
+    fetch('<?= BASE_URL ?>/api-messages.php?action=get-count', {
+      credentials: 'same-origin'
+    })
         .then(r => r.json())
         .then(data => {
             if (data.success && data.messageCount > lastMessageCount) {

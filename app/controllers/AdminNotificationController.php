@@ -16,15 +16,47 @@ if (session_status() === PHP_SESSION_NONE) {
 
 class AdminNotificationController {
 
+    public function __construct() {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        $this->db = Database::getInstance()->getConnection();
+
+        // If a fatal error happens, ensure JSON is returned (prevents '<' HTML breaking JSON.parse)
+        register_shutdown_function(function () {
+            $e = error_get_last();
+            if ($e && in_array($e['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR], true)) {
+                if (!headers_sent()) {
+                    header('Content-Type: application/json');
+                    http_response_code(500);
+                }
+                echo json_encode(['success' => false, 'message' => 'Fatal error']);
+                exit;
+            }
+        });
+    }
 
     private $db;
+
 
     public function __construct() {
         $this->db = Database::getInstance()->getConnection();
     }
 
     private function requireAdmin(): void {
-        if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+        $isAdmin = false;
+
+        // Accept both session styles used across the app.
+        if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true) {
+            $isAdmin = true;
+        }
+
+        if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') {
+            $isAdmin = true;
+        }
+
+        if (!$isAdmin || !isset($_SESSION['user_id'])) {
             http_response_code(401);
             header('Content-Type: application/json');
             echo json_encode(['success' => false, 'message' => 'Unauthorized']);

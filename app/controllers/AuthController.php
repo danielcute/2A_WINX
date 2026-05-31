@@ -71,6 +71,8 @@ if ($user) {
             $_SESSION['user_address'] = $user['address'];
             $_SESSION['user_avatar'] = $user['image'] ?? null;
             $_SESSION['user_role'] = $user['role'];
+            // Backward-compatible role flag used by some admin pages/APIs.
+            $_SESSION['role'] = $user['role'];
             
             if ($user['role'] === 'admin') {
                 $_SESSION['admin_logged_in'] = true;
