@@ -11,11 +11,23 @@
  *   - Get current user profile data
  */
 
-session_start();
-error_reporting(E_ALL);
+// Prevent PHP from outputting HTML errors/warnings that break JSON parsing
 ini_set('display_errors', 0);
+error_reporting(E_ALL);
 
+// Ensure JSON header is always sent
 header('Content-Type: application/json; charset=utf-8');
+
+// Catch fatal errors and return JSON
+register_shutdown_function(function () {
+    $e = error_get_last();
+    if ($e && in_array($e['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR], true)) {
+        if (!headers_sent()) { http_response_code(500); }
+        if (ob_get_length() === 0 || strpos(ob_get_contents(), '{') === false) { ob_clean(); echo json_encode(['success' => false, 'message' => 'Fatal error: ' . $e['message']]); }
+    }
+});
+
+session_start();
 
 // Define constants
 if (!defined('ROOT_PATH')) {
@@ -27,8 +39,8 @@ if (!defined('ROOT_PATH')) {
     }
 }
 
-require_once ROOT_PATH . '/config/database.php';
-require_once ROOT_PATH . '/app/models/User.php';
+require_once ROOT_PATH . '/config/database.php'; // Moved after shutdown function
+require_once ROOT_PATH . '/app/models/User.php'; // Moved after shutdown function
 
 // Require authentication
 if (!isset($_SESSION['user_id'])) {
@@ -338,6 +350,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'message' => 'Failed to update profile',
                 'code' => 'database_error'
             ]);
+        }
+        exit;
+    }
+    
+    // ===== UPLOAD DEFAULT AVATAR =====
+    elseif ($action === 'upload_avatar_default') {
+        $avatar_path = $_POST['avatar_path'] ?? null;
+
+        if (empty($avatar_path)) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Default avatar path is required.']);
+            exit;
+        }
+
+        // Validate path to prevent directory traversal
+        if (strpos($avatar_path, '..') !== false || strpos($avatar_path, '/assets/images/avatars/') === false) {
+             http_response_code(400);
+             echo json_encode(['success' => false, 'message' => 'Invalid default avatar path.']);
+             exit;
+        }
+
+        // Update database
+        $update_result = $userModel->update($userId, ['image' => $avatar_path]);
+
+        if ($update_result) {
+            $_SESSION['user_avatar'] = $avatar_path;
+            echo json_encode([
+                'success' => true,
+                'message' => 'Default avatar updated successfully',
+                'image_url' => $avatar_path,
+                'code' => 'default_avatar_updated'
+            ]);
+        } else {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'Failed to set default avatar in database.']);
         }
         exit;
     }

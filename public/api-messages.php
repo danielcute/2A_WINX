@@ -5,6 +5,22 @@
  * Access: /api-messages.php
  */
 
+// Prevent PHP from outputting HTML errors/warnings that break JSON parsing
+ini_set('display_errors', 0);
+error_reporting(E_ALL);
+
+// Ensure JSON header is always sent
+header('Content-Type: application/json; charset=utf-8');
+
+// Catch fatal errors and return JSON
+register_shutdown_function(function () {
+    $e = error_get_last();
+    if ($e && in_array($e['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR], true)) {
+        if (!headers_sent()) { http_response_code(500); }
+        if (ob_get_length() === 0 || strpos(ob_get_contents(), '{') === false) { ob_clean(); echo json_encode(['success' => false, 'message' => 'Fatal error: ' . $e['message']]); }
+    }
+});
+
 error_reporting(E_ALL);
 ini_set('display_errors', 0);
 
@@ -22,10 +38,8 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-require_once ROOT_PATH . '/config/database.php';
-require_once ROOT_PATH . '/app/controllers/MessagingController.php';
-
-header('Content-Type: application/json');
+require_once ROOT_PATH . '/config/database.php'; // Moved after shutdown function
+require_once ROOT_PATH . '/app/controllers/MessagingController.php'; // Moved after shutdown function
 header('Cache-Control: no-cache, no-store, must-revalidate');
 header('Pragma: no-cache');
 header('Expires: 0');

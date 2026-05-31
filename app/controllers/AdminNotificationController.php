@@ -7,6 +7,25 @@
  * Actions: get_unread, mark_as_read, mark_all_as_read, delete
  */
 
+// Prevent PHP from outputting HTML errors/warnings that break JSON parsing
+ini_set('display_errors', 0);
+error_reporting(E_ALL);
+
+// Catch fatal errors and return JSON
+register_shutdown_function(function () {
+    $e = error_get_last();
+    if ($e && in_array($e['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR], true)) {
+        if (!headers_sent()) { http_response_code(500); }
+        if (ob_get_length() === 0 || strpos(ob_get_contents(), '{') === false) { ob_clean(); echo json_encode(['success' => false, 'message' => 'Fatal error: ' . $e['message']]); }
+    }
+});
+
+ * File: /app/controllers/AdminNotificationController.php
+ *
+ * Handles route: admin-notifications
+ * Actions: get_unread, mark_as_read, mark_all_as_read, delete
+ */
+
 require_once ROOT_PATH . '/config/database.php';
 
 // Ensure session is available for AJAX routes that may bypass index.php session init.
@@ -15,32 +34,11 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 class AdminNotificationController {
-
-    public function __construct() {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-
-        $this->db = Database::getInstance()->getConnection();
-
-        // If a fatal error happens, ensure JSON is returned (prevents '<' HTML breaking JSON.parse)
-        register_shutdown_function(function () {
-            $e = error_get_last();
-            if ($e && in_array($e['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR], true)) {
-                if (!headers_sent()) {
-                    header('Content-Type: application/json');
-                    http_response_code(500);
-                }
-                echo json_encode(['success' => false, 'message' => 'Fatal error']);
-                exit;
-            }
-        });
-    }
-
     private $db;
 
-
     public function __construct() {
+        // Ensure JSON header is always sent for API responses
+        header('Content-Type: application/json; charset=utf-8');
         $this->db = Database::getInstance()->getConnection();
     }
 
