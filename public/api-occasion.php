@@ -7,10 +7,6 @@
  * POST   /api-occasion.php              - Create or update occasion with image
  * DELETE /api-occasion.php              - Delete occasion
  */
-
-ini_set('display_errors', 0);
-error_reporting(E_ALL);
-
 // Prevent PHP from outputting HTML errors/warnings that break JSON parsing
 ini_set('display_errors', 0);
 error_reporting(E_ALL);

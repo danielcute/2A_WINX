@@ -281,8 +281,7 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
 <body>
 <?php include 'admin-nav.php'; ?>
 
-<div class="admin-content-wrapper">
-    <div class="occasions-container">
+    <div class="admin-container">
         <div class="occasions-header">
             <h1 class="occasions-title"><i class="fas fa-calendar-day animated-icon"></i> Manage Occasions</h1>
             <button class="btn btn--primary btn--sm" id="addOccasionBtn">
@@ -419,8 +418,6 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
         </div>
     </div>
 
-</div>
-
 <script>
 const modal = document.getElementById('occasionModal');
 const addOccasionBtn = document.getElementById('addOccasionBtn');
@@ -445,7 +442,7 @@ function editOccasion(id) {
     document.getElementById('modalTitle').textContent = 'Edit Occasion';
     document.getElementById('occasionId').value = id;
 
-    fetch(baseUrl + '/api-occasion.php?id=' + id, {
+    fetch(baseUrl + '/public/api-occasion.php?id=' + id, {
         credentials: 'same-origin'
     })
         .then(response => response.json())
@@ -483,14 +480,13 @@ function editOccasion(id) {
 function deleteOccasion(id) {
     if (!confirm('Are you sure you want to delete this occasion? This will affect all associated packages.')) return;
 
-    fetch(baseUrl + '/api-occasion.php', {
+    fetch(baseUrl + '/public/api-occasion.php', {
         method: 'DELETE',
         headers: {
             'Content-Type': 'application/json',
         },
         credentials: 'same-origin',
-        body: JSON.stringify({ occasion_id: id }),
-        credentials: 'same-origin'
+        body: JSON.stringify({ occasion_id: id })
     })
     .then(response => {
         if (response.status === 401) {
@@ -542,13 +538,12 @@ occasionForm?.addEventListener('submit', (e) => {
     const formData = new FormData(occasionForm);
     const occasion_id = formData.get('occasion_id');
 
-    const url = occasion_id ? baseUrl + '/api-occasion.php?action=update' : baseUrl + '/api-occasion.php';
+    const url = occasion_id ? baseUrl + '/public/api-occasion.php?action=update' : baseUrl + '/public/api-occasion.php';
 
     fetch(url, {
         method: 'POST',
         credentials: 'same-origin',
-        body: formData,
-        credentials: 'same-origin'
+        body: formData
     })
     .then(response => {
         if (!response.ok && response.status === 401) {
