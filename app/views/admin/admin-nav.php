@@ -273,6 +273,7 @@ body {
     left: 0;
     box-shadow: var(--shadow-lg);
     border-right: none;
+    will-change: transform; /* Optimizes GPU rendering for smoother slides */
   }
   
   .admin-sidebar.open {

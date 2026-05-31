@@ -539,7 +539,7 @@ $page_title = 'Manage Wardrobes';
             padding: 10px 12px;
             border: 1px solid #ddd;
             border-radius: 5px;
-            font-size: 0.95rem;
+            font-size: 16px; /* Prevents auto-zoom on mobile devices */
             font-family: inherit;
         }
 
