@@ -30,7 +30,7 @@ $is_localhost = (
 if ($is_localhost || gethostname() === 'DESKTOP' || getenv('ENV') === 'local') {
     // LOCAL DEVELOPMENT (XAMPP)
     define('DB_HOST', 'localhost');
-    define('DB_PORT', 3306);              // Standard XAMPP MySQL port
+    define('DB_PORT', 3306);              // Standard MySQL port
     define('DB_USER', 'root');            // XAMPP default user
     define('DB_PASS', '');                // XAMPP default (no password)
     define('DB_NAME', 'sinta_db');        // Local database name

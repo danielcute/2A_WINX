@@ -441,7 +441,7 @@ async function handleSignin(event) {
     formData.append('email', email);
     formData.append('password', password);
     
-    const response = await fetch('/index.php', {
+    const response = await fetch('index.php', {
       method: 'POST',
       body: formData,
       credentials: 'same-origin'

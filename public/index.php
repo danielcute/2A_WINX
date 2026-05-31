@@ -59,7 +59,7 @@ if ($user) {
             $_SESSION['require_2fa'] = true;
             
             // Redirect to 2FA verification page
-            header('Location: /index.php?route=verify-2fa');
+            header('Location: index.php?route=verify-2fa');
             exit;
         } else {
             // No 2FA - complete login normally
@@ -75,17 +75,17 @@ if ($user) {
             
 if ($user['role'] === 'admin') {
                 $_SESSION['admin_logged_in'] = true;
-                header('Location: /index.php?route=admin-dashboard');
+                header('Location: index.php?route=admin-dashboard');
                 exit;
             } else {
                 $_SESSION['user_logged_in'] = true;
-                header('Location: /index.php?route=homepage');
+                header('Location: index.php?route=homepage');
                 exit;
             }
         }
     } else {
         $_SESSION['login_error'] = 'Invalid email or password';
-        header('Location: /index.php?route=signin');
+        header('Location: index.php?route=signin');
         exit;
     }
 }
@@ -155,7 +155,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     error_log("User created successfully, redirecting to signin page");
                     
                     // Redirect to signin page
-                    header('Location: /index.php?route=signin');
+                    header('Location: index.php?route=signin');
                     exit;
                 } else {
                     $errors[] = 'Registration failed. Please try again.';
@@ -179,7 +179,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         'birthday' => $birthday,
         'address' => $address
     ];
-    header('Location: /index.php?route=signup');
+    header('Location: index.php?route=signup');
     exit;
 }
 

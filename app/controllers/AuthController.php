@@ -29,7 +29,7 @@ class AuthController {
      */
     public function signin() {
         if (isset($_SESSION['user_logged_in']) || isset($_SESSION['admin_logged_in'])) {
-            header('Location: /index.php?route=' . (isset($_SESSION['admin_logged_in']) ? 'admin-dashboard' : 'homepage'));
+            header('Location: index.php?route=' . (isset($_SESSION['admin_logged_in']) ? 'admin-dashboard' : 'homepage'));
             exit;
         }
         
@@ -76,10 +76,10 @@ if ($user) {
             
             if ($user['role'] === 'admin') {
                 $_SESSION['admin_logged_in'] = true;
-                header('Location: /index.php?route=admin-dashboard');
+                header('Location: index.php?route=admin-dashboard');
             } else {
                 $_SESSION['user_logged_in'] = true;
-                header('Location: /index.php?route=homepage');
+                header('Location: index.php?route=homepage');
             }
             exit;
         } else {
@@ -105,7 +105,7 @@ if ($user) {
     public function handleVerify2FA($code) {
         // Must be logged in
         if (!isset($_SESSION['user_id'])) {
-            header('Location: /index.php?route=signin');
+            header('Location: index.php?route=signin');
             exit;
         }
         
@@ -122,7 +122,7 @@ if ($user) {
             unset($_SESSION['pending_2fa_verification']);
             
             $_SESSION['two_fa_success'] = '2FA verification successful! You can now use your authenticator app.';
-            header('Location: /index.php?route=profile&tab=security');
+            header('Location: index.php?route=profile&tab=security');
             exit;
         } else {
             $_SESSION['two_fa_error'] = 'Invalid authentication code. Please try again.';
@@ -135,7 +135,7 @@ if ($user) {
      */
     public function setup2FA() {
         if (!isset($_SESSION['user_id'])) {
-            header('Location: /index.php?route=signin');
+            header('Location: index.php?route=signin');
             exit;
         }
         
@@ -144,7 +144,7 @@ if ($user) {
         // Check if already enabled
         if ($this->userModel->isTwoFactorEnabled($userId)) {
             $_SESSION['two_fa_error'] = 'Two-factor authentication is already enabled.';
-            header('Location: /index.php?route=profile&tab=security');
+            header('Location: index.php?route=profile&tab=security');
             exit;
         }
         
@@ -169,7 +169,7 @@ if ($user) {
      */
     public function enable2FA($code) {
         if (!isset($_SESSION['temp_2fa_secret']) || !isset($_SESSION['user_id'])) {
-            header('Location: /index.php?route=profile&tab=security');
+            header('Location: index.php?route=profile&tab=security');
             exit;
         }
         
@@ -203,7 +203,7 @@ if ($user) {
      */
     public function disable2FA() {
         if (!isset($_SESSION['user_id'])) {
-            header('Location: /index.php?route=signin');
+            header('Location: index.php?route=signin');
             exit;
         }
         
@@ -215,7 +215,7 @@ if ($user) {
             $_SESSION['two_fa_error'] = 'Failed to disable two-factor authentication.';
         }
         
-        header('Location: /index.php?route=profile&tab=security');
+        header('Location: index.php?route=profile&tab=security');
         exit;
     }
     
@@ -224,7 +224,7 @@ if ($user) {
      */
     public function signup() {
         if (isset($_SESSION['user_logged_in']) || isset($_SESSION['admin_logged_in'])) {
-            header('Location: /index.php?route=' . (isset($_SESSION['admin_logged_in']) ? 'admin-dashboard' : 'homepage'));
+            header('Location: index.php?route=' . (isset($_SESSION['admin_logged_in']) ? 'admin-dashboard' : 'homepage'));
             exit;
         }
         
@@ -287,7 +287,7 @@ if ($user) {
         
         if ($userId) {
             $_SESSION['signup_success'] = 'Account created successfully! Please sign in with your credentials.';
-            header('Location: /index.php?route=signin');
+            header('Location: index.php?route=signin');
             exit;
         } else {
             $_SESSION['signup_error'] = 'Failed to create account. Please try again.';
@@ -300,7 +300,7 @@ if ($user) {
      */
     public function logout() {
         session_destroy();
-        header('Location: /index.php?route=landing');
+        header('Location: index.php?route=landing');
         exit;
     }
 }
