@@ -20,12 +20,6 @@ register_shutdown_function(function () {
     }
 });
 
- * File: /app/controllers/AdminNotificationController.php
- *
- * Handles route: admin-notifications
- * Actions: get_unread, mark_as_read, mark_all_as_read, delete
- */
-
 require_once ROOT_PATH . '/config/database.php';
 
 // Ensure session is available for AJAX routes that may bypass index.php session init.

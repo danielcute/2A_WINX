@@ -281,7 +281,8 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
 <body>
 <?php include 'admin-nav.php'; ?>
 
-    <div class="admin-container">
+<div class="admin-content-wrapper">
+    <div class="occasions-container">
         <div class="occasions-header">
             <h1 class="occasions-title"><i class="fas fa-calendar-day animated-icon"></i> Manage Occasions</h1>
             <button class="btn btn--primary btn--sm" id="addOccasionBtn">
@@ -418,6 +419,8 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
         </div>
     </div>
 
+</div>
+
 <script>
 const modal = document.getElementById('occasionModal');
 const addOccasionBtn = document.getElementById('addOccasionBtn');
@@ -486,7 +489,8 @@ function deleteOccasion(id) {
             'Content-Type': 'application/json',
         },
         credentials: 'same-origin',
-        body: JSON.stringify({ occasion_id: id })
+        body: JSON.stringify({ occasion_id: id }),
+        credentials: 'same-origin'
     })
     .then(response => {
         if (response.status === 401) {
@@ -543,7 +547,8 @@ occasionForm?.addEventListener('submit', (e) => {
     fetch(url, {
         method: 'POST',
         credentials: 'same-origin',
-        body: formData
+        body: formData,
+        credentials: 'same-origin'
     })
     .then(response => {
         if (!response.ok && response.status === 401) {
