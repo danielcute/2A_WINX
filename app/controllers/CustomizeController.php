@@ -1,3 +1,12 @@
+var map = L.map('map').setView([14.5995, 120.9842], 13); // Manila default
+L.tileLayer('<https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png>').addTo(map);
+var marker;
+map.on('click', function(e) {
+    if (marker) map.removeLayer(marker);
+    marker = L.marker(e.latlng).addTo(map);
+    document.getElementById('latitude').value = e.latlng.lat;
+    document.getElementById('longitude').value = e.latlng.lng;
+});
 <?php
 if (!defined('ROOT_PATH')) {
     // Check if app folder exists at current level (production) or parent level (local)
@@ -22,12 +31,14 @@ class CustomizeController {
         require_once ROOT_PATH . '/app/models/Customization.php';
         $customization = new Customization();
         $allOptions = $customization->getAllOptions();
+        
+        if (empty($allOptions)) {
+            $allOptions = $customization->getAllOptions(); // Model will attempt seeding
+        }
+
         // Filter to only main categories
         $mainCategories = ['Theme', 'Color Combinations', 'Venue', 'Food', 'Sweets', 'Catering', 'Pastries', 'Beverages', 'Add-ons'];
-        $options = array_filter($allOptions, function($opt) use ($mainCategories) {
-            return in_array($opt['category'], $mainCategories);
-        });
-        $options = array_values($options);
+        $options = $allOptions; // Show all for admin to manage
         include ROOT_PATH . '/app/views/admin/admin-customize.php';
     }
 

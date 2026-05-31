@@ -776,7 +776,7 @@ const notificationTypes = {
   function loadNotifications() {
     if (!notifContainer) return;
 
-    fetch('api-notification.php?action=get_unread&limit=10')
+    fetch('public/api-notification.php?action=get_unread&limit=10')
       .then(response => {
         if (!response.ok) throw new Error('Failed to fetch notifications');
         const contentType = response.headers.get('content-type');
@@ -847,7 +847,7 @@ const notificationTypes = {
 
   // Mark notification as read
   window.markNotificationAsRead = function(notificationId) {
-    fetch('/public/api-notification.php?action=mark_as_read', {
+    fetch('public/api-notification.php?action=mark_as_read', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: 'notification_id=' + notificationId
@@ -863,7 +863,7 @@ const notificationTypes = {
 
   // Delete notification
   window.deleteNotification = function(notificationId) {
-    fetch('/public/api-notification.php?action=delete', {
+    fetch('public/api-notification.php?action=delete', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: 'notification_id=' + notificationId
@@ -880,7 +880,7 @@ const notificationTypes = {
   // Mark all as read
   window.markAllNotificationsAsRead = function(e) {
     e.preventDefault();
-    fetch('/public/api-notification.php?action=mark_all_as_read', { method: 'POST' })
+    fetch('public/api-notification.php?action=mark_all_as_read', { method: 'POST' })
       .then(response => response.json())
       .then(data => {
         if (data.success) {

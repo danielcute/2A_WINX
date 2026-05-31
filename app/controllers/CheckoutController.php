@@ -90,6 +90,8 @@ class CheckoutController {
             $status = 'pending';
             $paymentMethod = trim($data['paymentMethod'] ?? 'bank');
             $paymentDetails = trim($data['paymentDetails'] ?? '{}');
+            $latitude = $data['latitude'] ?? null;
+            $longitude = $data['longitude'] ?? null;
 
             $events = json_encode([
                 'items' => $cartItems,
@@ -117,11 +119,15 @@ class CheckoutController {
                 'venue' => $venue,
                 'theme' => $theme,
                 'total_price' => $totalPrice,
-                'status' => $status,
+                'statu<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+                <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+                s' => $status,
                 'events' => $events,
                 'payment_method' => $paymentMethod,
                 'payment_details' => $paymentDetails,
-                'payment_status' => 'pending'
+                'payment_status' => 'pending',
+                'latitude' => $latitude,
+                'longitude' => $longitude
             ]);
 
             if ($planId) {

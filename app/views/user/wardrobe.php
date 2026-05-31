@@ -1026,6 +1026,9 @@ $wardrobesByCategory = $wardrobeModel->getAllByCategory();
   </div>
 
   <script>
+    // Load Agreement Modal Logic
+    <?php include_once ROOT_PATH . '/public/booking-agreement-modal.php'; ?>
+
     let selectedWardrobes = []; // Array of selected wardrobes for multiple selections
     let allWardrobes = [];
     let currentFilter = 'all';
@@ -1230,6 +1233,16 @@ $wardrobesByCategory = $wardrobeModel->getAllByCategory();
       });
 
       document.getElementById('proceedBtn').addEventListener('click', function() {
+        // First show the agreement modal
+        if (typeof openAgreementModal === 'function') {
+          openAgreementModal();
+        } else {
+          this.handleCheckoutSubmission();
+        }
+      });
+
+      // Original submission logic moved to a helper
+      window.handleCheckoutSubmission = function() {
         if (selectedWardrobes.length > 0) {
           // Get customization items from sessionStorage
           const customizationData = sessionStorage.getItem('customizationItems');
@@ -1270,8 +1283,53 @@ $wardrobesByCategory = $wardrobeModel->getAllByCategory();
           // Clean up session storage
           sessionStorage.removeItem('customizationItems');
         }
-      });
+      };
     }
+var map = L.map('map').setView([14.5995, 120.9842], 13); // Manila default
+L.tileLayer('<https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png>').addTo(map);
+var marker;
+map.on('click', function(e) {
+    if (marker) map.removeLayer(marker);
+    marker = L.marker(e.latlng).addTo(map);
+    document.getElementById('latitude').value = e.latlng.lat;
+    document.getElementById('longitude').value = e.latlng.lng;
+});
+var map = L.map('map').setView([14.5995, 120.9842], 13); // Manila default
+L.tileLayer('<https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png>').addTo(map);
+var marker;
+map.on('click', function(e) {
+    if (marker) map.removeLayer(marker);
+    marker = L.marker(e.latlng).addTo(map);
+    document.getElementById('latitude').value = e.latlng.lat;
+    document.getElementById('longitude').value = e.latlng.lng;
+});
+var map = L.map('map').setView([14.5995, 120.9842], 13); // Manila default
+L.tileLayer('<https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png>').addTo(map);
+var marker;
+map.on('click', function(e) {
+    if (marker) map.removeLayer(marker);
+    marker = L.marker(e.latlng).addTo(map);
+    document.getElementById('latitude').value = e.latlng.lat;
+    document.getElementById('longitude').value = e.latlng.lng;
+});
+var map = L.map('map').setView([14.5995, 120.9842], 13); // Manila default
+L.tileLayer('<https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png>').addTo(map);
+var marker;
+map.on('click', function(e) {
+    if (marker) map.removeLayer(marker);
+    marker = L.marker(e.latlng).addTo(map);
+    document.getElementById('latitude').value = e.latlng.lat;
+    document.getElementById('longitude').value = e.latlng.lng;
+});
+var map = L.map('map').setView([14.5995, 120.9842], 13); // Manila default
+L.tileLayer('<https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png>').addTo(map);
+var marker;
+map.on('click', function(e) {
+    if (marker) map.removeLayer(marker);
+    marker = L.marker(e.latlng).addTo(map);
+    document.getElementById('latitude').value = e.latlng.lat;
+    document.getElementById('longitude').value = e.latlng.lng;
+});
 
     function loadWardrobes() {
       fetch('/api-wardrobe.php?action=getAll')
