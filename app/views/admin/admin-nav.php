@@ -681,7 +681,14 @@ body {
     </div>
   </div>
   <span style="font-size: 0.9rem;">Administrator</span>
-  <div class="admin-avatar" onclick="window.location.href='<?php echo BASE_URL; ?>/index.php?route=admin-profile'"><i class="fas fa-user-cog"></i></div>
+  <div class="admin-avatar" onclick="window.location.href='<?php echo BASE_URL; ?>/index.php?route=admin-profile'">
+    <?php if (!empty($_SESSION['user_avatar'])): ?>
+        <?php $avatar_url = (strpos($_SESSION['user_avatar'], '/') === 0) ? $_SESSION['user_avatar'] : '/' . $_SESSION['user_avatar']; ?>
+        <img src="<?php echo htmlspecialchars($avatar_url); ?>" alt="Admin" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+    <?php else: ?>
+        <span style="font-weight: bold;"><?= substr($_SESSION['user_name'] ?? 'A', 0, 1) ?></span>
+    <?php endif; ?>
+  </div>
 </div>
 </div>
 <div class="admin-content">

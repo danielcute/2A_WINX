@@ -53,7 +53,11 @@ if (session_status() === PHP_SESSION_NONE) {
         <div class="app-nav__profile" id="profileBtn">
           <div class="app-nav__avatar">
             <?php if (!empty($_SESSION['user_avatar'])): ?>
-                <img src="<?php echo htmlspecialchars($_SESSION['user_avatar']); ?>" alt="Profile">
+                <?php 
+                  $avatar_url = $_SESSION['user_avatar'];
+                  if (strpos($avatar_url, 'http') !== 0 && strpos($avatar_url, '/') !== 0) { $avatar_url = '/' . $avatar_url; }
+                ?>
+                <img src="<?php echo htmlspecialchars($avatar_url); ?>" alt="Profile">
             <?php else: ?>
                 <div class="app-nav__avatar-placeholder" style="width:100%; height:100%; background:var(--primary); color:white; display:flex; align-items:center; justify-content:center; font-weight:bold;"><?= substr($_SESSION['user_name'] ?? 'U', 0, 1) ?></div>
             <?php endif; ?>
@@ -90,7 +94,15 @@ if (session_status() === PHP_SESSION_NONE) {
       <span class="mobile-menu__logo-text">Sinta</span>
     </div>
     <div class="mobile-menu__user">
-      <img src="<?php echo htmlspecialchars($_SESSION['user_avatar'] ?? '/assets/img/default-avatar.jpg'); ?>" alt="<?php echo htmlspecialchars($_SESSION['user_name'] ?? 'User'); ?>">
+      <?php if (!empty($_SESSION['user_avatar'])): ?>
+        <?php 
+          $avatar_url = $_SESSION['user_avatar'];
+          if (strpos($avatar_url, 'http') !== 0 && strpos($avatar_url, '/') !== 0) { $avatar_url = '/' . $avatar_url; }
+        ?>
+        <img src="<?php echo htmlspecialchars($avatar_url); ?>" alt="Profile">
+      <?php else: ?>
+        <div class="app-nav__avatar-placeholder" style="width:48px; height:48px; border-radius:50%; background:var(--primary); color:white; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size: 1.2rem; flex-shrink: 0;"><?= substr($_SESSION['user_name'] ?? 'U', 0, 1) ?></div>
+      <?php endif; ?>
       <div>
         <div class="mobile-menu__name"><?php echo htmlspecialchars(($_SESSION['user_name'] ?? 'User') . ' ' . ($_SESSION['user_last_name'] ?? '')); ?></div>
         <div class="mobile-menu__email"><?php echo htmlspecialchars($_SESSION['user_email'] ?? 'email@example.com'); ?></div>
