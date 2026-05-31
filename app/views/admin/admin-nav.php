@@ -272,7 +272,7 @@ body {
     max-width: 80%;
     height: 100vh;
     position: fixed;
-    z-index: 4100;
+    z-index: 1100;
     top: 0;
     left: 0;
     box-shadow: var(--shadow-lg);
@@ -293,7 +293,7 @@ body {
     inset: 0;
     background: rgba(0,0,0,0.4);
     backdrop-filter: blur(4px);
-    z-index: 4050;
+    z-index: 1050;
     opacity: 0;
     visibility: hidden;
     transition: all 0.3s ease;
@@ -306,7 +306,7 @@ body {
 
   .admin-main {
     margin-left: 0;
-    padding: calc(70px + 1.5rem) 1rem 2rem;
+    padding: calc(70px + 2rem) 1rem 2rem;
     min-height: calc(100vh - 60px);
     width: 100%;
     box-sizing: border-box;
@@ -317,7 +317,7 @@ body {
     top: 0;
     left: 0;
     right: 0;
-    z-index: 4000;
+    z-index: 1000;
     border-radius: 0;
     margin-bottom: 0;
     background: rgba(255, 255, 255, 0.8);

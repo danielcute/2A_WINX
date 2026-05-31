@@ -125,7 +125,7 @@ $stats = $bookingModel->getStats();
         .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem; }
         .stat-card { background: white; border-radius: 20px; padding: 1.5rem; text-align: center; border: 2px solid #E2D9C8; transition: all 0.3s ease; }
         .stat-card:hover { border-color: #8A7650; box-shadow: 0 10px 30px rgba(138, 118, 80, 0.15); }
-        .stat-card h3 { font-size: 1.8rem; margin: 0 0 0.5rem; color: #8A7650; font-weight: 700; }
+        .stat-card h3 { font-size: 1.rem; margin: 0 0 0.5rem; color: #8A7650; font-weight: 700; }
         .stat-card p { color: #8B7355; margin: 0; font-weight: 600; }
         .table-wrapper { overflow-x: auto; border-radius: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); max-width: 100%; }
         .admin-table { width: 100%; border-collapse: collapse; background: white; min-width: 1100px; }
@@ -161,6 +161,11 @@ $stats = $bookingModel->getStats();
 </head>
 <body>
 <?php include 'admin-nav.php'; ?>
+
+<div class="admin-container">
+    <div class="bookings-header">
+        <h1><i class="fas fa-calendar-check animated-icon"></i> Booking <em>Management</em></h1>
+    </div>
 
     <div class="stats-grid">
         <div class="stat-card">
@@ -265,6 +270,7 @@ $stats = $bookingModel->getStats();
         </tbody>
     </table>
     </div>
+</div>
 </div>
 
 <script>
