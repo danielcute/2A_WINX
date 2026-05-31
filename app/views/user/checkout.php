@@ -1,5 +1,7 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 $page = 'checkout';
 
 // Include payment modal component
@@ -80,8 +82,8 @@ $depositRequired = round($cartTotal * 0.5);
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600&family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/assets/css/global.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css' rel='stylesheet' />
     <style>
         /* FullCalendar Customization */
@@ -692,8 +694,8 @@ $depositRequired = round($cartTotal * 0.5);
                 </div>
                 <div class="form-group full-width">
                     <label>Venue / Location</label>
-                    <input type="text" id="venueLocation" placeholder="Venue name or address" value="">
-                    <div id="map" style="height: 300px; border-radius: 12px; margin-top: 10px; border: 1.5px solid var(--border); z-index: 1;"></div>
+                    <input type="text" id="venueLocation" placeholder="Venue name or address" value="" required>
+                    <div id="map" style="height: 350px; width: 100%; border-radius: 12px; margin-top: 10px; border: 2px solid var(--primary); z-index: 10;"></div>
                     <input type="hidden" id="latitude" name="latitude">
                     <input type="hidden" id="longitude" name="longitude">
                 </div>
@@ -1229,7 +1231,7 @@ async function checkAvailabilityAndShowTimes(selectedDate) {
     const timeSlots = generateTimeSlots();
     
     try {
-        const apiUrl = `api-calendar.php?action=getDateBookings&date=${selectedDate}`;
+        const apiUrl = `public/api-calendar.php?action=getDateBookings&date=${selectedDate}`;
         console.log('Fetching bookings from:', apiUrl);
         
         const response = await fetch(apiUrl);
@@ -1565,7 +1567,7 @@ function confirmBooking() {
         latitude: document.getElementById('latitude')?.value,
         longitude: document.getElementById('longitude')?.value,
         paymentMethod: paymentDetails.method,
-        paymentDetails: JSON.stringify(paymentDetails.data),
+        paymentDetails: paymentDetails.data,
         cartItems: <?= json_encode($cartItems) ?>,
         subtotal: <?= $cartSubtotal ?>,
         serviceFee: <?= $serviceFee ?>,
@@ -1573,7 +1575,13 @@ function confirmBooking() {
         deposit: <?= $depositRequired ?>
     };
 
-    fetch('/index.php?route=checkout-submit', {
+    // Redirect to Payment Gateway flow
+    if (typeof openPaymentModal === 'function') {
+        openPaymentModal(bookingData);
+        return;
+    }
+
+    fetch('index.php?route=checkout-submit', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'

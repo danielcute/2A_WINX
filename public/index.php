@@ -583,7 +583,7 @@ switch($route) {
         include VIEW_PATH . '/user/event-detail.php';
         break;
     case 'messages':
-        if (!isset($_SESSION['user_logged_in']) || $_SESSION['user_logged_in'] !== true) {
+        if (!isset($_SESSION['user_id'])) {
             header('Location: index.php?route=signin');
             exit;
         }

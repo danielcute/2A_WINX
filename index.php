@@ -86,6 +86,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             $_SESSION['role'] = $user['role'];
             if ($user['role'] === 'admin') {
                 $_SESSION['admin_logged_in'] = true;
+            } else {
+                $_SESSION['user_logged_in'] = true;
             }
             
             // Redirect to appropriate dashboard

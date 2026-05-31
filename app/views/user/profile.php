@@ -134,8 +134,8 @@ $avatar_path = !empty($user['image']) ? $user['image'] : '/assets/img/default-av
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Profile — Sinta</title>
     <!-- Fonts & Icons -->
@@ -809,10 +809,10 @@ $avatar_path = !empty($user['image']) ? $user['image'] : '/assets/img/default-av
         </form>
         
         <div class="default-avatars">
-            <img src="/assets/images/aelarie.jpg" class="default-avatar" onclick="selectDefaultAvatar('/assets/images/avatars/default-avatar.jpg', event)">
-            <img src="/assets/images/elarie.jpg" class="default-avatar" onclick="selectDefaultAvatar('/assets/images/avatars/avatar-2.jpg', event)">
-            <img src="/assets/images/elarie.jpg" class="default-avatar" onclick="selectDefaultAvatar('/assets/images/avatars/avatar-3.jpg', event)">
-            <img src="/assets/images/elarie.jpg" class="default-avatar" onclick="selectDefaultAvatar('/assets/images/avatars/avatar-4.jpg', event)">
+            <img src="assets/img/default-avatar.jpg" class="default-avatar" onclick="selectDefaultAvatar('assets/img/default-avatar.jpg', event)">
+            <img src="assets/img/default-avatar.jpg" class="default-avatar" onclick="selectDefaultAvatar('assets/img/default-avatar.jpg', event)">
+            <img src="assets/img/default-avatar.jpg" class="default-avatar" onclick="selectDefaultAvatar('assets/img/default-avatar.jpg', event)">
+            <img src="assets/img/default-avatar.jpg" class="default-avatar" onclick="selectDefaultAvatar('assets/img/default-avatar.jpg', event)">
         </div>
         
         <div class="modal-buttons">
@@ -844,6 +844,7 @@ async function previewImage(input) {
             avatarPreview.src = e.target.result;
         };
         reader.readAsDataURL(input.files[0]);
+    }
 }
 
 async function handleAvatarUpload() {
@@ -870,7 +871,7 @@ async function handleAvatarUpload() {
 
         if (data.success) {
                 showToast('Profile picture updated!', 'success');
-                document.querySelectorAll('.app-nav__avatar img, .app-nav__avatar-placeholder, #profileAvatar, #avatarPreview').forEach(el => { if(el.tagName === 'IMG') el.src = data.image_url + '?t=' + Date.now(); else location.reload(); });
+                document.querySelectorAll('.app-nav__avatar img, .app-nav__avatar-placeholder, #profileAvatar, #avatarPreview').forEach(el => { if(el.tagName === 'IMG') el.src = data.image_url + '?t=' + Date.now(); else { location.reload(); } });
             profileAvatar.src = data.image_url;
             closeAvatarModal();
         } else {
@@ -902,7 +903,7 @@ function selectDefaultAvatar(src, event) {
     formData.append('action', 'upload_avatar_default'); // New action for default avatars
     formData.append('avatar_path', src);
 
-    fetch('api-user-profile.php', {
+    fetch('public/api-user-profile.php', {
         method: 'POST',
         body: formData
     })

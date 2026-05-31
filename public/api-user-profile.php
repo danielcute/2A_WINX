@@ -94,7 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // ===== UPLOAD AVATAR WITH CROPPING =====
     if ($action === 'upload_avatar' && isset($_FILES['avatar'])) {
         $file = $_FILES['avatar'];
-        $upload_dir = ROOT_PATH . '/public/uploads/avatars/'; // Ensure path matches web root
+        $upload_dir = ROOT_PATH . '/uploads/avatars/'; 
         
         // Create upload directory if it doesn't exist
         if (!file_exists($upload_dir)) {
@@ -221,7 +221,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Generate unique filename
             $filename = 'avatar_' . $userId . '_' . time() . '.' . $ext;
             $file_path = $upload_dir . $filename;
-            $relative_path = '/uploads/avatars/' . $filename;
+            $relative_path = 'uploads/avatars/' . $filename;
             
             // Save cropped image
             switch ($ext) {

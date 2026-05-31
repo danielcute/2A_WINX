@@ -1,5 +1,8 @@
 <?php
 // Navigation for user pages
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 ?>
 <nav class="app-nav" id="mainNav">
   <div class="app-nav__inner">
@@ -49,7 +52,7 @@
       <div class="app-nav__profile-wrapper" style="position: relative;">
         <div class="app-nav__profile" id="profileBtn">
           <div class="app-nav__avatar">
-t             <?php if (!empty($_SESSION['user_avatar'])): ?>
+            <?php if (!empty($_SESSION['user_avatar'])): ?>
                 <img src="<?php echo htmlspecialchars($_SESSION['user_avatar']); ?>" alt="Profile">
             <?php else: ?>
                 <div class="app-nav__avatar-placeholder" style="width:100%; height:100%; background:var(--primary); color:white; display:flex; align-items:center; justify-content:center; font-weight:bold;"><?= substr($_SESSION['user_name'] ?? 'U', 0, 1) ?></div>
@@ -780,7 +783,7 @@ const notificationTypes = {
   function loadNotifications() {
     if (!notifContainer) return;
 
-    fetch('api-notification.php?action=get_unread&limit=10')
+    fetch('public/api-notification.php?action=get_unread&limit=10')
       .then(response => {
         if (!response.ok) throw new Error('Failed to fetch notifications');
         const contentType = response.headers.get('content-type');
@@ -851,7 +854,7 @@ const notificationTypes = {
 
   // Mark notification as read
   window.markNotificationAsRead = function(notificationId) {
-    fetch('api-notification.php?action=mark_as_read', {
+    fetch('public/api-notification.php?action=mark_as_read', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: 'notification_id=' + notificationId
@@ -867,7 +870,7 @@ const notificationTypes = {
 
   // Delete notification
   window.deleteNotification = function(notificationId) {
-    fetch('api-notification.php?action=delete', {
+    fetch('public/api-notification.php?action=delete', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: 'notification_id=' + notificationId
@@ -884,7 +887,7 @@ const notificationTypes = {
   // Mark all as read
   window.markAllNotificationsAsRead = function(e) {
     e.preventDefault();
-    fetch('api-notification.php?action=mark_all_as_read', { method: 'POST' })
+    fetch('public/api-notification.php?action=mark_all_as_read', { method: 'POST' })
       .then(response => response.json())
       .then(data => {
         if (data.success) {
