@@ -221,7 +221,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Generate unique filename
             $filename = 'avatar_' . $userId . '_' . time() . '.' . $ext;
             $file_path = $upload_dir . $filename;
-            $relative_path = '/public/uploads/avatars/' . $filename;
+            $relative_path = '/uploads/avatars/' . $filename;
             
             // Save cropped image
             switch ($ext) {

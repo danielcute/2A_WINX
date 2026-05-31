@@ -272,8 +272,7 @@ body {
     top: 0;
     left: 0;
     box-shadow: var(--shadow-lg);
-    border-right: none;
-    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), visibility 0s linear 0.4s;
+    border-right: none  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), visibility 0s linear 0.4s;
     will-change: transform;
     visibility: hidden;
   }

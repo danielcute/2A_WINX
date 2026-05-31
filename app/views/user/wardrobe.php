@@ -1,5 +1,7 @@
 <?php 
-session_start(); 
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 $page = 'wardrobe';
 
 // Load wardrobe options from database
@@ -1285,54 +1287,23 @@ $wardrobesByCategory = $wardrobeModel->getAllByCategory();
         }
       };
     }
-var map = L.map('map').setView([14.5995, 120.9842], 13); // Manila default
-L.tileLayer('<https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png>').addTo(map);
-var marker;
-map.on('click', function(e) {
-    if (marker) map.removeLayer(marker);
-    marker = L.marker(e.latlng).addTo(map);
-    document.getElementById('latitude').value = e.latlng.lat;
-    document.getElementById('longitude').value = e.latlng.lng;
-});
-var map = L.map('map').setView([14.5995, 120.9842], 13); // Manila default
-L.tileLayer('<https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png>').addTo(map);
-var marker;
-map.on('click', function(e) {
-    if (marker) map.removeLayer(marker);
-    marker = L.marker(e.latlng).addTo(map);
-    document.getElementById('latitude').value = e.latlng.lat;
-    document.getElementById('longitude').value = e.latlng.lng;
-});
-var map = L.map('map').setView([14.5995, 120.9842], 13); // Manila default
-L.tileLayer('<https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png>').addTo(map);
-var marker;
-map.on('click', function(e) {
-    if (marker) map.removeLayer(marker);
-    marker = L.marker(e.latlng).addTo(map);
-    document.getElementById('latitude').value = e.latlng.lat;
-    document.getElementById('longitude').value = e.latlng.lng;
-});
-var map = L.map('map').setView([14.5995, 120.9842], 13); // Manila default
-L.tileLayer('<https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png>').addTo(map);
-var marker;
-map.on('click', function(e) {
-    if (marker) map.removeLayer(marker);
-    marker = L.marker(e.latlng).addTo(map);
-    document.getElementById('latitude').value = e.latlng.lat;
-    document.getElementById('longitude').value = e.latlng.lng;
-});
-var map = L.map('map').setView([14.5995, 120.9842], 13); // Manila default
-L.tileLayer('<https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png>').addTo(map);
-var marker;
-map.on('click', function(e) {
-    if (marker) map.removeLayer(marker);
-    marker = L.marker(e.latlng).addTo(map);
-    document.getElementById('latitude').value = e.latlng.lat;
-    document.getElementById('longitude').value = e.latlng.lng;
-});
+
+    function initializeMap() {
+        const mapEl = document.getElementById('map');
+        if (!mapEl) return;
+        const map = L.map('map').setView([14.5995, 120.9842], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        let marker;
+        map.on('click', function(e) {
+            if (marker) map.removeLayer(marker);
+            marker = L.marker(e.latlng).addTo(map);
+            document.getElementById('latitude').value = e.latlng.lat;
+            document.getElementById('longitude').value = e.latlng.lng;
+        });
+    }
 
     function loadWardrobes() {
-      fetch('/api-wardrobe.php?action=getAll')
+      fetch('api-wardrobe.php?action=getAll')
         .then(response => {
           if (!response.ok) throw new Error('Server error: ' + response.status);
           const contentType = response.headers.get('content-type');
