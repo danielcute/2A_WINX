@@ -84,6 +84,7 @@ try {
             $data = $wardrobe->getCategories();
             echo json_encode(['success' => true, 'data' => $data]);
             break;
+
             
         case 'get':
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
