@@ -3,22 +3,22 @@
 ?>
 <nav class="app-nav" id="mainNav">
   <div class="app-nav__inner">
-    <a href="/index.php?route=homepage" class="app-nav__logo">
+    <a href="index.php?route=homepage" class="app-nav__logo">
       <img src="/assets/img/logo.png" alt="Sinta Logo" class="nav__logo-img" onerror="this.src='https://placehold.co/32x32/8A7650/white?text=S'">
       <span class="nav__logo-text">Sinta</span>
     </a>
 
     <div class="app-nav__links">
-      <a href="/index.php?route=homepage" class="app-nav__link <?= (isset($page) && $page === 'homepage') ? 'active' : '' ?>">
+      <a href="index.php?route=homepage" class="app-nav__link <?= (isset($page) && $page === 'homepage') ? 'active' : '' ?>">
         <i class="fas fa-home"></i><span>Home</span>
       </a>
-      <a href="/index.php?route=plans" class="app-nav__link <?= (isset($page) && $page === 'plans') ? 'active' : '' ?>">
+      <a href="index.php?route=plans" class="app-nav__link <?= (isset($page) && $page === 'plans') ? 'active' : '' ?>">
         <i class="fas fa-calendar-check"></i><span>Plans</span>
       </a>
-      <a href="/index.php?route=occasions" class="app-nav__link <?= (isset($page) && $page === 'occasions') ? 'active' : '' ?>">
+      <a href="index.php?route=occasions" class="app-nav__link <?= (isset($page) && $page === 'occasions') ? 'active' : '' ?>">
         <i class="fas fa-gift"></i><span>Occasions</span>
       </a>
-      <a href="/index.php?route=messages" class="app-nav__link <?= (isset($page) && $page === 'messages') ? 'active' : '' ?>">
+      <a href="index.php?route=messages" class="app-nav__link <?= (isset($page) && $page === 'messages') ? 'active' : '' ?>">
         <i class="fas fa-comment"></i><span>Messages</span>
       </a>
     </div>
@@ -49,7 +49,7 @@
       <div class="app-nav__profile-wrapper" style="position: relative;">
         <div class="app-nav__profile" id="profileBtn">
           <div class="app-nav__avatar">
-            <?php if (!empty($_SESSION['user_avatar'])): ?>
+t             <?php if (!empty($_SESSION['user_avatar'])): ?>
                 <img src="<?php echo htmlspecialchars($_SESSION['user_avatar']); ?>" alt="Profile">
             <?php else: ?>
                 <div class="app-nav__avatar-placeholder" style="width:100%; height:100%; background:var(--primary); color:white; display:flex; align-items:center; justify-content:center; font-weight:bold;"><?= substr($_SESSION['user_name'] ?? 'U', 0, 1) ?></div>
@@ -63,7 +63,7 @@
             <div class="profile-name"><?php echo htmlspecialchars(($_SESSION['user_name'] ?? 'User') . ' ' . ($_SESSION['user_last_name'] ?? '')); ?></div>
             <div class="profile-email-nav"><?php echo htmlspecialchars($_SESSION['user_email'] ?? 'email@example.com'); ?></div>
           </div>
-          <a href="/index.php?route=profile" class="profile-dropdown__item">
+          <a href="index.php?route=profile" class="profile-dropdown__item">
             <i class="fas fa-user"></i> Profile
           </a>
           <hr class="profile-dropdown__divider">
@@ -94,11 +94,11 @@
       </div>
     </div>
     <div class="mobile-menu__links">
-      <a href="/index.php?route=homepage" class="mobile-menu__link">Home</a>
-      <a href="/index.php?route=plans" class="mobile-menu__link">Plans</a>
-      <a href="/index.php?route=occasions" class="mobile-menu__link">Occasions</a>
-      <a href="/index.php?route=messages" class="mobile-menu__link">Messages</a>
-      <a href="/index.php?route=profile" class="mobile-menu__link">Profile</a>
+      <a href="index.php?route=homepage" class="mobile-menu__link">Home</a>
+      <a href="index.php?route=plans" class="mobile-menu__link">Plans</a>
+      <a href="index.php?route=occasions" class="mobile-menu__link">Occasions</a>
+      <a href="index.php?route=messages" class="mobile-menu__link">Messages</a>
+      <a href="index.php?route=profile" class="mobile-menu__link">Profile</a>
     </div>
     <div class="mobile-menu__footer">
       <a href="#" class="mobile-menu__logout" onclick="openLogoutModal(event);">
@@ -851,7 +851,7 @@ const notificationTypes = {
 
   // Mark notification as read
   window.markNotificationAsRead = function(notificationId) {
-    fetch('public/api-notification.php?action=mark_as_read', {
+    fetch('api-notification.php?action=mark_as_read', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: 'notification_id=' + notificationId
@@ -867,7 +867,7 @@ const notificationTypes = {
 
   // Delete notification
   window.deleteNotification = function(notificationId) {
-    fetch('public/api-notification.php?action=delete', {
+    fetch('api-notification.php?action=delete', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: 'notification_id=' + notificationId
@@ -884,7 +884,7 @@ const notificationTypes = {
   // Mark all as read
   window.markAllNotificationsAsRead = function(e) {
     e.preventDefault();
-    fetch('public/api-notification.php?action=mark_all_as_read', { method: 'POST' })
+    fetch('api-notification.php?action=mark_all_as_read', { method: 'POST' })
       .then(response => response.json())
       .then(data => {
         if (data.success) {

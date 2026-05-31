@@ -100,7 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!file_exists($upload_dir)) {
             mkdir($upload_dir, 0755, true);
         }
-        
+
         // Validation
         $allowed_types = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'image/webp'];
         $max_size = 5 * 1024 * 1024; // 5MB max

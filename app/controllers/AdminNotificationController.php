@@ -100,7 +100,7 @@ class AdminNotificationController {
         }
 
         $stmt = $this->db->prepare(
-            "SELECT id, type, title, message, is_read, created_at
+            "SELECT notification_id as id, type, title, message, is_read, created_at
              FROM notifications_tbl
              WHERE user_id = ? AND is_read = 0
              ORDER BY created_at DESC
@@ -138,7 +138,7 @@ class AdminNotificationController {
 
         $stmt = $this->db->prepare(
             "UPDATE notifications_tbl SET is_read = 1
-             WHERE id = ? AND user_id = ?"
+             WHERE notification_id = ? AND user_id = ?"
         );
 
         if (!$stmt) {
@@ -179,7 +179,7 @@ class AdminNotificationController {
         }
 
         $stmt = $this->db->prepare(
-            "DELETE FROM notifications_tbl WHERE id = ? AND user_id = ?"
+            "DELETE FROM notifications_tbl WHERE notification_id = ? AND user_id = ?"
         );
 
         if (!$stmt) {
