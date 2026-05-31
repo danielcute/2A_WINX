@@ -512,7 +512,7 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
                         <?php if (isset($occasion['image']) && $occasion['image']): ?>
                             <img id="occImg_<?= $occasion['occasion_id'] ?>" alt="<?= htmlspecialchars($occasion['events']) ?>" style="display: none;">
                             <script>
-                                fetch('/api-occasion.php?image=<?= $occasion['occasion_id'] ?>')
+fetch('<?= BASE_URL ?>/api-occasion.php?image=<?= $occasion['occasion_id'] ?>')
                                     .then(res => res.json())
                                     .then(data => {
                                         if (data.success && data.image) {
@@ -639,7 +639,7 @@ function editOccasion(id) {
     document.getElementById('occasionId').value = id;
     
     // Fetch occasion data via AJAX
-    fetch('/api-occasion.php?id=' + id)
+fetch('<?= BASE_URL ?>/api-occasion.php?id=' + id)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
