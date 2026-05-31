@@ -206,6 +206,12 @@ $page_title = 'Manage Customizations';
             margin-bottom: 2rem;
         }
 
+        @media (max-width: 600px) {
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
         /* Option Card */
         .option-card {
             background: white;
@@ -1490,5 +1496,3 @@ $page_title = 'Manage Customizations';
     </script>
 </body>
 <?php include 'admin-footer.php'; ?>
-
-

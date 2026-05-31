@@ -265,15 +265,16 @@ body {
   .admin-sidebar {
     transform: translateX(-100%);
     width: 280px;
-    max-width: 85%;
+    max-width: 80%;
     height: 100vh;
     position: fixed;
-    z-index: 1000;
+    z-index: 2100;
     top: 0;
     left: 0;
     box-shadow: var(--shadow-lg);
     border-right: none;
-    will-change: transform; /* Optimizes GPU rendering for smoother slides */
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: transform;
   }
   
   .admin-sidebar.open {
@@ -287,11 +288,12 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0,0,0,0.5);
+    background: rgba(0,0,0,0.3);
+    backdrop-filter: blur(4px);
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.3s;
-    z-index: -1;
+    z-index: 2050;
   }
   
   .admin-sidebar.open::before {
@@ -301,16 +303,24 @@ body {
 
   .admin-main {
     margin-left: 0;
-    padding: 0.8rem;
+    padding: calc(70px + 1rem) 1rem 2rem;
     min-height: calc(100vh - 60px);
   }
   
   .admin-topbar {
-    padding: 0.8rem;
-    margin-bottom: 1rem;
-    border-radius: var(--radius-sm);
-    flex-wrap: wrap;
-    gap: 0.8rem;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 2000;
+    border-radius: 0;
+    margin-bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(15px) saturate(180%);
+    -webkit-backdrop-filter: blur(15px) saturate(180%);
+    border-bottom: 1px solid var(--gray-light);
+    padding: 0.75rem 1rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
   }
   
   .admin-sidebar__header {

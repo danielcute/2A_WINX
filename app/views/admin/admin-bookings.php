@@ -205,14 +205,14 @@ $stats = $bookingModel->getStats();
             <?php else: ?>
                 <?php foreach ($bookings as $book): ?>
                     <tr id="booking-row-<?= $book['checkout_id'] ?>">
-                        <td><?= $book['checkout_id'] ?></td>
-                        <td><?= htmlspecialchars($book['first_name'] . ' ' . ($book['last_name'] ?? '')) ?></td>
-                        <td title="<?= htmlspecialchars($book['email'] ?? 'N/A') ?>" style="cursor: help;"><?= substr(htmlspecialchars($book['email'] ?? 'N/A'), 0, 18) ?><?= strlen($book['email'] ?? '') > 18 ? '...' : '' ?></td>
-                        <td title="<?= htmlspecialchars($book['event_name'] ?? 'Custom Event') ?>" style="cursor: help;"><?= substr(htmlspecialchars($book['event_name'] ?? 'Custom Event'), 0, 20) ?><?= strlen($book['event_name'] ?? '') > 20 ? '...' : '' ?></td>
-                        <td><?= !empty($book['event_date']) ? date('M d, Y', strtotime($book['event_date'])) : 'TBD' ?></td>
-                        <td><?= number_format($book['total_amount'], 0) ?></td>
-                        <td><?= number_format($book['total_paid'] ?? 0, 0) ?></td>
-                        <td>
+                        <td data-label="ID"><?= $book['checkout_id'] ?></td>
+                        <td data-label="Customer"><?= htmlspecialchars($book['first_name'] . ' ' . ($book['last_name'] ?? '')) ?></td>
+                        <td data-label="Email" title="<?= htmlspecialchars($book['email'] ?? 'N/A') ?>"><?= htmlspecialchars($book['email'] ?? 'N/A') ?></td>
+                        <td data-label="Event" title="<?= htmlspecialchars($book['event_name'] ?? 'Custom Event') ?>"><?= htmlspecialchars($book['event_name'] ?? 'Custom Event') ?></td>
+                        <td data-label="Date"><?= !empty($book['event_date']) ? date('M d, Y', strtotime($book['event_date'])) : 'TBD' ?></td>
+                        <td data-label="Total">₱<?= number_format($book['total_amount'], 0) ?></td>
+                        <td data-label="Paid">₱<?= number_format($book['total_paid'] ?? 0, 0) ?></td>
+                        <td data-label="Payment">
                             <?php 
                                 $paymentPercent = ($book['total_amount'] > 0) ? round(($book['total_paid'] ?? 0) / $book['total_amount'] * 100) : 0;
                                 if ($paymentPercent == 100) {
