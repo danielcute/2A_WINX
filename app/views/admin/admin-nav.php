@@ -327,6 +327,19 @@ body {
     height: 76px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.03);
   }
+
+  .admin-mobile-toggle {
+    display: flex;
+    position: fixed;
+    top: 18px;
+    left: 15px;
+    z-index: 3100;
+    background: var(--gold);
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 8px;
+  }
   
   .admin-sidebar__header {
     padding: 1rem;
@@ -683,7 +696,7 @@ body {
   <span style="font-size: 0.9rem;">Administrator</span>
   <div class="admin-avatar" onclick="window.location.href='<?php echo BASE_URL; ?>/index.php?route=admin-profile'">
     <?php if (!empty($_SESSION['user_avatar'])): ?>
-        <?php $avatar_url = (strpos($_SESSION['user_avatar'], '/') === 0) ? $_SESSION['user_avatar'] : '/' . $_SESSION['user_avatar']; ?>
+        <?php $avatar_url = (strpos($_SESSION['user_avatar'], 'http') === 0) ? $_SESSION['user_avatar'] : BASE_URL . $_SESSION['user_avatar']; ?>
         <img src="<?php echo htmlspecialchars($avatar_url); ?>" alt="Admin" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
     <?php else: ?>
         <span style="font-weight: bold;"><?= substr($_SESSION['user_name'] ?? 'A', 0, 1) ?></span>

@@ -150,7 +150,7 @@
 </div>
 
 <!-- Hidden form to submit booking data after agreement acceptance -->
-<form id="bookingForm" method="POST" action="index.php?route=checkout-submit" style="display: none;">
+<form id="bookingForm" style="display: none;">
     <input type="hidden" name="eventName" id="bookingEventName">
     <input type="hidden" name="eventDate" id="bookingEventDate">
     <input type="hidden" name="eventTime" id="bookingEventTime">

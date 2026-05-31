@@ -432,7 +432,7 @@ document.addEventListener('DOMContentLoaded', function() {
         dateClick: function(info) {
             console.log('Date clicked:', info.dateStr);
             // Load weather when a day is clicked
-            loadWeather(info.dateStr);
+            fetchWeatherForDate(info.dateStr);
         },
         events: function(info, successCallback, failureCallback) {
             console.log('Fetching calendar events...');
@@ -459,7 +459,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const eventDate = event.start ? event.start.toISOString().split('T')[0] : null;
             console.log('Event date:', eventDate);
             if (eventDate) {
-                loadWeather(eventDate);
+                fetchWeatherForDate(eventDate);
             }
             
             let detailsHTML = `
