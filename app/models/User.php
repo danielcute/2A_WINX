@@ -7,7 +7,9 @@ if (!defined('ROOT_PATH')) {
     define('ROOT_PATH', dirname(dirname(__DIR__)));
 }
 require_once ROOT_PATH . '/config/database.php';
-require_once ROOT_PATH . '/vendor/autoload.php';
+if (file_exists(ROOT_PATH . '/vendor/autoload.php')) {
+    require_once ROOT_PATH . '/vendor/autoload.php';
+}
 
 use PragmaRX\Google2FA\Google2FA;
 
@@ -251,6 +253,10 @@ class User {
      * Generate a new 2FA secret for user
      */
     public function generateTwoFactorSecret() {
+        if (!class_exists('PragmaRX\Google2FA\Google2FA')) {
+            error_log("SINTA Warning: 2FA library missing. Secret generation skipped.");
+            return null;
+        }
         $google2fa = new Google2FA();
         return $google2fa->generateSecretKey(32);
     }

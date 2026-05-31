@@ -189,11 +189,16 @@ $twoFactorEnabled = $userModel->isTwoFactorEnabled($admin_data['id']);
 // Generate QR code for 2FA setup
 $qrCodeUrl = '';
 if (!$twoFactorEnabled) {
-    $secret = $_SESSION['temp_2fa_secret'] ?? $userModel->generateTwoFactorSecret();
+    $secret = $_SESSION['temp_2fa_secret'] ?? null;
+    if (!$secret) {
+        $secret = $userModel->generateTwoFactorSecret();
+    }
     $_SESSION['temp_2fa_secret'] = $secret;
     $email = $admin_data['email'];
-    $otpauthUrl = 'otpauth://totp/' . urlencode('Sinta Admin:' . $email) . '?secret=' . $secret . '&issuer=Sinta';
-    $qrCodeUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' . urlencode($otpauthUrl);
+    if ($secret) {
+        $otpauthUrl = 'otpauth://totp/' . urlencode('Sinta Admin:' . $email) . '?secret=' . $secret . '&issuer=Sinta';
+        $qrCodeUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' . urlencode($otpauthUrl);
+    }
 }
 
 // Check if avatar exists, otherwise use default
@@ -313,7 +318,7 @@ $avatar_path = !empty($admin_data['image']) ? $admin_data['image'] : '/assets/im
 </head>
 <body>
 
-<?php include __DIR__ . '/admin-nav.php'; ?>
+<?php include VIEW_PATH . '/admin/admin-nav.php'; ?>
 
 <div class="app-shell">
     <main class="profile-main">
