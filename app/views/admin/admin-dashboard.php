@@ -50,16 +50,16 @@ if ($recent_bookings && $recent_bookings->num_rows > 0) {
     <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css' rel='stylesheet' />
     <style>
         /* Your existing dashboard specific styles (stats-grid, etc.) */
-        .dashboard-container { width: 100%; padding: 1.5rem; }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem; }
+        .dashboard-container { width: 100%; padding: 1rem; box-sizing: border-box; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
         .stat-card { background: white; border: 2px solid var(--border); border-radius: 24px; padding: 1.8rem; transition: all 0.3s; box-shadow: var(--shadow-sm); }
         .stat-card:hover { border-color: var(--primary); transform: translateY(-5px); box-shadow: var(--shadow-md); }
         .stat-card h3 { font-size: 2.2rem; margin: 0; color: var(--primary); font-weight: 800; font-family: var(--sans); }
         .stat-card p { color: var(--text-secondary); font-weight: 600; margin-top: 0.4rem; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; }
         
-        .quick-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin: 2rem 0; }
+        .quick-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.75rem; margin: 1.5rem 0; }
         .action-btn { background: white; border: 2px solid #E2D9C8; border-radius: 15px; padding: 1.25rem 1rem; text-align: center; text-decoration: none; color: #2C2820; transition: all 0.3s; font-size: 0.9rem; font-weight: 600; }
-        .action-btn:hover { border-color: #8A7650; transform: translateY(-3px); }
+        .action-btn:hover { border-color: #8A7650; transform: translateY(-2px); box-shadow: var(--shadow-sm); }
         
         /* Calendar Styles */
         .event-calendar { background: white; border-radius: 20px; padding: 1.5rem; margin-bottom: 2rem; border: 1px solid #E2D9C8; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
@@ -171,7 +171,7 @@ if ($recent_bookings && $recent_bookings->num_rows > 0) {
         }
         .dashboard-grid-2col {
             display: grid;
-            grid-template-columns: 1.5fr 1fr;
+            grid-template-columns: 1fr 1fr;
             gap: 1.5rem;
             margin-bottom: 2rem;
         }
@@ -186,9 +186,8 @@ if ($recent_bookings && $recent_bookings->num_rows > 0) {
             cursor: pointer;
         }
         @media (max-width: 1024px) {
-            .dashboard-grid-2col {
-                grid-template-columns: 1fr;
-            }
+            .dashboard-grid-2col { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
         }
         
         .recent-bookings { background: white; border-radius: 24px; overflow: hidden; border: 2px solid var(--border); box-shadow: var(--shadow-sm); margin-bottom: 2rem; }

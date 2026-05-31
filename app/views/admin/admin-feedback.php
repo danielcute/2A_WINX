@@ -119,16 +119,16 @@ if (!empty($_GET['id'])) {
         .admin-container { width: 100%; margin: 0; padding: 1.5rem; }
         .page-header { margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between; background: white; padding: 1.5rem 2rem; border-radius: 24px; border: 1px solid var(--border); }
         .page-header h1 { font-family: var(--serif); font-size: 2.2rem; color: var(--dark); margin: 0; font-weight: 700; }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
         .stat-card { background: white; padding: 1.5rem; border-radius: 24px; border: 2px solid var(--border); text-align: center; transition: all 0.3s; }
-        .stat-card:hover { border-color: var(--primary); transform: translateY(-4px); }
+        .stat-card:hover { border-color: var(--primary); transform: translateY(-2px); }
         .stat-card h3 { font-size: 2rem; color: var(--primary); margin: 0; font-weight: 800; }
         .stat-card p { color: var(--text-secondary); margin: 0.5rem 0 0; font-weight: 600; text-transform: uppercase; font-size: 0.8rem; }
 
         /* Unified Content Container */
         .content-wrapper { 
             display: grid; 
-            grid-template-columns: 380px 1fr; 
+            grid-template-columns: 350px 1fr; 
             gap: 0; 
             background: white; 
             border-radius: 24px; 
@@ -194,8 +194,8 @@ if (!empty($_GET['id'])) {
         .status-select { padding: 0.6rem 1rem; border-radius: 40px; border: 2px solid #E2D9C8; background: white; font-weight: 600; cursor: pointer; }
         .reply-form textarea { width: 100%; padding: 0.8rem; border: 2px solid #E2D9C8; border-radius: 16px; font-family: inherit; resize: vertical; min-height: 100px; }
         
-        @media (max-width: 900px) { 
-            .content-wrapper { grid-template-columns: 1fr; } 
+        @media (max-width: 968px) { 
+            .content-wrapper { grid-template-columns: 1fr; border-radius: 0; margin: -1rem; width: calc(100% + 2rem); } 
             .feedback-list { display: <?= !empty($_GET['id']) ? 'none' : 'block' ?>; border-right: none; }
             .detail-panel { display: <?= !empty($_GET['id']) ? 'flex' : 'none' ?>; }
             .back-to-list { display: inline-flex; }
