@@ -20,6 +20,14 @@ $action = $_POST['action'] ?? $_GET['action'] ?? '';
 $notificationId = isset($_POST['notification_id']) ? (int)$_POST['notification_id'] : (isset($_GET['notification_id']) ? (int)$_GET['notification_id'] : 0);
 $userId = $_SESSION['user_id'] ?? 0;
 
+// Normalize auth for both admin + user areas.
+// If you're admin-logged-in but user_id isn't set, try common variants.
+if ($userId <= 0) {
+    if (!empty($_SESSION['admin_logged_in']) && !empty($_SESSION['user_id'])) {
+        $userId = (int)$_SESSION['user_id'];
+    }
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' || $_SERVER['REQUEST_METHOD'] === 'GET') {
     $notificationModel = new Notification();
     
@@ -37,11 +45,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || $_SERVER['REQUEST_METHOD'] === 'GET
                     'notifications' => $unreadNotifications
                 ];
             } else {
+                http_response_code(401);
                 $response = ['success' => false, 'message' => 'Not authenticated'];
             }
             break;
             
         case 'get_all':
+
             // Get all notifications with pagination
             if ($userId > 0) {
                 $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 20;
