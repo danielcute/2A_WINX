@@ -1275,13 +1275,10 @@ $wardrobesByCategory = $wardrobeModel->getAllByCategory();
 
     function loadWardrobes() {
       fetch('/api-wardrobe.php?action=getAll')
-        .then(response => response.json())
         .then(response => {
-          if (!response.ok) throw new Error('HTTP ' + response.status);
+          if (!response.ok) throw new Error('Server error: ' + response.status);
           const contentType = response.headers.get('content-type');
-          if (!contentType || !contentType.includes('application/json')) {
-            throw new TypeError("Oops, we haven't got JSON!");
-          }
+          if (!contentType || !contentType.includes('application/json')) throw new TypeError('Invalid response format');
           return response.json();
         })
         .then(data => {
@@ -1305,13 +1302,9 @@ $wardrobesByCategory = $wardrobeModel->getAllByCategory();
     function searchWardrobes(query) {
       fetch('/api-wardrobe.php?action=search&q=' + encodeURIComponent(query))
         .then(response => {
-          if (!response.ok) {
-            throw new Error('Network response was not ok: ' + response.statusText);
-          }
+          if (!response.ok) throw new Error('Search failed');
           const contentType = response.headers.get('content-type');
-          if (!contentType || !contentType.includes('application/json')) {
-            throw new TypeError("Expected JSON but received " + contentType);
-          }
+          if (!contentType || !contentType.includes('application/json')) throw new TypeError('Invalid search response');
           return response.json();
         })
         .then(data => {

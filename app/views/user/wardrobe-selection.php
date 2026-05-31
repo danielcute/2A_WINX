@@ -528,13 +528,14 @@ if (!isset($_SESSION['user_id'])) {
                 if (search) params.append('search', search);
 
                 const response = await fetch('<?php echo APP_URL; ?>/app/controllers/WardrobeSelectionController.php?action=getByCategory&' + params);
-                if (!response.ok) {
-                    throw new Error('Network response was not ok: ' + response.statusText);
-                }
+cte                if (!response.ok) throw new Error('Server returned ' + response.status);
+                
                 const contentType = response.headers.get('content-type');
                 if (!contentType || !contentType.includes('application/json')) {
-                    throw new TypeError("Expected JSON but received " + contentType);
+                    const text = await response.text();
+                    throw new TypeError('Expected JSON but got: ' + text.substring(0, 50));
                 }
+
                 const data = await response.json();
                 if (data.success) { displayWardrobes(data.wardrobes); }
             } catch (error) {
@@ -553,12 +554,12 @@ if (!isset($_SESSION['user_id'])) {
             grid.innerHTML = wardrobes.map(w => `
                 <div class="wardrobe-card ${selectedWardrobes[w.wardrobe_id] ? 'selected' : ''}">
                     <div class="wardrobe-image">
-                        <i class="fas fa-${w.category.toLowerCase().includes('wedding') ? 'ring' : 'tuxedo'}"></i>
+                        <i class="fas fa-${(w.category || '').toLowerCase().includes('wedding') ? 'ring' : 'tuxedo'}"></i>
                     </div>
                     <div class="wardrobe-content">
                         <div class="wardrobe-name">${w.name}</div>
                         <span class="wardrobe-category">${w.category}</span>
-                        <p class="wardrobe-description">${w.description || ''}</p>
+                        <p class="wardrobe-description">${(w.description || '').substring(0, 100)}${(w.description || '').length > 100 ? '...' : ''}</p>
                         <div class="wardrobe-specs">
                             <div class="spec-item">
                                 <i class="fas fa-cube"></i>

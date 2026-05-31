@@ -778,13 +778,9 @@ const notificationTypes = {
 
     fetch('/public/api-notification.php?action=get_unread&limit=10')
       .then(response => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok: ' + response.statusText);
-        }
+        if (!response.ok) throw new Error('Failed to fetch notifications');
         const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-          throw new TypeError("Expected JSON but received " + contentType);
-        }
+        if (!contentType || !contentType.includes('application/json')) throw new TypeError('Invalid notification response');
         return response.json();
       })
       .then(data => {
