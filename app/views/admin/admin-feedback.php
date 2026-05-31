@@ -110,6 +110,7 @@ if (!empty($_GET['id'])) {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Admin - Feedback Management | Sinta</title>
     <link rel="stylesheet" href="/assets/css/global.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -195,7 +196,7 @@ if (!empty($_GET['id'])) {
         .reply-form textarea { width: 100%; padding: 0.8rem; border: 2px solid #E2D9C8; border-radius: 16px; font-family: inherit; resize: vertical; min-height: 100px; }
         
         @media (max-width: 968px) { 
-            .content-wrapper { grid-template-columns: 1fr; border-radius: 24px; margin: 0; width: 100%; } 
+            .content-wrapper { grid-template-columns: 1fr; border-radius: 0; margin: -1rem; width: calc(100% + 2rem); } 
             .feedback-list { display: <?= !empty($_GET['id']) ? 'none' : 'block' ?>; border-right: none; }
             .detail-panel { display: <?= !empty($_GET['id']) ? 'flex' : 'none' ?>; }
             .back-to-list { display: inline-flex; }

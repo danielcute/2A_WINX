@@ -293,7 +293,7 @@ body {
     inset: 0;
     background: rgba(0,0,0,0.4);
     backdrop-filter: blur(4px);
-    z-index: 4500; /* Sits just below the sidebar */
+    z-index: 8500;
     opacity: 0;
     visibility: hidden;
     transition: all 0.3s ease;
@@ -306,7 +306,7 @@ body {
 
   .admin-main {
     margin-left: 0;
-    padding: calc(70px + 1.5rem) 1rem 2rem;
+    padding: 70px 0 2rem;
     min-height: calc(100vh - 60px);
     width: 100%;
     box-sizing: border-box;
