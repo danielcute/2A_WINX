@@ -512,7 +512,7 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
                         <?php if (isset($occasion['image']) && $occasion['image']): ?>
                             <img id="occImg_<?= $occasion['occasion_id'] ?>" alt="<?= htmlspecialchars($occasion['events']) ?>" style="display: none;">
                             <script>
-fetch('<?= BASE_URL ?>/api-occasion.php?image=<?= $occasion['occasion_id'] ?>')
+fetch('<?= BASE_URL ?>/public/api-occasion.php?image=<?= $occasion['occasion_id'] ?>')
                                     .then(res => res.json())
                                     .then(data => {
                                         if (data.success && data.image) {
@@ -649,7 +649,7 @@ fetch('<?= BASE_URL ?>/api-occasion.php?id=' + id)
                 
                 // Load image if it exists
                 if (occasion.has_image) {
-                    fetch('/api-occasion.php?image=' + id)
+fetch('<?= BASE_URL ?>/public/api-occasion.php?image=' + id)
                         .then(res => res.json())
                         .then(imgData => {
                             if (imgData.success) {
