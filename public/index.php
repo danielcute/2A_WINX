@@ -350,7 +350,7 @@ switch($route) {
             $userId = $_SESSION['temp_user_id'] ?? null;
             
             if (!$userId) {
-                header('Location: /index.php?route=signin');
+                header('Location: index.php?route=signin');
                 exit;
             }
             
@@ -407,10 +407,10 @@ switch($route) {
                 // Redirect based on user role
                 if ($userRole === 'admin') {
                     $_SESSION['admin_logged_in'] = true;
-                    header('Location: /index.php?route=admin-dashboard');
+                    header('Location: index.php?route=admin-dashboard');
                 } else {
                     $_SESSION['user_logged_in'] = true;
-                    header('Location: /index.php?route=homepage');
+                    header('Location: index.php?route=homepage');
                 }
                 exit;
             } else {
@@ -422,7 +422,7 @@ switch($route) {
         
         // Show 2FA verification form
         if (!isset($_SESSION['require_2fa']) || !$_SESSION['require_2fa']) {
-            header('Location: /index.php?route=signin');
+            header('Location: index.php?route=signin');
             exit;
         }
         include VIEW_PATH . '/user/verify-2fa.php';
@@ -438,7 +438,7 @@ switch($route) {
             $secret = $_SESSION['temp_2fa_secret'] ?? null;
             
             if (!$userId || !$secret) {
-                header('Location: /index.php?route=profile&tab=security');
+                header('Location: index.php?route=profile&tab=security');
                 exit;
             }
             
@@ -457,7 +457,7 @@ switch($route) {
                 unset($_SESSION['temp_2fa_secret']);
                 
                 $_SESSION['two_fa_success'] = 'Two-factor authentication has been enabled successfully!';
-                header('Location: /index.php?route=profile&tab=security');
+                header('Location: index.php?route=profile&tab=security');
                 exit;
             } else {
                 $_SESSION['two_fa_error'] = 'Invalid authentication code. Please try again.';
@@ -468,7 +468,7 @@ switch($route) {
         
         // Show 2FA setup form - only for logged in users
         if (!isset($_SESSION['user_id'])) {
-            header('Location: /index.php?route=signin');
+            header('Location: index.php?route=signin');
             exit;
         }
         
@@ -479,7 +479,7 @@ switch($route) {
         
         if ($twoFactorEnabled) {
             $_SESSION['two_fa_error'] = 'Two-factor authentication is already enabled.';
-            header('Location: /index.php?route=profile&tab=security');
+            header('Location: index.php?route=profile&tab=security');
             exit;
         }
         
@@ -497,7 +497,7 @@ switch($route) {
         $userModel = new User();
         
         if (!isset($_SESSION['user_id'])) {
-            header('Location: /index.php?route=signin');
+            header('Location: index.php?route=signin');
             exit;
         }
         
@@ -509,39 +509,39 @@ switch($route) {
             $_SESSION['two_fa_error'] = 'Failed to disable two-factor authentication.';
         }
         
-        header('Location: /index.php?route=profile&tab=security');
+        header('Location: index.php?route=profile&tab=security');
         exit;
     case 'homepage':
         if (!isset($_SESSION['user_logged_in']) && !isset($_SESSION['admin_logged_in'])) {
-            header('Location: /index.php?route=signin');
+            header('Location: index.php?route=signin');
             exit;
         }
         include VIEW_PATH . '/user/homepage.php';
         break;
     case 'occasions':
         if (!isset($_SESSION['user_logged_in']) || $_SESSION['user_logged_in'] !== true) {
-            header('Location: /index.php?route=signin');
+            header('Location: index.php?route=signin');
             exit;
         }
         include VIEW_PATH . '/user/occasions.php';
         break;
     case 'packages':
         if (!isset($_SESSION['user_logged_in']) || $_SESSION['user_logged_in'] !== true) {
-            header('Location: /index.php?route=signin');
+            header('Location: index.php?route=signin');
             exit;
         }
         include VIEW_PATH . '/user/packages.php';
         break;
     case 'customize':
         if (!isset($_SESSION['user_logged_in']) || $_SESSION['user_logged_in'] !== true) {
-            header('Location: /index.php?route=signin');
+            header('Location: index.php?route=signin');
             exit;
         }
         include VIEW_PATH . '/user/customize.php';
         break;
     case 'checkout':
         if (!isset($_SESSION['user_logged_in']) || $_SESSION['user_logged_in'] !== true) {
-            header('Location: /index.php?route=signin');
+            header('Location: index.php?route=signin');
             exit;
         }
         require_once ROOT_PATH . '/app/controllers/CheckoutController.php';
@@ -550,7 +550,7 @@ switch($route) {
         break;
     case 'checkout-submit':
         if (!isset($_SESSION['user_logged_in']) || $_SESSION['user_logged_in'] !== true) {
-            header('Location: /index.php?route=signin');
+            header('Location: index.php?route=signin');
             exit;
         }
         require_once ROOT_PATH . '/app/controllers/CheckoutController.php';
@@ -559,7 +559,7 @@ switch($route) {
         break;
     case 'plans':
         if (!isset($_SESSION['user_logged_in']) || $_SESSION['user_logged_in'] !== true) {
-            header('Location: /index.php?route=signin');
+            header('Location: index.php?route=signin');
             exit;
         }
         require_once ROOT_PATH . '/app/controllers/PlanController.php';
@@ -568,7 +568,7 @@ switch($route) {
         break;
     case 'delete-plan':
         if (!isset($_SESSION['user_logged_in']) || $_SESSION['user_logged_in'] !== true) {
-            header('Location: /index.php?route=signin');
+            header('Location: index.php?route=signin');
             exit;
         }
         require_once ROOT_PATH . '/app/controllers/PlanController.php';
@@ -577,14 +577,14 @@ switch($route) {
         break;
     case 'event-detail':
         if (!isset($_SESSION['user_logged_in']) || $_SESSION['user_logged_in'] !== true) {
-            header('Location: /index.php?route=signin');
+            header('Location: index.php?route=signin');
             exit;
         }
         include VIEW_PATH . '/user/event-detail.php';
         break;
     case 'messages':
         if (!isset($_SESSION['user_logged_in']) || $_SESSION['user_logged_in'] !== true) {
-            header('Location: /index.php?route=signin');
+            header('Location: index.php?route=signin');
             exit;
         }
         include VIEW_PATH . '/user/messages.php';
@@ -592,14 +592,14 @@ switch($route) {
 case 'profile':
         // Allow both regular users and admin users to access profile
         if (!isset($_SESSION['user_logged_in']) && !isset($_SESSION['admin_logged_in'])) {
-            header('Location: /index.php?route=signin');
+            header('Location: index.php?route=signin');
             exit;
         }
         include VIEW_PATH . '/user/profile.php';
         break;
     case 'about':
         if (!isset($_SESSION['user_logged_in']) || $_SESSION['user_logged_in'] !== true) {
-            header('Location: /index.php?route=signin');
+            header('Location: index.php?route=signin');
             exit;
         }
         include VIEW_PATH . '/user/about.php';
@@ -609,42 +609,42 @@ case 'profile':
         break;
     case 'admin-dashboard':
         if (!isset($_SESSION['admin_logged_in'])) {
-            header('Location: /index.php?route=signin');
+            header('Location: index.php?route=signin');
             exit;
         }
         include VIEW_PATH . '/admin/admin-dashboard.php';
         break;
     case 'admin-bookings':
         if (!isset($_SESSION['admin_logged_in'])) {
-            header('Location: /index.php?route=signin');
+            header('Location: index.php?route=signin');
             exit;
         }
         include VIEW_PATH . '/admin/admin-bookings.php';
         break;
     case 'admin-packages':
         if (!isset($_SESSION['admin_logged_in'])) {
-            header('Location: /index.php?route=signin');
+            header('Location: index.php?route=signin');
             exit;
         }
         include VIEW_PATH . '/admin/admin-manage-packages.php';
         break;
     case 'admin-occasions':
         if (!isset($_SESSION['admin_logged_in'])) {
-            header('Location: /index.php?route=signin');
+            header('Location: index.php?route=signin');
             exit;
         }
         include VIEW_PATH . '/admin/admin-occasions.php';
         break;
    case 'admin-messages':
     if (!isset($_SESSION['admin_logged_in'])) {
-        header('Location: /index.php?route=signin');
+        header('Location: index.php?route=signin');
         exit;
     }
     include VIEW_PATH . '/admin/admin-messages-real.php';
     break;
     case 'admin-customize':
         if (!isset($_SESSION['admin_logged_in'])) {
-            header('Location: /index.php?route=signin');
+            header('Location: index.php?route=signin');
             exit;
         }
         require_once ROOT_PATH . '/app/controllers/CustomizeController.php';
@@ -653,7 +653,7 @@ case 'profile':
         break;
     case 'admin-customize-add':
         if (!isset($_SESSION['admin_logged_in'])) {
-            header('Location: /index.php?route=signin');
+            header('Location: index.php?route=signin');
             exit;
         }
         require_once ROOT_PATH . '/app/controllers/CustomizeController.php';
@@ -662,7 +662,7 @@ case 'profile':
         break;
     case 'admin-customize-create':
         if (!isset($_SESSION['admin_logged_in'])) {
-            header('Location: /index.php?route=signin');
+            header('Location: index.php?route=signin');
             exit;
         }
         require_once ROOT_PATH . '/app/controllers/CustomizeController.php';
@@ -671,7 +671,7 @@ case 'profile':
         break;
     case 'admin-customize-edit':
         if (!isset($_SESSION['admin_logged_in'])) {
-            header('Location: /index.php?route=signin');
+            header('Location: index.php?route=signin');
             exit;
         }
         require_once ROOT_PATH . '/app/controllers/CustomizeController.php';
@@ -680,7 +680,7 @@ case 'profile':
         break;
     case 'admin-customize-update':
         if (!isset($_SESSION['admin_logged_in'])) {
-            header('Location: /index.php?route=signin');
+            header('Location: index.php?route=signin');
             exit;
         }
         require_once ROOT_PATH . '/app/controllers/CustomizeController.php';
@@ -689,7 +689,7 @@ case 'profile':
         break;
     case 'admin-customize-delete':
         if (!isset($_SESSION['admin_logged_in'])) {
-            header('Location: /index.php?route=signin');
+            header('Location: index.php?route=signin');
             exit;
         }
         require_once ROOT_PATH . '/app/controllers/CustomizeController.php';
@@ -700,7 +700,7 @@ case 'profile':
     // ========== WARDROBE ROUTES ==========
     case 'wardrobe':
         if (!isset($_SESSION['user_logged_in'])) {
-            header('Location: /index.php?route=signin');
+            header('Location: index.php?route=signin');
             exit;
         }
         require_once ROOT_PATH . '/app/controllers/WardrobeController.php';
@@ -710,7 +710,7 @@ case 'profile':
 
     case 'admin-wardrobe':
         if (!isset($_SESSION['admin_logged_in'])) {
-            header('Location: /index.php?route=signin');
+            header('Location: index.php?route=signin');
             exit;
         }
         require_once ROOT_PATH . '/app/controllers/AdminWardrobeController.php';
@@ -720,7 +720,7 @@ case 'profile':
 
     case 'admin-wardrobe-add':
         if (!isset($_SESSION['admin_logged_in'])) {
-            header('Location: /index.php?route=signin');
+            header('Location: index.php?route=signin');
             exit;
         }
         require_once ROOT_PATH . '/app/controllers/AdminWardrobeController.php';
@@ -735,7 +735,7 @@ case 'profile':
 
     case 'admin-wardrobe-edit':
         if (!isset($_SESSION['admin_logged_in'])) {
-            header('Location: /index.php?route=signin');
+            header('Location: index.php?route=signin');
             exit;
         }
         require_once ROOT_PATH . '/app/controllers/AdminWardrobeController.php';
@@ -745,7 +745,7 @@ case 'profile':
 
     case 'admin-wardrobe-update':
         if (!isset($_SESSION['admin_logged_in'])) {
-            header('Location: /index.php?route=signin');
+            header('Location: index.php?route=signin');
             exit;
         }
         require_once ROOT_PATH . '/app/controllers/AdminWardrobeController.php';
@@ -755,7 +755,7 @@ case 'profile':
 
     case 'admin-wardrobe-delete':
         if (!isset($_SESSION['admin_logged_in'])) {
-            header('Location: /index.php?route=signin');
+            header('Location: index.php?route=signin');
             exit;
         }
         require_once ROOT_PATH . '/app/controllers/AdminWardrobeController.php';
@@ -765,7 +765,7 @@ case 'profile':
     
     case 'admin-wardrobe-selections':
         if (!isset($_SESSION['admin_logged_in'])) {
-            header('Location: /index.php?route=signin');
+            header('Location: index.php?route=signin');
             exit;
         }
         include VIEW_PATH . '/admin/admin-wardrobe-selections.php';
@@ -773,7 +773,7 @@ case 'profile':
     
     case 'wardrobe-selection':
         if (!isset($_SESSION['user_logged_in'])) {
-            header('Location: /index.php?route=signin');
+            header('Location: index.php?route=signin');
             exit;
         }
         require_once ROOT_PATH . '/app/controllers/WardrobeSelectionController.php';
@@ -789,25 +789,25 @@ case 'profile':
 
     case 'feedback':
         if (isset($_SESSION['admin_logged_in'])) {
-            header('Location: /index.php?route=admin-dashboard');
+            header('Location: index.php?route=admin-dashboard');
             exit;
         }
         if (!isset($_SESSION['user_logged_in'])) {
-            header('Location: /index.php?route=signin');
+            header('Location: index.php?route=signin');
             exit;
         }
         include VIEW_PATH . '/user/feedback.php';
         break;
 case 'admin-feedback':
         if (!isset($_SESSION['admin_logged_in'])) {
-            header('Location: /index.php?route=signin');
+            header('Location: index.php?route=signin');
             exit;
         }
         include VIEW_PATH . '/admin/admin-feedback.php';
         break;
     case 'admin-profile':
         if (!isset($_SESSION['admin_logged_in'])) {
-            header('Location: /index.php?route=signin');
+            header('Location: index.php?route=signin');
             exit;
         }
         include VIEW_PATH . '/admin/admin-profile.php';
