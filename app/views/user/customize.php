@@ -943,7 +943,7 @@ $extraIconMap = [
   function calculateTotal() {
     let total = 0;
 
-    const selectedIds = [selectedTheme, selectedVenueDeco, selectedColorCombination, selectedVenue, selectedFood, selectedSweets, selectedCatering].filter(Boolean);
+    const selectedIds = [selectedTheme, selectedVenueDeco, selectedColorCombination, selectedVenue, selectedFood, selectedSweets, selectedCatering, selectedPastries, selectedBeverages].filter(Boolean);
     selectedIds.forEach(id => {
       const card = document.querySelector(`[data-option-id="${id}"]`);
       if (card) total += parseInt(card.getAttribute('data-price')) || 0;
