@@ -1,55 +1,6 @@
 <?php
-// Check admin authentication
-if (!isset($_SESSION['user_id'])) {
-    header("Location: " . BASE_URL . "/index.php?route=admin-login");
-    exit;
-}
-
-require_once ROOT_PATH . '/config/database.php';
-require_once ROOT_PATH . '/app/models/User.php';
-require_once ROOT_PATH . '/app/models/Wardrobe.php';
-
-$user = new User();
-$wardrobe = new Wardrobe();
-$admin = $user->findById($_SESSION['user_id']);
-
-if (!$admin || $admin['role'] !== 'admin') {
-    header("Location: " . BASE_URL . "/index.php?route=home");
-    exit;
-}
-
-// Get filter
-$filter_status = $_GET['status'] ?? '';
-$filter_plan = $_GET['plan_id'] ?? '';
-
-// Build query
-$sql = "SELECT ws.*, w.name, w.rental_price, w.category, p.event_name, p.event_date, u.first_name, u.last_name
-        FROM wardrobe_selections_tbl ws
-        LEFT JOIN wardrobes_tbl w ON ws.wardrobe_id = w.wardrobe_id
-        LEFT JOIN plans_tbl p ON ws.plan_id = p.plan_id
-        LEFT JOIN users_tbl u ON ws.user_id = u.user_id
-        WHERE 1=1";
-
-$db = Database::getInstance()->getConnection();
-
-if ($filter_status) {
-    $sql .= " AND ws.status = '" . $db->real_escape_string($filter_status) . "'";
-}
-if ($filter_plan) {
-    $sql .= " AND ws.plan_id = " . (int)$filter_plan;
-}
-
-$sql .= " ORDER BY ws.created_at DESC";
-
-$result = $db->query($sql);
-$selections = [];
-if ($result) {
-    while ($row = $result->fetch_assoc()) {
-        $selections[] = $row;
-    }
-}
-
-$page = 'admin-wardrobe-selections';
+// $selections, $filter_status, and $filter_plan are provided by WardrobeController::selections()
+$page       = 'admin-wardrobe-selections';
 $page_title = 'Wardrobe Rentals';
 ?>
 
@@ -248,7 +199,7 @@ $page_title = 'Wardrobe Rentals';
                 Wardrobe <em>Rentals</em>
             </h1>
             <div class="filter-section">
-                <form method="get" action="<?php echo APP_URL; ?>/admin-wardrobe-selections" style="display: flex; gap: 10px;">
+                <form method="get" action="<?php echo BASE_URL; ?>/index.php?route=admin-wardrobe-selections" style="display: flex; gap: 10px;">
                     <select name="status" onchange="this.form.submit()">
                         <option value="">-- All Status --</option>
                         <option value="pending" <?php echo $filter_status === 'pending' ? 'selected' : ''; ?>>Pending</option>
@@ -317,7 +268,7 @@ $page_title = 'Wardrobe Rentals';
                                     </span>
                                 </td>
                                 <td>
-                                    <a href="<?php echo APP_URL; ?>/admin-wardrobe-selections-edit?id=<?php echo $selection['selection_id']; ?>" class="btn-small btn-update">
+                                    <a href="<?php echo BASE_URL; ?>/index.php?route=admin-wardrobe-selections-edit&id=<?php echo $selection['selection_id']; ?>" class="btn-small btn-update">
                                         <i class="fas fa-edit"></i>
                                     </a>
                                 </td>

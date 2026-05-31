@@ -4,12 +4,14 @@
  * File: /app/controllers/WardrobeController.php
  *
  * Handles routes:
- *   GET/POST  admin-wardrobe               → list all wardrobes
+ *   GET       admin-wardrobe               → list all wardrobes
  *   GET       admin-wardrobe-add           → show add form
  *   POST      admin-wardrobe-add           → create wardrobe (JSON response)
  *   GET       admin-wardrobe-edit?id=      → show edit form
  *   POST      admin-wardrobe-update        → update wardrobe (JSON response)
  *   POST      admin-wardrobe-delete        → delete wardrobe (JSON response)
+ *   GET       admin-wardrobe-get?id=       → fetch single wardrobe as JSON (edit modal)
+ *   GET       admin-wardrobe-image?id=     → stream wardrobe image
  *   GET       admin-wardrobe-selections    → list rentals
  */
 
@@ -31,14 +33,14 @@ class WardrobeController {
 
     private function requireAdmin(): void {
         if (!isset($_SESSION['user_id'])) {
-            header('Location: ' . BASE_URL . '/index.php?route=admin-login');
+            header('Location: ' . BASE_URL . '/index.php?route=signin');
             exit;
         }
 
         $admin = $this->userModel->findById($_SESSION['user_id']);
 
         if (!$admin || $admin['role'] !== 'admin') {
-            header('Location: ' . BASE_URL . '/index.php?route=home');
+            header('Location: ' . BASE_URL . '/index.php?route=homepage');
             exit;
         }
 
@@ -100,7 +102,7 @@ class WardrobeController {
         $wardrobe = $id > 0 ? $this->wardrobeModel->findById($id) : null;
 
         if (!$wardrobe) {
-            header('Location: ' . APP_URL . '/admin-wardrobe');
+            header('Location: ' . BASE_URL . '/index.php?route=admin-wardrobe');
             exit;
         }
 
@@ -149,9 +151,92 @@ class WardrobeController {
         $this->jsonResponse($result);
     }
 
+    /** GET admin-wardrobe-get?id=  →  return single wardrobe as JSON (for edit modal) */
+    public function getJson(): void {
+        $this->requireAdmin();
+
+        $id       = (int)($_GET['id'] ?? 0);
+        $wardrobe = $id > 0 ? $this->wardrobeModel->findById($id) : null;
+
+        if (!$wardrobe) {
+            $this->jsonResponse(['success' => false, 'message' => 'Wardrobe not found']);
+        }
+
+        // Base64-encode the image blob for JSON transport
+        if (!empty($wardrobe['image'])) {
+            $wardrobe['image'] = base64_encode($wardrobe['image']);
+        }
+
+        $this->jsonResponse(['success' => true, 'data' => $wardrobe]);
+    }
+
+    /** GET admin-wardrobe-image?id=  →  stream raw image */
+    public function serveImage(): void {
+        $this->requireAdmin();
+
+        $id  = (int)($_GET['id'] ?? 0);
+        $row = $id > 0 ? $this->wardrobeModel->getImage($id) : null;
+
+        if (!$row) {
+            http_response_code(404);
+            exit;
+        }
+
+        header('Content-Type: ' . $row['image_type']);
+        header('Cache-Control: public, max-age=86400');
+        echo $row['image'];
+        exit;
+    }
+
     /** GET admin-wardrobe-selections  →  rentals list view */
     public function selections(): void {
         $this->requireAdmin();
+
+        $db = Database::getInstance()->getConnection();
+
+        $filter_status = $_GET['status'] ?? '';
+        $filter_plan   = isset($_GET['plan_id']) ? (int)$_GET['plan_id'] : 0;
+
+        $sql = "SELECT ws.*, w.name, w.rental_price, w.category,
+                       p.event_name, p.event_date,
+                       u.first_name, u.last_name
+                FROM wardrobe_selections_tbl ws
+                LEFT JOIN wardrobes_tbl w ON ws.wardrobe_id = w.wardrobe_id
+                LEFT JOIN plans_tbl p ON ws.plan_id = p.plan_id
+                LEFT JOIN users_tbl u ON ws.user_id = u.user_id
+                WHERE 1=1";
+
+        $params = [];
+        $types  = '';
+
+        if ($filter_status !== '') {
+            $sql    .= ' AND ws.status = ?';
+            $params[] = $filter_status;
+            $types   .= 's';
+        }
+        if ($filter_plan > 0) {
+            $sql    .= ' AND ws.plan_id = ?';
+            $params[] = $filter_plan;
+            $types   .= 'i';
+        }
+
+        $sql .= ' ORDER BY ws.created_at DESC';
+
+        $stmt = $db->prepare($sql);
+        if ($stmt) {
+            if ($params) {
+                $stmt->bind_param($types, ...$params);
+            }
+            $stmt->execute();
+            $result     = $stmt->get_result();
+            $selections = [];
+            while ($row = $result->fetch_assoc()) {
+                $selections[] = $row;
+            }
+            $stmt->close();
+        } else {
+            $selections = [];
+        }
 
         require_once VIEW_PATH . '/admin/admin-wardrobe-selections.php';
     }

@@ -301,36 +301,92 @@ switch ($route) {
         require ROOT_PATH . '/app/views/admin/admin-occasions.php';
         break;
     
+    case 'admin-notifications':
+        if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+            http_response_code(401);
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+            exit;
+        }
+        require_once ROOT_PATH . '/app/controllers/AdminNotificationController.php';
+        (new AdminNotificationController())->handle();
+        break;
+
     case 'admin-wardrobe':
         if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
             header('Location: ' . BASE_URL . '/index.php?route=signin');
             exit;
         }
-        require ROOT_PATH . '/app/views/admin/admin-wardrobe.php';
+        require_once ROOT_PATH . '/app/controllers/WardrobeController.php';
+        (new WardrobeController())->index();
         break;
-    
+
     case 'admin-wardrobe-add':
         if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
             header('Location: ' . BASE_URL . '/index.php?route=signin');
             exit;
         }
-        require ROOT_PATH . '/app/views/admin/admin-wardrobe-add.php';
+        require_once ROOT_PATH . '/app/controllers/WardrobeController.php';
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            (new WardrobeController())->addSubmit();
+        } else {
+            (new WardrobeController())->addForm();
+        }
         break;
-    
+
     case 'admin-wardrobe-edit':
         if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
             header('Location: ' . BASE_URL . '/index.php?route=signin');
             exit;
         }
-        require ROOT_PATH . '/app/views/admin/admin-wardrobe-edit.php';
+        require_once ROOT_PATH . '/app/controllers/WardrobeController.php';
+        (new WardrobeController())->editForm();
         break;
-    
+
+    case 'admin-wardrobe-update':
+        if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+            header('Location: ' . BASE_URL . '/index.php?route=signin');
+            exit;
+        }
+        require_once ROOT_PATH . '/app/controllers/WardrobeController.php';
+        (new WardrobeController())->updateSubmit();
+        break;
+
+    case 'admin-wardrobe-delete':
+        if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+            header('Location: ' . BASE_URL . '/index.php?route=signin');
+            exit;
+        }
+        require_once ROOT_PATH . '/app/controllers/WardrobeController.php';
+        (new WardrobeController())->deleteSubmit();
+        break;
+
+    case 'admin-wardrobe-get':
+        if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+            http_response_code(401);
+            echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+            exit;
+        }
+        require_once ROOT_PATH . '/app/controllers/WardrobeController.php';
+        (new WardrobeController())->getJson();
+        break;
+
+    case 'admin-wardrobe-image':
+        if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+            http_response_code(401);
+            exit;
+        }
+        require_once ROOT_PATH . '/app/controllers/WardrobeController.php';
+        (new WardrobeController())->serveImage();
+        break;
+
     case 'admin-wardrobe-selections':
         if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
             header('Location: ' . BASE_URL . '/index.php?route=signin');
             exit;
         }
-        require ROOT_PATH . '/app/views/admin/admin-wardrobe-selections.php';
+        require_once ROOT_PATH . '/app/controllers/WardrobeController.php';
+        (new WardrobeController())->selections();
         break;
     
     case 'admin-bookings':

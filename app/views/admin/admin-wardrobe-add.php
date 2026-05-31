@@ -1,19 +1,5 @@
 <?php
-// Check admin authentication
-if (!isset($_SESSION['user_id'])) {
-    header("Location: " . BASE_URL . "/index.php?route=admin-login");
-    exit;
-}
-
-require_once ROOT_PATH . '/app/models/User.php';
-$user = new User();
-$admin = $user->findById($_SESSION['user_id']);
-
-if (!$admin || $admin['role'] !== 'admin') {
-    header("Location: " . BASE_URL . "/index.php?route=home");
-    exit;
-}
-
+// Authentication and $allCategories are provided by WardrobeController::addForm()
 $page = 'admin-wardrobe-add';
 $page_title = 'Add New Wardrobe';
 ?>
@@ -254,7 +240,7 @@ $page_title = 'Add New Wardrobe';
                 <i class="fas fa-plus"></i>
                 Add New <em>Wardrobe</em>
             </h1>
-            <a href="<?php echo APP_URL; ?>/admin-wardrobe" class="back-link">
+            <a href="<?php echo BASE_URL; ?>/index.php?route=admin-wardrobe" class="back-link">
                 <i class="fas fa-arrow-left"></i> Back to Wardrobes
             </a>
         </div>
@@ -334,7 +320,7 @@ $page_title = 'Add New Wardrobe';
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-save"></i> Add Wardrobe
                     </button>
-                    <a href="<?php echo APP_URL; ?>/admin-wardrobe" class="btn btn-secondary">
+                    <a href="<?php echo BASE_URL; ?>/index.php?route=admin-wardrobe" class="btn btn-secondary">
                         <i class="fas fa-times"></i> Cancel
                     </a>
                 </div>
@@ -378,7 +364,7 @@ $page_title = 'Add New Wardrobe';
                 }
             }
 
-            fetch('<?php echo APP_URL; ?>/admin-wardrobe-add', {
+            fetch('<?php echo BASE_URL; ?>/index.php?route=admin-wardrobe-add', {
                 method: 'POST',
                 body: formData
             })
@@ -386,7 +372,7 @@ $page_title = 'Add New Wardrobe';
             .then(data => {
                 if (data.success) {
                     alert('Wardrobe added successfully!');
-                    window.location.href = '<?php echo APP_URL; ?>/admin-wardrobe';
+                    window.location.href = '<?php echo BASE_URL; ?>/index.php?route=admin-wardrobe';
                 } else {
                     alert('Error: ' + (data.message || 'Failed to add wardrobe'));
                 }

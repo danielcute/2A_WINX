@@ -1,16 +1,7 @@
 <?php
-// Authentication is handled by the controller/router
-// Set page variables
+// Authentication and $wardrobesByCategory / $allCategories are provided by WardrobeController::index()
 $page = 'admin-wardrobe';
 $page_title = 'Manage Wardrobes';
-
-// Define BASE_URL if not already defined (for standalone use)
-if (!defined('BASE_URL')) {
-    define('BASE_URL', '');
-}
-if (!defined('APP_URL')) {
-    define('APP_URL', BASE_URL . '/index.php');
-}
 ?>
 
 <!DOCTYPE html>
@@ -680,14 +671,6 @@ if (!defined('APP_URL')) {
             </button>
         </div>
 
-        <?php 
-        // Ensure wardrobes are loaded
-        if (!isset($wardrobesByCategory) || empty($wardrobesByCategory)) {
-            require_once ROOT_PATH . '/app/models/Wardrobe.php';
-            $wardrobeModel = new Wardrobe();
-            $wardrobesByCategory = $wardrobeModel->getAllByCategory();
-        }
-        ?>
 
         <?php if (!empty($wardrobesByCategory)): ?>
             <?php foreach ($wardrobesByCategory as $category => $wardrobes): ?>
@@ -717,8 +700,8 @@ if (!defined('APP_URL')) {
                             <?php foreach ($wardrobes as $wardrobe): ?>
                                 <tr>
                                     <td class="wardrobe-image-cell" data-label="Image">
-                                        <?php if (!empty($wardrobe['image']) && !empty($wardrobe['image_type'])): ?>
-                                            <img src="<?php echo BASE_URL; ?>/api-wardrobe-image.php?id=<?php echo $wardrobe['wardrobe_id']; ?>" 
+                                        <?php if (!empty($wardrobe['has_image']) && !empty($wardrobe['image_type'])): ?>
+                                            <img src="<?php echo BASE_URL; ?>/index.php?route=admin-wardrobe-image&id=<?php echo $wardrobe['wardrobe_id']; ?>" 
                                                  alt="<?php echo htmlspecialchars($wardrobe['name']); ?>" 
                                                  class="wardrobe-thumbnail"
                                                  loading="lazy">
@@ -804,7 +787,7 @@ if (!defined('APP_URL')) {
                 <div class="empty-state-icon">
                     <i class="fas fa-inbox"></i>
                 </div>
-                <p>No wardrobes yet. <a href="<?php echo APP_URL; ?>/admin-wardrobe-add" style="color: #8A7650;">Add your first wardrobe</a></p>
+                <p>No wardrobes yet. <a href="<?php echo BASE_URL; ?>/index.php?route=admin-wardrobe-add" style="color: #8A7650;">Add your first wardrobe</a></p>
             </div>
         <?php endif; ?>
     </div>
@@ -970,7 +953,7 @@ if (!defined('APP_URL')) {
                 formData.append('wardrobe_image', imageFile);
             }
             
-            fetch('<?php echo APP_URL; ?>?route=admin-wardrobe-add', {
+            fetch('<?php echo BASE_URL; ?>/index.php?route=admin-wardrobe-add', {
                 method: 'POST',
                 body: formData,
                 credentials: 'include'
@@ -1014,7 +997,7 @@ if (!defined('APP_URL')) {
                 const formData = new FormData();
                 formData.append('wardrobe_id', wardrobeId);
 
-                fetch('<?php echo APP_URL; ?>/admin-wardrobe-delete', {
+                fetch('<?php echo BASE_URL; ?>/index.php?route=admin-wardrobe-delete', {
                     method: 'POST',
                     body: formData
                 })
@@ -1045,7 +1028,7 @@ if (!defined('APP_URL')) {
             
             // Fetch wardrobe data
             console.log('Fetching wardrobe data for ID:', wardrobeId);
-            fetch('<?php echo BASE_URL; ?>/api-wardrobe.php?action=get&id=' + wardrobeId, {
+            fetch('<?php echo BASE_URL; ?>/index.php?route=admin-wardrobe-get&id=' + wardrobeId, {
                 credentials: 'same-origin'
             })
                 .then(response => {
@@ -1219,7 +1202,7 @@ if (!defined('APP_URL')) {
             }
             
             console.log('Submitting form data...');
-            fetch('<?php echo BASE_URL; ?>/api-wardrobe-update.php', {
+            fetch('<?php echo BASE_URL; ?>/index.php?route=admin-wardrobe-update', {
                 method: 'POST',
                 body: formData,
                 credentials: 'include'
@@ -1265,7 +1248,7 @@ if (!defined('APP_URL')) {
                 const formData = new FormData();
                 formData.append('wardrobe_id', wardrobeId);
 
-                fetch('<?php echo APP_URL; ?>/admin-wardrobe-delete', {
+                fetch('<?php echo BASE_URL; ?>/index.php?route=admin-wardrobe-delete', {
                     method: 'POST',
                     body: formData
                 })

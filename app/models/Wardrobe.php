@@ -43,6 +43,34 @@ class Wardrobe {
         return $grouped;
     }
 
+    /** Return a flat list of wardrobes filtered by category */
+    public function getByCategory(string $category): array {
+        $stmt = $this->conn->prepare(
+            "SELECT wardrobe_id, category, name, description,
+                    rental_price, availability_count,
+                    rental_duration_days, sizes_available,
+                    CASE WHEN image IS NOT NULL THEN 1 ELSE 0 END AS has_image,
+                    image_type,
+                    created_at, updated_at
+             FROM wardrobes_tbl
+             WHERE category = ?
+             ORDER BY name ASC"
+        );
+
+        if (!$stmt) return [];
+
+        $stmt->bind_param('s', $category);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $rows   = [];
+        while ($row = $result->fetch_assoc()) {
+            $rows[] = $row;
+        }
+        $stmt->close();
+
+        return $rows;
+    }
+
     /** Return a flat list of all wardrobes (no image blob) */
     public function getAll(): array {
         $sql = "SELECT wardrobe_id, category, name, description,
@@ -129,6 +157,31 @@ class Wardrobe {
 
         sort($cats);
         return $cats;
+    }
+
+    /** Return all wardrobe selections for a given plan */
+    public function getSelectionsByPlan(int $planId): array {
+        $stmt = $this->conn->prepare(
+            "SELECT ws.*, w.name, w.rental_price, w.category, w.image_type,
+                    CASE WHEN w.image IS NOT NULL THEN 1 ELSE 0 END AS has_image
+             FROM wardrobe_selections_tbl ws
+             LEFT JOIN wardrobes_tbl w ON ws.wardrobe_id = w.wardrobe_id
+             WHERE ws.plan_id = ?
+             ORDER BY ws.created_at ASC"
+        );
+
+        if (!$stmt) return [];
+
+        $stmt->bind_param('i', $planId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $rows   = [];
+        while ($row = $result->fetch_assoc()) {
+            $rows[] = $row;
+        }
+        $stmt->close();
+
+        return $rows;
     }
 
     // -------------------------------------------------------

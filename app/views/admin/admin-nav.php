@@ -715,7 +715,7 @@ const adminNotificationTypes = {
   function loadAdminNotifications() {
     if (!adminNotifContainer) return;
 
-    fetch('/SINTA/public/api-notification.php?action=get_unread&limit=15')
+    fetch('/index.php?route=admin-notifications&action=get_unread&limit=15')
       .then(response => response.json())
       .then(data => {
         if (data.success && data.notifications) {
@@ -783,7 +783,7 @@ const adminNotificationTypes = {
 
   // Mark admin notification as read
   window.markAdminNotificationAsRead = function(notificationId) {
-    fetch('/SINTA/public/api-notification.php?action=mark_as_read', {
+    fetch('/index.php?route=admin-notifications&action=mark_as_read', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: 'notification_id=' + notificationId
@@ -799,7 +799,7 @@ const adminNotificationTypes = {
 
   // Delete admin notification
   window.deleteAdminNotification = function(notificationId) {
-    fetch('/SINTA/public/api-notification.php?action=delete', {
+    fetch('/index.php?route=admin-notifications&action=delete', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: 'notification_id=' + notificationId
@@ -816,7 +816,7 @@ const adminNotificationTypes = {
   // Mark all as read
   window.markAllAdminNotificationsAsRead = function(e) {
     e.preventDefault();
-    fetch('/SINTA/public/api-notification.php?action=mark_all_as_read', { method: 'POST' })
+    fetch('/index.php?route=admin-notifications&action=mark_all_as_read', { method: 'POST' })
       .then(response => response.json())
       .then(data => {
         if (data.success) {

@@ -1,6 +1,6 @@
 <?php
 // Session already started in index.php
-if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     header('Location: /index.php?route=signin');
     exit;
 }

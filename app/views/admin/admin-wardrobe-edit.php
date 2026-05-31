@@ -1,23 +1,5 @@
 <?php
-// Start session and check admin authentication
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-if (!isset($_SESSION['user_id'])) {
-    header("Location: " . BASE_URL . "/index.php?route=admin-login");
-    exit;
-}
-
-require_once ROOT_PATH . '/app/models/User.php';
-$user = new User();
-$admin = $user->findById($_SESSION['user_id']);
-
-if (!$admin || $admin['role'] !== 'admin') {
-    header("Location: " . BASE_URL . "/index.php?route=home");
-    exit;
-}
-
+// Authentication and $wardrobe / $allCategories are provided by WardrobeController::editForm()
 $page = 'admin-wardrobe-edit';
 $page_title = 'Edit Wardrobe';
 ?>
@@ -214,7 +196,7 @@ $page_title = 'Edit Wardrobe';
                 <i class="fas fa-edit"></i>
                 Edit <em><?php echo htmlspecialchars($wardrobe['name']); ?></em>
             </h1>
-            <a href="<?php echo APP_URL; ?>/admin-wardrobe" class="back-link">
+            <a href="<?php echo BASE_URL; ?>/index.php?route=admin-wardrobe" class="back-link">
                 <i class="fas fa-arrow-left"></i> Back to Wardrobes
             </a>
         </div>
@@ -303,7 +285,7 @@ $page_title = 'Edit Wardrobe';
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-save"></i> Update Wardrobe
                     </button>
-                    <a href="<?php echo APP_URL; ?>/admin-wardrobe" class="btn btn-secondary">
+                    <a href="<?php echo BASE_URL; ?>/index.php?route=admin-wardrobe" class="btn btn-secondary">
                         <i class="fas fa-times"></i> Cancel
                     </a>
                     <button type="button" class="btn btn-danger" onclick="deleteWardrobe()">
@@ -352,7 +334,7 @@ $page_title = 'Edit Wardrobe';
 
             console.log('Submitting wardrobe update:', { wardrobeId: formData.get('wardrobe_id'), hasImage: !!imageFile });
 
-            fetch('<?php echo APP_URL; ?>/admin-wardrobe-update', {
+            fetch('<?php echo BASE_URL; ?>/index.php?route=admin-wardrobe-update', {
                 method: 'POST',
                 body: formData,
                 credentials: 'same-origin'
@@ -361,7 +343,7 @@ $page_title = 'Edit Wardrobe';
                 console.log('Wardrobe update response status:', response.status);
                 if (!response.ok && response.status === 401) {
                     alert('Session expired. Please login again.');
-                    window.location.href = '<?php echo APP_URL; ?>/index.php?route=signin';
+                    window.location.href = '<?php echo BASE_URL; ?>/index.php?route=signin';
                     return null;
                 }
                 return response.json();
@@ -371,7 +353,7 @@ $page_title = 'Edit Wardrobe';
                 console.log('Wardrobe update response:', data);
                 if (data.success) {
                     alert('Wardrobe updated successfully!');
-                    window.location.href = '<?php echo APP_URL; ?>/admin-wardrobe';
+                    window.location.href = '<?php echo BASE_URL; ?>/index.php?route=admin-wardrobe';
                 } else {
                     alert('Error: ' + (data.message || 'Failed to update wardrobe'));
                 }
@@ -390,7 +372,7 @@ $page_title = 'Edit Wardrobe';
 
                 console.log('Deleting wardrobe:', wardrobeId);
 
-                fetch('<?php echo APP_URL; ?>/admin-wardrobe-delete', {
+                fetch('<?php echo BASE_URL; ?>/index.php?route=admin-wardrobe-delete', {
                     method: 'POST',
                     body: formData,
                     credentials: 'same-origin'
@@ -398,7 +380,8 @@ $page_title = 'Edit Wardrobe';
                 .then(response => {
                     console.log('Delete response status:', response.status);
                     if (!response.ok && response.status === 401) {
-                        alert('Session expired. Please login again.');\n                        window.location.href = '<?php echo APP_URL; ?>/index.php?route=signin';
+                        alert('Session expired. Please login again.');
+                        window.location.href = '<?php echo BASE_URL; ?>/index.php?route=signin';
                         return null;
                     }
                     return response.json();
@@ -407,13 +390,16 @@ $page_title = 'Edit Wardrobe';
                     if (!data) return;
                     console.log('Delete response:', data);
                     if (data.success) {
-                        alert('Wardrobe deleted successfully!');\n                        window.location.href = '<?php echo APP_URL; ?>/admin-wardrobe';
+                        alert('Wardrobe deleted successfully!');
+                        window.location.href = '<?php echo BASE_URL; ?>/index.php?route=admin-wardrobe';
                     } else {
-                        alert('Error: ' + (data.message || 'Failed to delete wardrobe'));\n                    }
+                        alert('Error: ' + (data.message || 'Failed to delete wardrobe'));
+                    }
                 })
                 .catch(error => {
                     console.error('Delete error:', error);
-                    alert('An error occurred while deleting the wardrobe');\n                });
+                    alert('An error occurred while deleting the wardrobe');
+                });
             }
         }
     </script>
