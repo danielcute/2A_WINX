@@ -1044,18 +1044,28 @@ if (!defined('APP_URL')) {
             modal.classList.add('active');
             
             // Fetch wardrobe data
-            fetch('<?php echo BASE_URL; ?>/api-wardrobe.php?action=get&id=' + wardrobeId)
-                .then(response => response.json())
+            console.log('Fetching wardrobe data for ID:', wardrobeId);
+            fetch('<?php echo BASE_URL; ?>/api-wardrobe.php?action=get&id=' + wardrobeId, {
+                credentials: 'same-origin'
+            })
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    if (!response.ok && response.status === 401) {
+                        throw new Error('Session expired');
+                    }
+                    return response.json();
+                })
                 .then(data => {
+                    console.log('Wardrobe data:', data);
                     if (data.success) {
                         populateEditForm(data.data);
                     } else {
-                        form.innerHTML = '<p style="color: red;">Error loading wardrobe data</p>';
+                        form.innerHTML = '<p style="color: red;">Error loading wardrobe data: ' + (data.message || 'Unknown error') + '</p>';
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    form.innerHTML = '<p style="color: red;">Error loading wardrobe data</p>';
+                    form.innerHTML = '<p style="color: red;">Error loading wardrobe data: ' + error.message + '</p>';
                 });
         }
 
