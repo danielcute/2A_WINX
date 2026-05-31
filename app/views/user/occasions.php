@@ -16,7 +16,7 @@ $occasions = $occasionModel->getAll();
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="/SINTA/public/assets/css/global.css">
+  <link rel="stylesheet" href="/assets/css/global.css">
   <style>
     /* Styles remain the same */
     .app-shell {
@@ -188,26 +188,38 @@ $occasions = $occasionModel->getAll();
     <div class="occ-grid stagger">
       <?php if (!empty($occasions)): ?>
         <?php foreach ($occasions as $occasion): ?>
-          <a href="/SINTA/public/index.php?route=packages&occasion=<?= urlencode(strtolower($occasion['events'])) ?>" class="occ-card">
-            <?php if (isset($occasion['image']) && $occasion['image']): ?>
-              <div class="occ-card__img" id="img_<?= $occasion['occasion_id'] ?>">
-                <script>
-                  (function() {
-                    const occId = <?= $occasion['occasion_id'] ?>;
-                    fetch('/SINTA/public/api-occasion.php?image=' + occId)
-                      .then(res => res.json())
-                      .then(data => {
-                        if (data.success && data.image) {
-                          const img = document.getElementById('img_' + occId);
-                          img.style.backgroundImage = 'url(' + data.image + ')';
-                        }
-                      });
-                  })();
-                </script>
-              </div>
-            <?php else: ?>
-              <div class="occ-card__img" style="background: linear-gradient(135deg, #E2D9C8 0%, #D4C7B1 100%); display: flex; align-items: center; justify-content: center;"><i class="fas fa-calendar-alt" style="font-size: 2.5rem; color: #8A7650;"></i></div>
-            <?php endif; ?>
+          <a href="/index.php?route=packages&occasion=<?= urlencode(strtolower($occasion['events'])) ?>" class="occ-card">
+            <div class="occ-card__img" id="img_<?= $occasion['occasion_id'] ?>" style="background: linear-gradient(135deg, #E2D9C8 0%, #D4C7B1 100%); display: flex; align-items: center; justify-content: center;">
+              <i class="fas fa-image" style="font-size: 2.5rem; color: #8A7650; opacity: 0.3;"></i>
+            </div>
+            <script>
+              (function() {
+                const occId = <?= $occasion['occasion_id'] ?>;
+                const imgContainer = document.getElementById('img_' + occId);
+                
+                // Load image via API
+                fetch('/api-occasion.php?image=' + occId)
+                  .then(res => {
+                    if (!res.ok) throw new Error('Image not found');
+                    return res.json();
+                  })
+                  .then(data => {
+                    if (data.success && data.image) {
+                      imgContainer.style.backgroundImage = 'url(' + data.image + ')';
+                      imgContainer.style.backgroundSize = 'cover';
+                      imgContainer.style.backgroundPosition = 'center';
+                      // Clear the loading icon
+                      imgContainer.innerHTML = '';
+                    } else {
+                      console.warn('No image for occasion', occId);
+                    }
+                  })
+                  .catch(err => {
+                    console.warn('Image load failed for occasion ' + occId + ':', err.message);
+                    // Keep placeholder visible
+                  });
+              })();
+            </script>
             <div class="occ-card__body">
               <div class="occ-card__icon"><i class="fas fa-calendar"></i></div>
               <div class="occ-card__text">
@@ -223,7 +235,7 @@ $occasions = $occasionModel->getAll();
         <p>No occasions available.</p>
       <?php endif; ?>
       
-      <a href="/SINTA/public/index.php?route=packages&occasion=other" class="occ-card">
+      <a href="/index.php?route=packages&occasion=other" class="occ-card">
         <div class="occ-card__img" style="background: linear-gradient(135deg, #F0E5D8 0%, #E8D5C4 100%); display: flex; align-items: center; justify-content: center;"><i class="fas fa-plus" style="font-size: 2.5rem; color: #8A7650;"></i></div>
         <div class="occ-card__body occ-card__body--center">
           <div class="occ-card__icon occ-card__icon--lg"><i class="fas fa-plus"></i></div>

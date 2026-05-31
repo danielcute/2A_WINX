@@ -18,7 +18,7 @@ class Booking {
     public function getAll() {
         // Fetch all plans as bookings (from plans_tbl)
         $sql = "SELECT p.plan_id as checkout_id, p.user_id, p.event_name, p.event_date, p.venue, 
-                p.guest_count, p.total_price as total_amount, p.status, p.theme, p.event_time,
+                p.guest_count, p.total_price as total_amount, p.total_paid, p.balance_remaining, p.status, p.theme, p.event_time,
                 u.first_name, u.last_name, u.email, u.phone
                 FROM plans_tbl p
                 LEFT JOIN users_tbl u ON p.user_id = u.user_id

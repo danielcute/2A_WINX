@@ -3,7 +3,12 @@
  * Script to quickly populate or reset occasions with images
  * Reads images from assets/img and stores as BLOB in database
  */
-require_once dirname(__FILE__) . '/../config/database.php';
+
+if (!defined('ROOT_PATH')) {
+    define('ROOT_PATH', dirname(__DIR__));
+}
+
+require_once ROOT_PATH . '/config/database.php';
 
 $db = Database::getInstance()->getConnection();
 
@@ -84,8 +89,8 @@ echo "<p><strong>Summary:</strong> $success_count success, $fail_count failed</p
 
 if ($success_count > 0) {
     echo "<p style='color: green;'><strong>✓ Done! Occasions are now in the database with images.</strong></p>";
-    echo "<p><a href='/SINTA/public/index.php?route=occasions' style='color: #8A7650; font-weight: bold;'>View Occasions →</a></p>";
-    echo "<p><a href='/SINTA/public/index.php?route=admin-occasions' style='color: #8A7650; font-weight: bold;'>View Admin Occasions →</a></p>";
+    echo "<p><a href='/index.php?route=occasions' style='color: #8A7650; font-weight: bold;'>View Occasions →</a></p>";
+    echo "<p><a href='/index.php?route=admin-occasions' style='color: #8A7650; font-weight: bold;'>View Admin Occasions →</a></p>";
 } else {
     echo "<p style='color: red;'><strong>⚠ No occasions were populated. Check image paths above.</strong></p>";
 }

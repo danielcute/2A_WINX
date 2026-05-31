@@ -1,17 +1,41 @@
 <?php
 /**
  * Database Configuration — Sinta
- * Place this file at: /SINTA/config/database.php
- *
- * Matches your sinta_db running on XAMPP (MariaDB port 3307).
- * Change DB_HOST, DB_PORT, DB_USER, DB_PASS if your setup differs.
+ * Environment-aware configuration for local development and production deployment
+ * 
+ * AUTO-DETECTED:
+ * - Local: localhost:3306, root user (no password)
+ * - Production: Hostinger remote database with credentials
  */
 
-define('DB_HOST', '127.0.0.1');
-define('DB_PORT', 3307);          // Change to 3306 if using default MySQL port
-define('DB_USER', 'root');        // Change to your MySQL username
-define('DB_PASS', '');            // Change to your MySQL password (blank by default in XAMPP)
-define('DB_NAME', 'sinta_db');
+// Detect environment
+$is_localhost = (
+    $_SERVER['HTTP_HOST'] === 'localhost' ||
+    $_SERVER['HTTP_HOST'] === '127.0.0.1' ||
+    $_SERVER['HTTP_HOST'] === 'localhost:8080' ||
+    $_SERVER['HTTP_HOST'] === 'localhost:80' ||
+    strpos($_SERVER['HTTP_HOST'], 'localhost') === 0 ||
+    strpos($_SERVER['HTTP_HOST'], '127.0.0.1') === 0
+);
+
+// Environment-based configuration
+if ($is_localhost || gethostname() === 'DESKTOP' || getenv('ENV') === 'local') {
+    // LOCAL DEVELOPMENT (XAMPP)
+    define('DB_HOST', 'localhost');
+    define('DB_PORT', 3306);              // Standard XAMPP MySQL port
+    define('DB_USER', 'root');            // XAMPP default user
+    define('DB_PASS', '');                // XAMPP default (no password)
+    define('DB_NAME', 'sinta_db');        // Local database name
+    define('ENVIRONMENT', 'LOCAL');
+} else {
+    // PRODUCTION (Hostinger)
+    define('DB_HOST', 'localhost');       // Hostinger uses localhost from their server
+    define('DB_PORT', 3307);              // Hostinger custom port
+    define('DB_USER', 'u536627044_sinta');
+    define('DB_PASS', 'Sinta2026');
+    define('DB_NAME', 'u536627044_sinta');
+    define('ENVIRONMENT', 'PRODUCTION');
+}
 
 class Database {
     private static $instance = null;

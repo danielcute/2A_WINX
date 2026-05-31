@@ -3,22 +3,22 @@
 ?>
 <nav class="app-nav" id="mainNav">
   <div class="app-nav__inner">
-    <a href="/SINTA/public/index.php?route=homepage" class="app-nav__logo">
-      <img src="/SINTA/public/assets/img/logo.png" alt="Sinta Logo" class="nav__logo-img" onerror="this.src='https://placehold.co/32x32/8A7650/white?text=S'">
+    <a href="/index.php?route=homepage" class="app-nav__logo">
+      <img src="/assets/img/logo.png" alt="Sinta Logo" class="nav__logo-img" onerror="this.src='https://placehold.co/32x32/8A7650/white?text=S'">
       <span class="nav__logo-text">Sinta</span>
     </a>
 
     <div class="app-nav__links">
-      <a href="/SINTA/public/index.php?route=homepage" class="app-nav__link <?= (isset($page) && $page === 'homepage') ? 'active' : '' ?>">
+      <a href="/index.php?route=homepage" class="app-nav__link <?= (isset($page) && $page === 'homepage') ? 'active' : '' ?>">
         <i class="fas fa-home"></i><span>Home</span>
       </a>
-      <a href="/SINTA/public/index.php?route=plans" class="app-nav__link <?= (isset($page) && $page === 'plans') ? 'active' : '' ?>">
+      <a href="/index.php?route=plans" class="app-nav__link <?= (isset($page) && $page === 'plans') ? 'active' : '' ?>">
         <i class="fas fa-calendar-check"></i><span>Plans</span>
       </a>
-      <a href="/SINTA/public/index.php?route=occasions" class="app-nav__link <?= (isset($page) && $page === 'occasions') ? 'active' : '' ?>">
+      <a href="/index.php?route=occasions" class="app-nav__link <?= (isset($page) && $page === 'occasions') ? 'active' : '' ?>">
         <i class="fas fa-gift"></i><span>Occasions</span>
       </a>
-      <a href="/SINTA/public/index.php?route=messages" class="app-nav__link <?= (isset($page) && $page === 'messages') ? 'active' : '' ?>">
+      <a href="/index.php?route=messages" class="app-nav__link <?= (isset($page) && $page === 'messages') ? 'active' : '' ?>">
         <i class="fas fa-comment"></i><span>Messages</span>
       </a>
     </div>
@@ -49,7 +49,7 @@
       <div class="app-nav__profile-wrapper" style="position: relative;">
         <div class="app-nav__profile" id="profileBtn">
           <div class="app-nav__avatar">
-            <img src="<?php echo htmlspecialchars($_SESSION['user_avatar'] ?? '/SINTA/public/assets/img/default-avatar.jpg'); ?>" alt="<?php echo htmlspecialchars($_SESSION['user_name'] ?? 'User'); ?>">
+            <img src="<?php echo htmlspecialchars($_SESSION['user_avatar'] ?? '/assets/img/default-avatar.jpg'); ?>" alt="<?php echo htmlspecialchars($_SESSION['user_name'] ?? 'User'); ?>">
           </div>
           <span class="app-nav__profile-name"><?php echo htmlspecialchars(substr($_SESSION['user_name'] ?? 'User', 0, 1) . ' ' . $_SESSION['user_last_name'] ?? 'User'); ?></span>
           <i class="fas fa-chevron-down app-nav__chevron"></i>
@@ -59,7 +59,7 @@
             <div class="profile-name"><?php echo htmlspecialchars(($_SESSION['user_name'] ?? 'User') . ' ' . ($_SESSION['user_last_name'] ?? '')); ?></div>
             <div class="profile-email-nav"><?php echo htmlspecialchars($_SESSION['user_email'] ?? 'email@example.com'); ?></div>
           </div>
-          <a href="/SINTA/public/index.php?route=profile" class="profile-dropdown__item">
+          <a href="/index.php?route=profile" class="profile-dropdown__item">
             <i class="fas fa-user"></i> Profile
           </a>
           <hr class="profile-dropdown__divider">
@@ -79,22 +79,22 @@
 <div class="mobile-menu" id="mobileMenu">
   <div class="mobile-menu__inner">
     <div class="mobile-menu__logo">
-      <img src="/SINTA/public/assets/img/logo.png" alt="Sinta Logo" class="mobile-menu__logo-img">
+      <img src="/assets/img/logo.png" alt="Sinta Logo" class="mobile-menu__logo-img">
       <span class="mobile-menu__logo-text">Sinta</span>
     </div>
     <div class="mobile-menu__user">
-      <img src="<?php echo htmlspecialchars($_SESSION['user_avatar'] ?? '/SINTA/public/assets/img/default-avatar.jpg'); ?>" alt="<?php echo htmlspecialchars($_SESSION['user_name'] ?? 'User'); ?>">
+      <img src="<?php echo htmlspecialchars($_SESSION['user_avatar'] ?? '/assets/img/default-avatar.jpg'); ?>" alt="<?php echo htmlspecialchars($_SESSION['user_name'] ?? 'User'); ?>">
       <div>
         <div class="mobile-menu__name"><?php echo htmlspecialchars(($_SESSION['user_name'] ?? 'User') . ' ' . ($_SESSION['user_last_name'] ?? '')); ?></div>
         <div class="mobile-menu__email"><?php echo htmlspecialchars($_SESSION['user_email'] ?? 'email@example.com'); ?></div>
       </div>
     </div>
     <div class="mobile-menu__links">
-      <a href="/SINTA/public/index.php?route=homepage" class="mobile-menu__link">Home</a>
-      <a href="/SINTA/public/index.php?route=plans" class="mobile-menu__link">Plans</a>
-      <a href="/SINTA/public/index.php?route=occasions" class="mobile-menu__link">Occasions</a>
-      <a href="/SINTA/public/index.php?route=messages" class="mobile-menu__link">Messages</a>
-      <a href="/SINTA/public/index.php?route=profile" class="mobile-menu__link">Profile</a>
+      <a href="/index.php?route=homepage" class="mobile-menu__link">Home</a>
+      <a href="/index.php?route=plans" class="mobile-menu__link">Plans</a>
+      <a href="/index.php?route=occasions" class="mobile-menu__link">Occasions</a>
+      <a href="/index.php?route=messages" class="mobile-menu__link">Messages</a>
+      <a href="/index.php?route=profile" class="mobile-menu__link">Profile</a>
     </div>
     <div class="mobile-menu__footer">
       <a href="#" class="mobile-menu__logout" onclick="openLogoutModal(event);">
@@ -423,6 +423,7 @@
   border-bottom: 1px solid #E2D9C8;
   cursor: pointer;
   transition: background 0.2s ease;
+  position: relative;
 }
 
 .notif-dropdown__item:last-child {
@@ -431,6 +432,103 @@
 
 .notif-dropdown__item:hover {
   background: #F5F0E8;
+}
+
+.notif-dropdown__item.notif-read {
+  opacity: 0.7;
+  background: #FCFAF7;
+}
+
+.notif-icon-wrapper {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(138, 118, 80, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.notif-icon-wrapper i {
+  font-size: 0.9rem;
+}
+
+.notif-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.notif-title {
+  font-size: 0.82rem;
+  color: #2C2820;
+  font-weight: 500;
+  margin: 0;
+  word-break: break-word;
+}
+
+.notif-message {
+  font-size: 0.75rem;
+  color: #8A8475;
+  margin-top: 0.25rem;
+  word-break: break-word;
+}
+
+.notif-time {
+  font-size: 0.7rem;
+  color: #A8A09B;
+  margin-top: 0.3rem;
+}
+
+.notif-actions {
+  display: flex;
+  gap: 0.4rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.notif-dropdown__item:hover .notif-actions {
+  opacity: 1;
+}
+
+.notif-action-btn {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: rgba(138, 118, 80, 0.1);
+  border-radius: 6px;
+  color: #8A7650;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.notif-action-btn:hover {
+  background: rgba(138, 118, 80, 0.2);
+  color: #6B5A3E;
+}
+
+.notif-action-btn.notif-delete-btn:hover {
+  background: rgba(192, 57, 43, 0.2);
+  color: #c0392b;
+}
+
+.notif-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.25rem;
+  color: #8A8475;
+}
+
+.notif-loading i {
+  font-size: 1.5rem;
 }
 
 .notif-dot {
@@ -444,18 +542,6 @@
 
 .notif-dot.read {
   background: #A8A09B;
-}
-
-.notif-title {
-  font-size: 0.82rem;
-  color: #2C2820;
-  font-weight: 500;
-}
-
-.notif-time {
-  font-size: 0.7rem;
-  color: #8A8475;
-  margin-top: 0.2rem;
 }
 
 .app-nav__mobile-btn {
@@ -642,6 +728,19 @@
 </style>
 
 <script>
+// Notification Type Configuration
+const notificationTypes = {
+  'realtime': { icon: 'fa-clock', label: 'Real-time Update', color: '#8A7650' },
+  'messages': { icon: 'fa-envelope', label: 'Message', color: '#3498db' },
+  'ratings': { icon: 'fa-star', label: 'Rating', color: '#f39c12' },
+  'replies': { icon: 'fa-reply', label: 'Reply', color: '#1abc9c' },
+  'feedback': { icon: 'fa-comment-dots', label: 'Feedback', color: '#9b59b6' },
+  'book_confirmation': { icon: 'fa-calendar-check', label: 'Book Confirmation', color: '#27ae60' },
+  'new_updates': { icon: 'fa-bell', label: 'New Update', color: '#e74c3c' },
+  'receipts': { icon: 'fa-receipt', label: 'Receipt', color: '#2c3e50' },
+  'system_update': { icon: 'fa-cog', label: 'System Update', color: '#95a5a6' }
+};
+
 (function() {
   const nav = document.getElementById('mainNav');
   const mobileBtn = document.getElementById('mobileMenuBtn');
@@ -650,6 +749,172 @@
   const profileDropdown = document.getElementById('profileDropdown');
   const notifBtn = document.getElementById('notifBtn');
   const notifDropdown = document.getElementById('notifDropdown');
+  const notifContainer = document.querySelector('.notif-dropdown__container');
+  const notifBadge = document.querySelector('.app-nav__badge');
+  let notificationRefreshInterval = null;
+
+  // Function to get notification icon and color
+  function getNotificationTypeInfo(type) {
+    return notificationTypes[type] || notificationTypes['system_update'];
+  }
+
+  // Function to format time
+  function formatTime(timestamp) {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diff = Math.floor((now - date) / 1000); // seconds
+    
+    if (diff < 60) return 'Just now';
+    if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+    if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+    if (diff < 604800) return Math.floor(diff / 86400) + 'd ago';
+    
+    return date.toLocaleDateString();
+  }
+
+  // Function to load notifications
+  function loadNotifications() {
+    if (!notifContainer) return;
+
+    fetch('/public/api-notification.php?action=get_unread&limit=10')
+      .then(response => response.json())
+      .then(data => {
+        if (data.success && data.notifications) {
+          // Update badge
+          if (notifBadge && data.unread_count > 0) {
+            notifBadge.textContent = data.unread_count > 99 ? '99+' : data.unread_count;
+            notifBadge.style.display = 'flex';
+          } else if (notifBadge) {
+            notifBadge.style.display = 'none';
+          }
+
+          // Render notifications
+          renderNotifications(data.notifications);
+        } else {
+          notifContainer.innerHTML = '<div style="padding: 1.5rem; text-align: center; color: #8A8475;"><p>No notifications yet</p></div>';
+        }
+      })
+      .catch(error => {
+        console.error('Error loading notifications:', error);
+        notifContainer.innerHTML = '<div style="padding: 1.5rem; text-align: center; color: #c0392b;"><p>Error loading notifications</p></div>';
+      });
+  }
+
+  // Function to render notifications
+  function renderNotifications(notifications) {
+    if (!notifContainer) return;
+
+    if (notifications.length === 0) {
+      notifContainer.innerHTML = '<div style="padding: 1.5rem; text-align: center; color: #8A8475;"><p>No notifications</p></div>';
+      return;
+    }
+
+    let html = '';
+    notifications.forEach(notif => {
+      const typeInfo = getNotificationTypeInfo(notif.type);
+      const isRead = notif.is_read == 1;
+      const timeStr = formatTime(notif.created_at);
+
+      html += `
+        <div class="notif-dropdown__item ${isRead ? 'notif-read' : ''}" data-id="${notif.id}">
+          <div class="notif-icon-wrapper">
+            <i class="fas ${typeInfo.icon}" style="color: ${typeInfo.color};"></i>
+          </div>
+          <div class="notif-content">
+            <div class="notif-title">${notif.title || typeInfo.label}</div>
+            <div class="notif-message" style="font-size: 0.75rem; color: #8A8475; margin-top: 0.25rem;">${notif.message || ''}</div>
+            <div class="notif-time">${timeStr}</div>
+          </div>
+          <div class="notif-actions">
+            <button class="notif-action-btn" onclick="markNotificationAsRead(${notif.id})" title="Mark as read">
+              <i class="fas fa-check"></i>
+            </button>
+            <button class="notif-action-btn notif-delete-btn" onclick="deleteNotification(${notif.id})" title="Delete">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </div>
+        </div>
+      `;
+    });
+
+    notifContainer.innerHTML = html;
+  }
+
+  // Mark notification as read
+  window.markNotificationAsRead = function(notificationId) {
+    fetch('/public/api-notification.php?action=mark_as_read', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'notification_id=' + notificationId
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        loadNotifications();
+      }
+    })
+    .catch(error => console.error('Error marking notification as read:', error));
+  };
+
+  // Delete notification
+  window.deleteNotification = function(notificationId) {
+    fetch('/public/api-notification.php?action=delete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'notification_id=' + notificationId
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        loadNotifications();
+      }
+    })
+    .catch(error => console.error('Error deleting notification:', error));
+  };
+
+  // Mark all as read
+  window.markAllNotificationsAsRead = function(e) {
+    e.preventDefault();
+    fetch('/public/api-notification.php?action=mark_all_as_read', { method: 'POST' })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          loadNotifications();
+        }
+      })
+      .catch(error => console.error('Error marking all as read:', error));
+  };
+
+  // Setup notification button click
+  if (notifBtn) {
+    notifBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      notifDropdown.classList.toggle('active');
+      if (profileDropdown) profileDropdown.classList.remove('active');
+      
+      // Load notifications when dropdown opens
+      if (notifDropdown.classList.contains('active')) {
+        loadNotifications();
+        
+        // Auto-refresh every 30 seconds while dropdown is open
+        if (!notificationRefreshInterval) {
+          notificationRefreshInterval = setInterval(loadNotifications, 30000);
+        }
+      } else {
+        // Clear interval when dropdown closes
+        if (notificationRefreshInterval) {
+          clearInterval(notificationRefreshInterval);
+          notificationRefreshInterval = null;
+        }
+      }
+    });
+  }
+
+  // Mark all read link
+  const markAllReadLink = document.querySelector('.notif-dropdown__header a');
+  if (markAllReadLink) {
+    markAllReadLink.addEventListener('click', window.markAllNotificationsAsRead);
+  }
 
   if (nav) {
     window.addEventListener('scroll', function() {
@@ -765,7 +1030,7 @@ function closeLogoutModal() {
 }
 
 function confirmLogout() {
-  window.location.href = '/SINTA/public/index.php?route=logout';
+  window.location.href = '/index.php?route=logout';
 }
 
 // Close modal when clicking outside of it

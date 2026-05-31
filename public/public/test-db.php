@@ -1,5 +1,9 @@
 <?php
-require_once dirname(__DIR__) . '/config/database.php';
+if (!defined('ROOT_PATH')) {
+    define('ROOT_PATH', dirname(dirname(__DIR__)));
+}
+
+require_once ROOT_PATH . '/config/database.php';
 
 echo "<h1>Database Connection Test</h1>";
 

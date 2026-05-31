@@ -10,7 +10,14 @@
  */
 
 if (!defined('ROOT_PATH')) {
-    define('ROOT_PATH', dirname(dirname(__DIR__)));
+    // Check if app folder exists at current level (production) or parent level (local)
+    $appDir = dirname(dirname(__DIR__));
+    if (is_dir($appDir . '/app')) {
+        define('ROOT_PATH', $appDir);
+    } else {
+        // Go up 3 levels from controllers folder
+        define('ROOT_PATH', $appDir);
+    }
 }
 require_once ROOT_PATH . '/config/database.php';
 require_once ROOT_PATH . '/app/models/Notification.php';
@@ -254,7 +261,7 @@ class AdminPackageController
         $ext           = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
         $file_name     = 'package_' . $package_id . '_' . time() . '.' . $ext;
         $target_file   = $upload_dir . $file_name;
-        $relative_path = '/SINTA/public/assets/img/packages/' . $file_name;
+        $relative_path = '/assets/img/packages/' . $file_name;
 
         if (move_uploaded_file($file['tmp_name'], $target_file)) {
             // ✅ Update the image column in packages_tbl

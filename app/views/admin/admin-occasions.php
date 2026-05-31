@@ -1,6 +1,7 @@
 <?php
 // Authentication is already checked by index.php
 // Set page title for use in admin-nav.php
+$page = 'admin-occasions';
 $page_title = 'Occasions Management';
 
 require_once ROOT_PATH . '/config/database.php';
@@ -34,7 +35,7 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Occasions Management | Sinta Admin</title>
-    <link rel="stylesheet" href="/SINTA/public/assets/css/global.css">
+    <link rel="stylesheet" href="/assets/css/global.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         .occasions-container {
@@ -511,7 +512,7 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
                         <?php if (isset($occasion['image']) && $occasion['image']): ?>
                             <img id="occImg_<?= $occasion['occasion_id'] ?>" alt="<?= htmlspecialchars($occasion['events']) ?>" style="display: none;">
                             <script>
-                                fetch('/SINTA/public/api-occasion.php?image=<?= $occasion['occasion_id'] ?>')
+                                fetch('/api-occasion.php?image=<?= $occasion['occasion_id'] ?>')
                                     .then(res => res.json())
                                     .then(data => {
                                         if (data.success && data.image) {
@@ -637,7 +638,7 @@ function editOccasion(id) {
     document.getElementById('occasionId').value = id;
     
     // Fetch occasion data via AJAX
-    fetch('/SINTA/public/api-occasion.php?id=' + id)
+    fetch('/api-occasion.php?id=' + id)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -647,7 +648,7 @@ function editOccasion(id) {
                 
                 // Load image if it exists
                 if (occasion.has_image) {
-                    fetch('/SINTA/public/api-occasion.php?image=' + id)
+                    fetch('/api-occasion.php?image=' + id)
                         .then(res => res.json())
                         .then(imgData => {
                             if (imgData.success) {
@@ -668,7 +669,7 @@ function editOccasion(id) {
 // Delete occasion
 function deleteOccasion(id) {
     if (confirm('Are you sure you want to delete this occasion? This will affect all associated packages.')) {
-        fetch('/SINTA/public/api-occasion.php', {
+        fetch('/api-occasion.php', {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
@@ -715,7 +716,7 @@ occasionForm.addEventListener('submit', (e) => {
     
     // For updates with FormData, we'll send as POST with action parameter
     // since PUT doesn't work well with FormData in all browsers
-    const url = occasion_id ? '/SINTA/public/api-occasion.php?action=update' : '/SINTA/public/api-occasion.php';
+    const url = occasion_id ? '/api-occasion.php?action=update' : '/api-occasion.php';
     
     fetch(url, {
         method: 'POST',

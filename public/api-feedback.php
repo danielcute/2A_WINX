@@ -34,7 +34,7 @@ try {
             exit;
         }
         
-        $sql = "SELECT f.feedback_id, f.subject, f.message, f.status, f.created_at,
+        $sql = "SELECT f.feedback_id, f.subject, f.message, f.rating, f.status, f.created_at,
                 u.first_name, u.last_name, u.image as user_image
                 FROM feedback_tbl f
                 LEFT JOIN users_tbl u ON f.user_id = u.user_id

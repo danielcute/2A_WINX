@@ -3,12 +3,14 @@ $page = 'profile';
 
 // Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
-    header('Location: /SINTA/public/index.php?route=signin');
+    header('Location: /index.php?route=signin');
     exit;
 }
 
 // Fetch full user data from database
-define('ROOT_PATH', dirname(dirname(dirname(__FILE__))));
+if (!defined('ROOT_PATH')) {
+    define('ROOT_PATH', dirname(dirname(dirname(__DIR__))));
+}
 require_once ROOT_PATH . '/app/models/User.php';
 require_once ROOT_PATH . '/app/models/Feedback.php';
 
@@ -18,7 +20,7 @@ $user = $userModel->findById($_SESSION['user_id']);
 
 if (!$user) {
     $_SESSION['login_error'] = 'User data not found';
-    header('Location: /SINTA/public/index.php?route=signin');
+    header('Location: /index.php?route=signin');
     exit;
 }
 
@@ -57,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['avatar'])) {
     $file = $_FILES['avatar'];
     $file_name = 'user_' . $user['id'] . '_' . time() . '.' . pathinfo($file['name'], PATHINFO_EXTENSION);
     $target_file = $upload_dir . $file_name;
-    $relative_path = '/SINTA/public/assets/img/' . $file_name;
+    $relative_path = '/assets/img/' . $file_name;
     
     // Allowed file types
     $allowed_types = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'image/webp'];
@@ -175,20 +177,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Check if avatar exists, otherwise use default
-$avatar_path = !empty($user['image']) ? $user['image'] : '/SINTA/public/assets/img/default-avatar.jpg';
+$avatar_path = !empty($user['image']) ? $user['image'] : '/assets/img/default-avatar.jpg';
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Profile — Sinta</title>
     <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="/SINTA/public/assets/css/profile.css">
+    <link rel="stylesheet" href="/assets/css/profile.css">
     <style>
         /* Additional styles for avatar upload */
         .avatar-upload-modal {
@@ -276,7 +280,88 @@ $avatar_path = !empty($user['image']) ? $user['image'] : '/SINTA/public/assets/i
             border-color: var(--gold);
             box-shadow: 0 0 0 2px var(--gold-pale);
         }
-    </style>
+        
+        /* Mobile responsive improvements */
+        @media (max-width: 768px) {
+            .avatar-upload-modal {
+                display: flex !important;
+            }
+
+            .avatar-upload-content {
+                max-width: 95%;
+                padding: 1.5rem;
+            }
+
+            .avatar-preview {
+                width: 100px;
+                height: 100px;
+            }
+
+            .upload-area {
+                padding: 1rem;
+                margin: 0.75rem 0;
+            }
+
+            .upload-area i {
+                font-size: 1.5rem;
+            }
+
+            .default-avatars {
+                gap: 0.75rem;
+            }
+
+            .default-avatar {
+                width: 50px;
+                height: 50px;
+            }
+
+            .modal-buttons {
+                gap: 0.75rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .avatar-upload-content {
+                max-width: 100%;
+                width: 95%;
+                padding: 1rem;
+                border-radius: 12px;
+            }
+
+            .avatar-preview {
+                width: 80px;
+                height: 80px;
+            }
+
+            .upload-area {
+                padding: 1rem;
+                margin: 0.5rem 0;
+            }
+
+            .upload-area i {
+                font-size: 1.25rem;
+                margin-bottom: 0.25rem;
+            }
+
+            .modal-buttons {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .modal-buttons .btn {
+                width: 100%;
+            }
+
+            .default-avatars {
+                gap: 0.5rem;
+            }
+
+            .default-avatar {
+                width: 45px;
+                height: 45px;
+                font-size: 1.5rem;
+            }
+        }
 </head>
 <body>
 
@@ -423,8 +508,57 @@ $avatar_path = !empty($user['image']) ? $user['image'] : '/SINTA/public/assets/i
             </div>
         </div>
         
-        <!-- Tab: Security -->
+<!-- Tab: Security -->
         <div id="tab-security" class="profile-pane">
+            <div class="pane-card">
+                <div class="pane-card__head">
+                    <h3 class="pane-card__title">Two-Factor Authentication</h3>
+                    <span class="pane-card__hint">Add an extra layer of security to your account</span>
+                </div>
+<?php
+                // Check 2FA status
+                $twoFactorStatus = $userModel->isTwoFactorEnabled($_SESSION['user_id']);
+                $twoFaEnabled = $twoFactorStatus && isset($twoFactorStatus['two_factor_enabled']) && $twoFactorStatus['two_factor_enabled'] == 1;
+                $hasPendingVerification = isset($_SESSION['pending_2fa_verification']) && $_SESSION['pending_2fa_verification'];
+                ?>
+                <div class="pane-card__body">
+                    <div style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: <?php echo $twoFaEnabled ? '#f0fdf4' : '#fef3c7'; ?>; border-radius: 12px; margin-bottom: 1rem;">
+                        <div style="width: 48px; height: 48px; border-radius: 50%; background: <?php echo $twoFaEnabled ? '#16a34a' : '#d97706'; ?>; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.25rem;">
+                            <i class="fas fa-shield-<?php echo $twoFaEnabled ? 'checkmark' : 'exclamation-triangle'; ?>"></i>
+                        </div>
+                        <div>
+                            <strong style="color: <?php echo $twoFaEnabled ? '#16a34a' : '#d97706'; ?>;">
+                                <?php echo $twoFaEnabled ? 'Two-Factor Authentication Enabled' : 'Two-Factor Authentication Not Enabled'; ?>
+                            </strong>
+                            <p style="margin: 0.25rem 0 0 0; color: #666; font-size: 0.9rem;">
+                                <?php echo $twoFaEnabled 
+                                    ? 'Your account is protected with 2FA using Google Authenticator or similar apps.' 
+                                    : 'Enable 2FA to add an extra layer of security to your account.'; ?>
+                            </p>
+                            <?php if ($hasPendingVerification): ?>
+                            <p style="margin: 0.5rem 0 0 0; color: #d97706; font-size: 0.85rem;">
+                                <i class="fas fa-info-circle"></i> Pending verification - you can verify now or use your auth app on next login
+                            </p>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    
+                    <?php if ($twoFaEnabled): ?>
+                        <!-- Optionally verify 2FA code from settings -->
+                        <a href="/index.php?route=verify-2fa" class="btn btn--gold" style="margin-right: 0.5rem;">
+                            <i class="fas fa-shield-alt"></i> Verify Code
+                        </a>
+                        <a href="/index.php?route=disable-2fa" class="btn btn--ghost" style="color: #dc2626; border-color: #dc2626;" onclick="return confirm('Are you sure you want to disable Two-Factor Authentication? Your account will be less secure.');">
+                            <i class="fas fa-shield-alt"></i> Disable 2FA
+                        </a>
+                    <?php else: ?>
+                        <a href="/index.php?route=setup-2fa" class="btn btn--gold">
+                            <i class="fas fa-shield-alt"></i> Set Up 2FA
+                        </a>
+                    <?php endif; ?>
+                </div>
+            </div>
+            
             <div class="pane-card">
                 <div class="pane-card__head">
                     <h3 class="pane-card__title">Change Password</h3>
@@ -726,10 +860,10 @@ $avatar_path = !empty($user['image']) ? $user['image'] : '/SINTA/public/assets/i
         </form>
         
         <div class="default-avatars">
-            <img src="/SINTA/public/assets/images/aelarie.jpg" class="default-avatar" onclick="selectDefaultAvatar('/SINTA/public/assets/images/avatars/default-avatar.jpg')">
-            <img src="/SINTA/public/assets/images/elarie.jpg" class="default-avatar" onclick="selectDefaultAvatar('/SINTA/public/assets/images/avatars/avatar-2.jpg')">
-            <img src="/SINTA/public/assets/images/elarie.jpg" class="default-avatar" onclick="selectDefaultAvatar('/SINTA/public/assets/images/avatars/avatar-3.jpg')">
-            <img src="/SINTA/public/assets/images/elarie.jpg" class="default-avatar" onclick="selectDefaultAvatar('assets/images/avatars/avatar-4.jpg')">
+            <img src="/assets/images/aelarie.jpg" class="default-avatar" onclick="selectDefaultAvatar('/assets/images/avatars/default-avatar.jpg')">
+            <img src="/assets/images/elarie.jpg" class="default-avatar" onclick="selectDefaultAvatar('/assets/images/avatars/avatar-2.jpg')">
+            <img src="/assets/images/elarie.jpg" class="default-avatar" onclick="selectDefaultAvatar('/assets/images/avatars/avatar-3.jpg')">
+            <img src="/assets/images/elarie.jpg" class="default-avatar" onclick="selectDefaultAvatar('assets/images/avatars/avatar-4.jpg')">
         </div>
         
         <div class="modal-buttons">
@@ -926,7 +1060,7 @@ document.getElementById('profileFeedbackForm').addEventListener('submit', functi
     formData.append('message', this.querySelector('[name="message"]').value);
     formData.append('rating', document.getElementById('profileFeedbackRatingValue').value);
     
-    fetch('/SINTA/public/index.php?route=feedback', {
+    fetch('/index.php?route=feedback', {
         method: 'POST',
         body: formData,
         credentials: 'same-origin'
@@ -986,7 +1120,7 @@ function sendReplyFromProfile(feedbackId) {
     formData.append('feedback_id', feedbackId);
     formData.append('message', message);
     
-    fetch('/SINTA/public/index.php?route=feedback', {
+    fetch('/index.php?route=feedback', {
         method: 'POST',
         body: formData,
         credentials: 'same-origin'

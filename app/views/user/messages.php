@@ -1,15 +1,19 @@
 <?php 
 $page = 'messages';
 if (!isset($_SESSION['user_logged_in']) && !isset($_SESSION['admin_logged_in'])) {
-    header('Location: /SINTA/public/index.php?route=signin');
+    header('Location: /index.php?route=signin');
     exit;
 }
 $user_id = $_SESSION['user_id'];
+require_once ROOT_PATH . '/app/models/Plan.php';
 require_once ROOT_PATH . '/app/controllers/MessagingController.php';
+
+$planModel = new Plan();
 $msgCtrl = new MessagingController();
 
 // Handle sending a new message
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'send') {
+    $plan_id = isset($_POST['plan_id']) ? (int)$_POST['plan_id'] : 0;
     $subject = trim($_POST['subject'] ?? '');
     $message_text = trim($_POST['message_text'] ?? '');
     $message_type = $_POST['message_type'] ?? 'inquiry';
@@ -20,17 +24,60 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         } else {
             $_SESSION['msg_error'] = 'Failed to send: ' . $result['error'];
         }
-        header('Location: /SINTA/public/index.php?route=messages');
+        header('Location: /index.php?route=messages&plan_id=' . $plan_id);
         exit;
     }
 }
 
-// Get all conversation threads for this user
-$threads = $msgCtrl->getUserFullConversation($user_id);
-$selected_id = isset($_GET['thread']) ? (int)$_GET['thread'] : ($threads[0]['message_id'] ?? 0);
-$selected_thread = null;
-if ($selected_id) {
-    $selected_thread = $msgCtrl->getConversationByMessageId($selected_id, $user_id, false);
+// Get all conversations for this user
+$all_conversations = $msgCtrl->getUserFullConversation($user_id);
+
+// Extract event names that have messages
+$events_with_messages = [];
+foreach ($all_conversations as $conv) {
+    // Extract event name from subject (format: "Event Name - Inquiry")
+    $subject = $conv['subject'];
+    if (strpos($subject, ' - Inquiry') !== false) {
+        $event_name = str_replace(' - Inquiry', '', $subject);
+        if (!in_array($event_name, $events_with_messages)) {
+            $events_with_messages[] = $event_name;
+        }
+    }
+}
+
+// Get user's booked events
+$userPlans = $planModel->getUserPlans($user_id);
+
+// Filter plans to show only those with messages
+$plansWithMessages = [];
+foreach ($userPlans as $plan) {
+    if (in_array($plan['event_name'], $events_with_messages)) {
+        $plansWithMessages[] = $plan;
+    }
+}
+
+// Use filtered plans for display
+$displayPlans = $plansWithMessages;
+
+// Get selected plan (event)
+$selected_plan_id = isset($_GET['plan_id']) ? (int)$_GET['plan_id'] : ($displayPlans[0]['plan_id'] ?? 0);
+$selected_plan = null;
+$selected_conversations = [];
+
+if ($selected_plan_id) {
+    $selected_plan = $planModel->findById($selected_plan_id);
+    if ($selected_plan && $selected_plan['user_id'] == $user_id) {
+        // Get conversations related to this event
+        $event_name = $selected_plan['event_name'];
+        $expected_subject = $event_name . ' - Inquiry';
+        
+        // Filter conversations related to this event - check exact subject match
+        foreach ($all_conversations as $conv) {
+            if (strcasecmp(trim($conv['subject']), trim($expected_subject)) === 0) {
+                $selected_conversations[] = $conv;
+            }
+        }
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -43,187 +90,212 @@ if ($selected_id) {
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="/SINTA/public/assets/css/global.css">
+  <link rel="stylesheet" href="/assets/css/global.css">
   <style>
     .app-shell { padding-top: 76px; min-height: 100vh; background: var(--bg-primary); }
     .msg-container { display: flex; height: calc(100vh - 76px); max-width: 1400px; margin: 0 auto; }
-    .msg-sidebar { width: 320px; border-right: 1px solid var(--border); background: var(--bg-card); display: flex; flex-direction: column; }
-    .msg-sidebar__header { padding: 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-    .msg-sidebar__header h3 { font-size: 1.2rem; }
-    .msg-search { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); }
-    .msg-search input { width: 100%; padding: 0.6rem 1rem; border: 1px solid var(--border); border-radius: 60px; background: var(--bg-alt); font-size: 0.85rem; outline: none; }
-    .msg-threads { flex: 1; overflow-y: auto; }
-    .msg-thread { display: flex; align-items: center; gap: 1rem; padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); cursor: pointer; transition: all 0.2s ease; }
-    .msg-thread:hover { background: var(--bg-alt); }
-    .msg-thread.active { background: var(--primary-pale); }
-    .msg-thread__avatar { width: 48px; height: 48px; border-radius: 50%; background: var(--primary-pale); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 600; color: var(--primary); flex-shrink: 0; }
-    .msg-thread__info { flex: 1; }
-    .msg-thread__name { font-weight: 600; margin-bottom: 0.25rem; }
-    .msg-thread__preview { font-size: 0.8rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .msg-thread__meta { text-align: right; }
-    .msg-thread__time { font-size: 0.7rem; color: var(--text-muted); }
-    .msg-thread__badge { background: var(--primary); color: white; font-size: 0.7rem; padding: 0.15rem 0.45rem; border-radius: 20px; margin-top: 0.25rem; display: inline-block; }
-    .msg-chat { flex: 1; display: flex; flex-direction: column; background: var(--bg-secondary); }
-    .msg-chat__header { padding: 1rem 1.5rem; background: var(--bg-card); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-    .msg-chat__contact { display: flex; align-items: center; gap: 1rem; }
-    .msg-chat__name { font-weight: 600; font-size: 1rem; }
-    .msg-chat__status { font-size: 0.75rem; color: var(--success); }
+    
+    /* Sidebar with events */
+    .msg-sidebar { width: 340px; border-right: 1px solid var(--border); background: white; display: flex; flex-direction: column; box-shadow: 1px 0 3px rgba(0,0,0,0.05); }
+    .msg-sidebar__header { padding: 1.5rem; border-bottom: 1px solid var(--border); }
+    .msg-sidebar__header h3 { font-size: 1.1rem; margin: 0 0 1rem 0; font-weight: 600; }
+    .msg-search { padding: 0 1.5rem 1rem 1.5rem; }
+    .msg-search input { width: 100%; padding: 0.6rem 1rem; border: 1px solid var(--border); border-radius: 20px; background: var(--bg-alt); font-size: 0.85rem; outline: none; transition: all 0.2s ease; }
+    .msg-search input:focus { border-color: var(--primary); background: white; }
+    .msg-events { flex: 1; overflow-y: auto; }
+    .msg-event { padding: 1rem 1.5rem; border-bottom: 1px solid #f0f0f0; cursor: pointer; transition: all 0.2s ease; }
+    .msg-event:hover { background: var(--bg-alt); }
+    .msg-event.active { background: var(--primary-pale); border-left: 3px solid var(--primary); padding-left: calc(1.5rem - 3px); }
+    .msg-event__title { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.3rem; color: #333; }
+    .msg-event__date { font-size: 0.8rem; color: #999; }
+    .msg-event__icon { width: 40px; height: 40px; background: linear-gradient(135deg, #f5d0a9 0%, #f9e4c8 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 1rem; font-size: 1.2rem; flex-shrink: 0; }
+    
+    /* Chat area */
+    .msg-chat { flex: 1; display: flex; flex-direction: column; background: white; }
+    .msg-chat__header { padding: 1.5rem; background: white; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .msg-chat__contact { display: flex; flex-direction: column; }
+    .msg-chat__name { font-weight: 600; font-size: 1.1rem; }
+    .msg-chat__date { font-size: 0.8rem; color: #999; }
     .msg-chat__body { flex: 1; overflow-y: auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
     .msg-date { text-align: center; margin: 1rem 0; }
-    .msg-date span { font-size: 0.7rem; color: var(--text-muted); background: var(--bg-alt); padding: 0.25rem 0.75rem; border-radius: 20px; }
-    .msg-bubble { display: flex; max-width: 70%; }
-    .msg-bubble.incoming { align-self: flex-start; }
-    .msg-bubble.outgoing { align-self: flex-end; flex-direction: row-reverse; }
-    .msg-bubble__content { padding: 0.75rem 1rem; border-radius: 20px; background: var(--bg-card); border: 1px solid var(--border); }
-    .msg-bubble.outgoing .msg-bubble__content { background: var(--primary); border-color: var(--primary); color: white; }
-    .msg-bubble__text { font-size: 0.85rem; line-height: 1.5; }
-    .msg-bubble__time { font-size: 0.65rem; color: var(--text-muted); margin-top: 0.25rem; text-align: right; }
+    .msg-date span { font-size: 0.75rem; color: #999; background: #f0f0f0; padding: 0.25rem 0.75rem; border-radius: 15px; display: inline-block; }
+    
+    .msg-bubble { display: flex; margin-bottom: 0.5rem; }
+    .msg-bubble.incoming { justify-content: flex-start; }
+    .msg-bubble.outgoing { justify-content: flex-end; }
+    .msg-bubble__content { max-width: 60%; padding: 0.75rem 1rem; border-radius: 18px; word-wrap: break-word; }
+    .msg-bubble.incoming .msg-bubble__content { background: #f0f0f0; color: #333; }
+    .msg-bubble.outgoing .msg-bubble__content { background: var(--primary); color: white; }
+    .msg-bubble__text { font-size: 0.9rem; line-height: 1.4; }
+    .msg-bubble__time { font-size: 0.7rem; margin-top: 0.25rem; text-align: right; }
+    .msg-bubble.incoming .msg-bubble__time { color: #999; }
     .msg-bubble.outgoing .msg-bubble__time { color: rgba(255,255,255,0.7); }
-    .msg-chat__footer { padding: 1rem 1.5rem; background: var(--bg-card); border-top: 1px solid var(--border); display: flex; gap: 1rem; align-items: center; }
-    .msg-chat__footer input { flex: 1; padding: 0.75rem 1rem; border: 1px solid var(--border); border-radius: 60px; outline: none; font-size: 0.85rem; }
-    .msg-chat__footer button { width: 40px; height: 40px; border-radius: 50%; background: var(--primary); border: none; color: white; cursor: pointer; }
-    @media (max-width: 768px) { .msg-sidebar { width: 80px; } .msg-thread__info, .msg-thread__meta { display: none; } .msg-sidebar__header h3 { display: none; } }
+    
+    .msg-chat__footer { padding: 1.5rem; background: white; border-top: 1px solid var(--border); display: flex; gap: 1rem; align-items: flex-end; }
+    .msg-chat__input-wrapper { flex: 1; }
+    .msg-chat__input-wrapper textarea { width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--border); border-radius: 20px; outline: none; font-family: inherit; font-size: 0.9rem; resize: none; max-height: 120px; transition: all 0.2s ease; }
+    .msg-chat__input-wrapper textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(166, 124, 82, 0.1); }
+    .msg-chat__footer button { width: 40px; height: 40px; border-radius: 50%; background: var(--primary); border: none; color: white; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .msg-chat__footer button:hover { transform: scale(1.05); }
+    
+    .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #999; text-align: center; }
+    .empty-state i { font-size: 3rem; margin-bottom: 1rem; color: #ddd; }
+    
+    @media (max-width: 768px) { 
+      .msg-sidebar { width: 100px; } 
+      .msg-event__title, .msg-event__date { display: none; } 
+      .msg-sidebar__header h3 { display: none; } 
+      .msg-search { display: none; }
+      .msg-chat__header, .msg-chat__body, .msg-chat__footer { display: none; }
+    }
   </style>
 </head>
 <body>
 <?php include __DIR__ . '/nav.php'; ?>
 <div class="app-shell">
   <div class="msg-container">
+    <!-- Left Sidebar: Events List -->
     <aside class="msg-sidebar">
       <div class="msg-sidebar__header">
         <h3>Messages</h3>
-        <button class="btn btn--primary btn--sm" id="newMsgBtn"><i class="fas fa-pen"></i> New</button>
       </div>
       <div class="msg-search">
-        <input type="text" id="searchThreads" placeholder="Search conversations...">
+        <input type="text" id="searchEvents" placeholder="Search events...">
       </div>
-      <div class="msg-threads" id="threadList">
-        <?php if (empty($threads)): ?>
-          <div style="padding: 1rem; text-align:center; color: #999;">No conversations yet.<br>Click "New" to start.</div>
+      <div class="msg-events" id="eventList">
+        <?php if (empty($displayPlans)): ?>
+          <div style="padding: 2rem 1.5rem; text-align:center; color: #999; font-size:0.9rem;">
+            <i class="fas fa-comments" style="display:block; font-size:1.5rem; margin-bottom:1rem; color:#ddd;"></i>
+            No conversations yet
+          </div>
         <?php else: ?>
-          <?php foreach ($threads as $thread): ?>
-            <div class="msg-thread <?= ($selected_id == $thread['message_id']) ? 'active' : '' ?>" data-message-id="<?= $thread['message_id'] ?>" onclick="location.href='?route=messages&thread=<?= $thread['message_id'] ?>'">
-              <div class="msg-thread__avatar">A</div>
-              <div class="msg-thread__info">
-                <div class="msg-thread__name">Admin Support</div>
-                <div class="msg-thread__preview"><?= htmlspecialchars(substr($thread['subject'], 0, 40)) ?></div>
-              </div>
-              <div class="msg-thread__meta">
-                <div class="msg-thread__time"><?= date('M d', strtotime($thread['created_at'])) ?></div>
-                <?php if ($thread['status'] === 'unread'): ?>
-                  <div class="msg-thread__badge">new</div>
-                <?php endif; ?>
-              </div>
+          <?php foreach ($displayPlans as $plan): 
+            $planDate = $plan['event_date'] ? date('M d, Y', strtotime($plan['event_date'])) : 'TBD';
+            $isActive = ($selected_plan_id == $plan['plan_id']) ? 'active' : '';
+          ?>
+            <div class="msg-event <?= $isActive ?>" onclick="location.href='?route=messages&plan_id=<?= $plan['plan_id'] ?>'">
+              <div class="msg-event__title"><?= htmlspecialchars($plan['event_name']) ?></div>
+              <div class="msg-event__date"><?= htmlspecialchars($planDate) ?></div>
             </div>
           <?php endforeach; ?>
         <?php endif; ?>
       </div>
     </aside>
 
+    <!-- Right Side: Chat Area -->
     <main class="msg-chat">
-      <?php if ($selected_thread): ?>
+      <?php if ($selected_plan): ?>
+        <!-- Chat Header -->
         <div class="msg-chat__header">
           <div class="msg-chat__contact">
-            <div class="msg-thread__avatar">A</div>
-            <div>
-              <div class="msg-chat__name">Admin Support</div>
-              <div class="msg-chat__status"><i class="fas fa-circle"></i> Online</div>
+            <div class="msg-chat__name"><?= htmlspecialchars($selected_plan['event_name']) ?></div>
+            <div class="msg-chat__date">
+              <?= date('F j, Y', strtotime($selected_plan['event_date'])) ?> at <?= htmlspecialchars($selected_plan['event_time'] ?: 'TBD') ?>
             </div>
           </div>
-          <button class="btn btn--ghost btn--sm" id="eventInfoBtn"><i class="fas fa-info-circle"></i> Event Info</button>
         </div>
+
+        <!-- Chat Messages -->
         <div class="msg-chat__body" id="chatBody">
-          <div class="msg-date"><span><?= date('F j, Y', strtotime($selected_thread['created_at'])) ?></span></div>
-          <div class="msg-bubble outgoing">
-            <div class="msg-bubble__content">
-              <div class="msg-bubble__text"><strong><?= htmlspecialchars($selected_thread['subject']) ?></strong><br><?= nl2br(htmlspecialchars($selected_thread['message_text'])) ?></div>
-              <div class="msg-bubble__time"><?= date('g:i A', strtotime($selected_thread['created_at'])) ?></div>
-            </div>
-          </div>
-          <?php foreach ($selected_thread['replies'] as $reply): ?>
-            <?php $isAdmin = ($reply['role'] === 'admin'); ?>
-            <div class="msg-bubble <?= $isAdmin ? 'incoming' : 'outgoing' ?>">
-              <div class="msg-bubble__content">
-                <div class="msg-bubble__text"><?= nl2br(htmlspecialchars($reply['reply_text'])) ?></div>
-                <div class="msg-bubble__time"><?= date('g:i A', strtotime($reply['created_at'])) ?></div>
+          <?php if (empty($selected_conversations)): ?>
+            <div style="flex: 1; display: flex; align-items: center; justify-content: center; color: #999; text-align: center;">
+              <div>
+                <i class="fas fa-comments" style="font-size: 2.5rem; color: #ddd; margin-bottom: 1rem; display: block;"></i>
+                <p>No messages yet. Start a conversation!</p>
               </div>
             </div>
-          <?php endforeach; ?>
+          <?php else: ?>
+            <?php foreach ($selected_conversations as $conv): ?>
+              <div class="msg-date"><span><?= date('F j, Y', strtotime($conv['created_at'])) ?></span></div>
+              
+              <!-- User's message -->
+              <div class="msg-bubble outgoing">
+                <div>
+                  <div class="msg-bubble__content">
+                    <div class="msg-bubble__text"><?= nl2br(htmlspecialchars($conv['message_text'])) ?></div>
+                  </div>
+                  <div class="msg-bubble__time"><?= date('g:i A', strtotime($conv['created_at'])) ?></div>
+                </div>
+              </div>
+              
+              <!-- Admin replies -->
+              <?php if (!empty($conv['replies'])): ?>
+                <?php foreach ($conv['replies'] as $reply): ?>
+                  <div class="msg-bubble incoming">
+                    <div>
+                      <div class="msg-bubble__content">
+                        <div class="msg-bubble__text"><?= nl2br(htmlspecialchars($reply['reply_text'])) ?></div>
+                      </div>
+                      <div class="msg-bubble__time"><?= date('g:i A', strtotime($reply['created_at'])) ?></div>
+                    </div>
+                  </div>
+                <?php endforeach; ?>
+              <?php endif; ?>
+            <?php endforeach; ?>
+          <?php endif; ?>
         </div>
+
+        <!-- Chat Footer: Message Input -->
         <div class="msg-chat__footer">
-          <input type="text" id="replyInput" placeholder="Type a message... (admin will see as a new thread)">
-          <button id="sendReplyBtn"><i class="fas fa-paper-plane"></i></button>
+          <form id="messageForm" method="POST" style="display: flex; gap: 1rem; width: 100%;">
+            <input type="hidden" name="action" value="send">
+            <input type="hidden" name="plan_id" value="<?= $selected_plan['plan_id'] ?>">
+            <input type="hidden" name="subject" value="<?= htmlspecialchars($selected_plan['event_name'] . ' - Inquiry') ?>">
+            <div class="msg-chat__input-wrapper">
+              <textarea id="messageInput" name="message_text" placeholder="Message SINTA Event Team..." rows="1" required></textarea>
+            </div>
+            <button type="submit" title="Send"><i class="fas fa-paper-plane"></i></button>
+          </form>
         </div>
       <?php else: ?>
-        <div style="text-align:center; padding: 3rem; color: #999;">Select a conversation or start a new one.</div>
+        <!-- No event selected -->
+        <div class="empty-state">
+          <i class="fas fa-inbox"></i>
+          <p>Select an event to start messaging</p>
+        </div>
       <?php endif; ?>
     </main>
   </div>
 </div>
 
-<!-- New Message Modal -->
-<div id="newMsgModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:1000;">
-  <div style="background:white; max-width:500px; width:90%; border-radius:12px; padding:1.5rem;">
-    <h3>New Message to Admin</h3>
-    <?php if (isset($_SESSION['msg_error'])): ?>
-      <div style="color:red; margin-bottom:1rem;"><?= htmlspecialchars($_SESSION['msg_error']); unset($_SESSION['msg_error']); ?></div>
-    <?php endif; ?>
-    <?php if (isset($_SESSION['msg_flash'])): ?>
-      <div style="color:green; margin-bottom:1rem;"><?= htmlspecialchars($_SESSION['msg_flash']); unset($_SESSION['msg_flash']); ?></div>
-    <?php endif; ?>
-    <form method="POST">
-      <input type="hidden" name="action" value="send">
-      <input type="text" name="subject" placeholder="Subject" required style="width:100%; margin-bottom:1rem; padding:0.5rem;">
-      <textarea name="message_text" placeholder="Your message..." rows="5" required style="width:100%; margin-bottom:1rem;"></textarea>
-      <select name="message_type" style="margin-bottom:1rem; width:100%; padding:0.5rem;">
-        <option value="inquiry">Inquiry</option>
-        <option value="support">Support</option>
-        <option value="feedback">Feedback</option>
-      </select>
-      <div style="display:flex; justify-content:flex-end; gap:1rem;">
-        <button type="button" id="closeModalBtn" class="btn btn--ghost">Cancel</button>
-        <button type="submit" class="btn btn--primary">Send</button>
-      </div>
-    </form>
-  </div>
-</div>
-
 <script>
-const modal = document.getElementById('newMsgModal');
-document.getElementById('newMsgBtn')?.addEventListener('click', () => modal.style.display = 'flex');
-document.getElementById('closeModalBtn')?.addEventListener('click', () => modal.style.display = 'none');
-window.onclick = function(e) { if (e.target === modal) modal.style.display = 'none'; }
-
-// Sending a reply (creates a new message thread)
-document.getElementById('sendReplyBtn')?.addEventListener('click', function() {
-    let input = document.getElementById('replyInput');
-    let text = input.value.trim();
-    if (!text) return;
-    let subject = "Re: <?= $selected_thread ? addslashes($selected_thread['subject']) : 'Conversation' ?>";
-    let form = document.createElement('form');
-    form.method = 'POST';
-    form.innerHTML = `
-        <input type="hidden" name="action" value="send">
-        <input type="hidden" name="subject" value="${subject.replace(/"/g, '&quot;')}">
-        <input type="hidden" name="message_text" value="${text.replace(/"/g, '&quot;')}">
-    `;
-    document.body.appendChild(form);
-    form.submit();
-});
-
-// Search filter
-document.getElementById('searchThreads')?.addEventListener('keyup', function(e) {
-    let term = e.target.value.toLowerCase();
-    document.querySelectorAll('.msg-thread').forEach(thread => {
-        let name = thread.querySelector('.msg-thread__name')?.innerText.toLowerCase() || '';
-        let preview = thread.querySelector('.msg-thread__preview')?.innerText.toLowerCase() || '';
-        if (name.includes(term) || preview.includes(term)) {
-            thread.style.display = 'flex';
-        } else {
-            thread.style.display = 'none';
-        }
+  // Auto-resize textarea
+  const textarea = document.getElementById('messageInput');
+  if (textarea) {
+    textarea.addEventListener('input', function() {
+      this.style.height = 'auto';
+      this.style.height = Math.min(this.scrollHeight, 120) + 'px';
     });
-});
+  }
+
+  // Search events
+  document.getElementById('searchEvents')?.addEventListener('keyup', function(e) {
+    const term = e.target.value.toLowerCase();
+    document.querySelectorAll('.msg-event').forEach(event => {
+      const title = event.querySelector('.msg-event__title')?.textContent.toLowerCase() || '';
+      const date = event.querySelector('.msg-event__date')?.textContent.toLowerCase() || '';
+      if (title.includes(term) || date.includes(term)) {
+        event.style.display = 'block';
+      } else {
+        event.style.display = 'none';
+      }
+    });
+  });
+
+  // Auto-scroll to bottom
+  const chatBody = document.getElementById('chatBody');
+  if (chatBody) {
+    chatBody.scrollTop = chatBody.scrollHeight;
+  }
+
+  // Form validation
+  document.getElementById('messageForm')?.addEventListener('submit', function(e) {
+    const text = document.getElementById('messageInput').value.trim();
+    if (!text) {
+      e.preventDefault();
+      alert('Please enter a message');
+    }
+  });
 </script>
 </body>
 </html>

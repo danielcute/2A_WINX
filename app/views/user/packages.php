@@ -108,8 +108,8 @@ if ($occasion === 'other') {
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="/SINTA/public/assets/css/global.css">
-  <link rel="stylesheet" href="/SINTA/public/assets/css/nav.css">
+  <link rel="stylesheet" href="/assets/css/global.css">
+  <link rel="stylesheet" href="/assets/css/nav.css">
   <style>
     .pkg-main {
       max-width: 1200px;
@@ -525,7 +525,7 @@ if ($occasion === 'other') {
         <?php if ($index === $featuredIndex): ?>
           <div class="pkg-card__badge">Most Popular</div>
         <?php endif; ?>
-        <div class="pkg-card__img" style="background-image: url('<?= htmlspecialchars($pkg['image'] ?? '/SINTA/public/assets/img/placeholder.jpg') ?>')"></div>
+        <div class="pkg-card__img" style="background-image: url('<?= htmlspecialchars($pkg['image'] ?? '/assets/img/placeholder.jpg') ?>')"></div>
         <div class="pkg-card__body">
           <h3><?= htmlspecialchars($pkg['package_name'] ?? $pkg['name'] ?? 'Unnamed Package') ?></h3>
           <p class="pkg-card__desc"><?= htmlspecialchars(substr($pkg['description'], 0, 80)) ?>...</p>
@@ -555,7 +555,7 @@ if ($occasion === 'other') {
     <?php if (empty($weddingPackages)): // Fallback if no packages in DB ?>
       <div class="pkg-card featured">
         <div class="pkg-card__badge">Most Popular</div>
-        <div class="pkg-card__img" style="background-image: url('/SINTA/public/assets/img/classic.jpg')"></div>
+        <div class="pkg-card__img" style="background-image: url('/assets/img/classic.jpg')"></div>
         <div class="pkg-card__body">
           <h3>Classic Wedding</h3>
           <p class="pkg-card__desc">Perfect for those who want a beautifully organized event without complexity.</p>
@@ -568,7 +568,7 @@ if ($occasion === 'other') {
           </ul>
           <div class="pkg-card__footer">
             <div class="pkg-price">₱150,000 <small>+ VAT</small></div>
-            <button class="btn btn--primary" onclick="addToCart({name: 'Classic Wedding', price: 150000, description: 'Perfect for those who want a beautifully organized event without complexity.', features: 'Full Event Coordination\nVenue Setup & Styling\nCatering (100 pax)\nPhotography (6 hours)\nProfessional Host/Emcee', image: '/SINTA/public/assets/img/classic.jpg', occasion: 'wedding'})">Select Package</button>
+            <button class="btn btn--primary" onclick="addToCart({name: 'Classic Wedding', price: 150000, description: 'Perfect for those who want a beautifully organized event without complexity.', features: 'Full Event Coordination\nVenue Setup & Styling\nCatering (100 pax)\nPhotography (6 hours)\nProfessional Host/Emcee', image: '/assets/img/classic.jpg', occasion: 'wedding'})">Select Package</button>
           </div>
         </div>
       </div>
@@ -588,7 +588,7 @@ if ($occasion === 'other') {
         <?php elseif (stripos($pkg['package_name'] ?? $pkg['name'], 'Bundle') !== false): ?>
           <div class="pkg-card__badge">Bundle <?= substr($pkg['package_name'] ?? $pkg['name'], -1) ?></div>
         <?php endif; ?>
-        <div class="pkg-card__img" style="background-image: url('<?= htmlspecialchars($pkg['image'] ?? '/SINTA/public/assets/img/placeholder.jpg') ?>')"></div>
+        <div class="pkg-card__img" style="background-image: url('<?= htmlspecialchars($pkg['image'] ?? '/assets/img/placeholder.jpg') ?>')"></div>
         <div class="pkg-card__body">
           <h3><?= htmlspecialchars($pkg['package_name'] ?? $pkg['name'] ?? 'Unnamed Package') ?></h3>
           <p class="pkg-card__desc"><?= htmlspecialchars(substr($pkg['description'], 0, 80)) ?>...</p>
@@ -618,7 +618,7 @@ if ($occasion === 'other') {
     <?php if (empty($birthdayPackages)): // Fallback hardcoded packages ?>
       <div class="pkg-card featured">
         <div class="pkg-card__badge">Most Popular</div>
-        <div class="pkg-card__img" style="background-image: url('/SINTA/public/assets/img/classicbday.jpg')"></div>
+        <div class="pkg-card__img" style="background-image: url('/assets/img/classicbday.jpg')"></div>
         <div class="pkg-card__body">
           <h3>Classic Birthday</h3>
           <p class="pkg-card__desc">Fun and festive celebration with all the essentials.</p>
@@ -632,13 +632,13 @@ if ($occasion === 'other') {
           </ul>
           <div class="pkg-card__footer">
             <div class="pkg-price">₱45,000 <small>+ VAT</small></div>
-            <button class="btn btn--primary" onclick="addToCart({name: 'Classic Birthday', price: 45000, description: 'Fun and festive celebration with all the essentials.', features: 'Party Coordination\nThemed Decor & Balloons\nCatering (50 pax)\nPhotography (4 hours)\nBirthday Cake (2-tier)\nParty Host/Game Master', image: '/SINTA/public/assets/img/classicbday.jpg', occasion: 'birthday'})">Select Package</button>
+            <button class="btn btn--primary" onclick="addToCart({name: 'Classic Birthday', price: 45000, description: 'Fun and festive celebration with all the essentials.', features: 'Party Coordination\nThemed Decor & Balloons\nCatering (50 pax)\nPhotography (4 hours)\nBirthday Cake (2-tier)\nParty Host/Game Master', image: '/assets/img/classicbday.jpg', occasion: 'birthday'})">Select Package</button>
           </div>
         </div>
       </div>
       
       <div class="pkg-card">
-        <div class="pkg-card__img" style="background-image: url('/SINTA/public/assets/img/deluxbday.jpg')"></div>
+        <div class="pkg-card__img" style="background-image: url('/assets/img/deluxbday.jpg')"></div>
         <div class="pkg-card__body">
           <h3>Deluxe Birthday</h3>
           <p class="pkg-card__desc">Extra special celebration with premium entertainment.</p>
@@ -653,13 +653,13 @@ if ($occasion === 'other') {
           </ul>
           <div class="pkg-card__footer">
             <div class="pkg-price">₱85,000 <small>+ VAT</small></div>
-            <button class="btn btn--primary" onclick="addToCart({name: 'Deluxe Birthday', price: 85000, description: 'Extra special celebration with premium entertainment.', features: 'Full Party Coordination\nPremium Themed Decor\nCatering (100 pax)\nPhotography + Video (6 hours)\nCustom 3-Tier Cake\nLive Band (3 pieces)\nPhoto Booth + Giveaways', image: '/SINTA/public/assets/img/deluxbday.jpg', occasion: 'birthday'})">Select Package</button>
+            <button class="btn btn--primary" onclick="addToCart({name: 'Deluxe Birthday', price: 85000, description: 'Extra special celebration with premium entertainment.', features: 'Full Party Coordination\nPremium Themed Decor\nCatering (100 pax)\nPhotography + Video (6 hours)\nCustom 3-Tier Cake\nLive Band (3 pieces)\nPhoto Booth + Giveaways', image: '/assets/img/deluxbday.jpg', occasion: 'birthday'})">Select Package</button>
           </div>
         </div>
       </div>
       
       <div class="pkg-card">
-        <div class="pkg-card__img" style="background-image: url('/SINTA/public/assets/img/ultimatebday.jpg')"></div>
+        <div class="pkg-card__img" style="background-image: url('/assets/img/ultimatebday.jpg')"></div>
         <div class="pkg-card__body">
           <h3>Ultimate Birthday Bash</h3>
           <p class="pkg-card__desc">Over-the-top celebration with everything you can imagine.</p>
@@ -674,7 +674,7 @@ if ($occasion === 'other') {
           </ul>
           <div class="pkg-card__footer">
             <div class="pkg-price">₱180,000 <small>+ VAT</small></div>
-            <button class="btn btn--primary" onclick="addToCart({name: 'Ultimate Birthday Bash', price: 180000, description: 'Over-the-top celebration with everything you can imagine.', features: 'Dedicated Event Manager\nLuxury Themed Transformation\nCatering (150 pax)\nCinematic Coverage + SDE\nDesigner Cake + Dessert Buffet\nCelebrity Guest / Performer\nFireworks Display', image: '/SINTA/public/assets/img/ultimatebday.jpg', occasion: 'birthday'})">Select Package</button>
+            <button class="btn btn--primary" onclick="addToCart({name: 'Ultimate Birthday Bash', price: 180000, description: 'Over-the-top celebration with everything you can imagine.', features: 'Dedicated Event Manager\nLuxury Themed Transformation\nCatering (150 pax)\nCinematic Coverage + SDE\nDesigner Cake + Dessert Buffet\nCelebrity Guest / Performer\nFireworks Display', image: '/assets/img/ultimatebday.jpg', occasion: 'birthday'})">Select Package</button>
           </div>
         </div>
       </div>
@@ -682,7 +682,7 @@ if ($occasion === 'other') {
       <!-- Additional Birthday Bundles -->
       <div class="pkg-card">
         <div class="pkg-card__badge">Bundle A</div>
-        <div class="pkg-card__img" style="background-image: url('/SINTA/public/assets/img/bundlea.jpg')"></div>
+        <div class="pkg-card__img" style="background-image: url('/assets/img/bundlea.jpg')"></div>
         <div class="pkg-card__body">
           <h3>Birthday Bundle A</h3>
           <p class="pkg-card__desc">Intimate celebration perfect for close family and friends.</p>
@@ -698,14 +698,14 @@ if ($occasion === 'other') {
           </ul>
           <div class="pkg-card__footer">
             <div class="pkg-price">₱25,000 <small>+ VAT</small></div>
-            <button class="btn btn--primary" onclick="addToCart({name: 'Birthday Bundle A', price: 25000, description: 'Intimate celebration perfect for close family and friends.', features: 'Event Coordination & Planning\nVenue Setup (2 hours)\nBasic Themed Decorations\nCatering for 30 guests\nBirthday Cake (1-tier)\nPhotography (2 hours)\nSound System Setup\nParty Favors for guests', image: '/SINTA/public/assets/img/bundlea.jpg', occasion: 'birthday'})">Select Package</button>
+            <button class="btn btn--primary" onclick="addToCart({name: 'Birthday Bundle A', price: 25000, description: 'Intimate celebration perfect for close family and friends.', features: 'Event Coordination & Planning\nVenue Setup (2 hours)\nBasic Themed Decorations\nCatering for 30 guests\nBirthday Cake (1-tier)\nPhotography (2 hours)\nSound System Setup\nParty Favors for guests', image: '/assets/img/bundlea.jpg', occasion: 'birthday'})">Select Package</button>
           </div>
         </div>
       </div>
 
       <div class="pkg-card">
         <div class="pkg-card__badge">Bundle B</div>
-        <div class="pkg-card__img" style="background-image: url('/SINTA/public/assets/img/bundleb.jpg')"></div>
+        <div class="pkg-card__img" style="background-image: url('/assets/img/bundleb.jpg')"></div>
         <div class="pkg-card__body">
           <h3>Birthday Bundle B</h3>
           <p class="pkg-card__desc">Fun-filled celebration with entertainment and activities.</p>
@@ -722,14 +722,14 @@ if ($occasion === 'other') {
           </ul>
           <div class="pkg-card__footer">
             <div class="pkg-price">₱65,000 <small>+ VAT</small></div>
-            <button class="btn btn--primary" onclick="addToCart({name: 'Birthday Bundle B', price: 65000, description: 'Fun-filled celebration with entertainment and activities.', features: 'Full Event Management\nCreative Venue Styling\nCatering for 75 guests\nCustom Birthday Cake (2-tier)\nPhoto & Video Coverage (4 hours)\nLive DJ/Music Entertainment\nGames & Activities Host\nPhoto Booth with Props\nCustom Invitations', image: '/SINTA/public/assets/img/bundleb.jpg', occasion: 'birthday'})">Select Package</button>
+            <button class="btn btn--primary" onclick="addToCart({name: 'Birthday Bundle B', price: 65000, description: 'Fun-filled celebration with entertainment and activities.', features: 'Full Event Management\nCreative Venue Styling\nCatering for 75 guests\nCustom Birthday Cake (2-tier)\nPhoto & Video Coverage (4 hours)\nLive DJ/Music Entertainment\nGames & Activities Host\nPhoto Booth with Props\nCustom Invitations', image: '/assets/img/bundleb.jpg', occasion: 'birthday'})">Select Package</button>
           </div>
         </div>
       </div>
 
       <div class="pkg-card">
         <div class="pkg-card__badge">Bundle C</div>
-        <div class="pkg-card__img" style="background-image: url('/SINTA/public/assets/img/bundlec.jpg')"></div>
+        <div class="pkg-card__img" style="background-image: url('/assets/img/bundlec.jpg')"></div>
         <div class="pkg-card__body">
           <h3>Birthday Bundle C</h3>
           <p class="pkg-card__desc">Luxurious celebration with premium services and VIP treatment.</p>
@@ -747,7 +747,7 @@ if ($occasion === 'other') {
           </ul>
           <div class="pkg-card__footer">
             <div class="pkg-price">₱150,000 <small>+ VAT</small></div>
-            <button class="btn btn--primary" onclick="addToCart({name: 'Birthday Bundle C', price: 150000, description: 'Luxurious celebration with premium services and VIP treatment.', features: 'Dedicated Event Coordinator\nPremium Venue Transformation\nGourmet Catering for 120 guests\nDesigner Cake (3-tier)\nProfessional Photo/Video Team (6 hours)\nLive Band Performance\nCelebrity Guest Appearance\nLuxury Photo Booth\nRed Carpet Entrance\nVIP Guest Coordination', image: '/SINTA/public/assets/img/bundlec.jpg', occasion: 'birthday'})">Select Package</button>
+            <button class="btn btn--primary" onclick="addToCart({name: 'Birthday Bundle C', price: 150000, description: 'Luxurious celebration with premium services and VIP treatment.', features: 'Dedicated Event Coordinator\nPremium Venue Transformation\nGourmet Catering for 120 guests\nDesigner Cake (3-tier)\nProfessional Photo/Video Team (6 hours)\nLive Band Performance\nCelebrity Guest Appearance\nLuxury Photo Booth\nRed Carpet Entrance\nVIP Guest Coordination', image: '/assets/img/bundlec.jpg', occasion: 'birthday'})">Select Package</button>
           </div>
         </div>
       </div>
@@ -769,7 +769,7 @@ if ($occasion === 'other') {
         <?php elseif (stripos($pkg['package_name'] ?? $pkg['name'], 'Bundle') !== false): ?>
           <div class="pkg-card__badge">Bundle <?= substr($pkg['package_name'] ?? $pkg['name'], -1) ?></div>
         <?php endif; ?>
-        <div class="pkg-card__img" style="background-image: url('<?= htmlspecialchars($pkg['image'] ?? '/SINTA/public/assets/img/placeholder.jpg') ?>')"></div>
+        <div class="pkg-card__img" style="background-image: url('<?= htmlspecialchars($pkg['image'] ?? '/assets/img/placeholder.jpg') ?>')"></div>
         <div class="pkg-card__body">
           <h3><?= htmlspecialchars($pkg['package_name'] ?? $pkg['name'] ?? 'Unnamed Package') ?></h3>
           <p class="pkg-card__desc"><?= htmlspecialchars(substr($pkg['description'], 0, 80)) ?>...</p>
@@ -805,7 +805,7 @@ if ($occasion === 'other') {
     <?php if (empty($bigEventsPackages)): // Fallback hardcoded packages ?>
       <div class="pkg-card featured">
         <div class="pkg-card__badge">Best Value</div>
-        <div class="pkg-card__img" style="background-image: url('/SINTA/public/assets/img/corpgala.jpg')"></div>
+        <div class="pkg-card__img" style="background-image: url('/assets/img/corpgala.jpg')"></div>
         <div class="pkg-card__body">
           <h3>Corporate Gala</h3>
           <p class="pkg-card__desc">Professional and elegant event for company celebrations.</p>
@@ -819,7 +819,7 @@ if ($occasion === 'other') {
           </ul>
           <div class="pkg-card__footer">
             <div class="pkg-price">₱250,000 <small>+ VAT</small></div>
-            <button class="btn btn--primary" onclick="addToCart({name: 'Corporate Gala', price: 250000, description: 'Professional and elegant event for company celebrations.', features: 'Event Planning & Logistics\nVenue Selection & Setup\nCatering (200 pax)\nProfessional Photography\nAV Equipment & Lighting\nProfessional Emcee', image: '/SINTA/public/assets/img/corpgala.jpg', occasion: 'big-events'})">Select Package</button>
+            <button class="btn btn--primary" onclick="addToCart({name: 'Corporate Gala', price: 250000, description: 'Professional and elegant event for company celebrations.', features: 'Event Planning & Logistics\nVenue Selection & Setup\nCatering (200 pax)\nProfessional Photography\nAV Equipment & Lighting\nProfessional Emcee', image: '/assets/img/corpgala.jpg', occasion: 'big-events'})">Select Package</button>
           </div>
         </div>
       </div>
@@ -834,7 +834,7 @@ if ($occasion === 'other') {
       </div>
       <h2>Custom Event Planning</h2>
       <p>For christenings, reunions, graduations, or any special celebration you have in mind, we'll create a package tailored just for you.</p>
-      <a href="/SINTA/public/index.php?route=customize&occasion=other" class="btn btn--primary btn--lg">
+      <a href="/index.php?route=customize&occasion=other" class="btn btn--primary btn--lg">
         <i class="fas fa-magic"></i> Create Custom Package
       </a>
     </div>
@@ -846,7 +846,7 @@ if ($occasion === 'other') {
     <div class="eyebrow"><span class="rule"></span> Want Something Unique?</div>
     <h3 style="margin: 0.5rem 0;">Build Your <em>Own Package</em></h3>
     <p>Can't find what you're looking for? Create a completely customized event tailored to your vision.</p>
-    <a href="/SINTA/public/index.php?route=customize&occasion=<?= urlencode($occasion) ?>" class="btn btn--primary btn--lg">
+    <a href="/index.php?route=customize&occasion=<?= urlencode($occasion) ?>" class="btn btn--primary btn--lg">
       <i class="fas fa-magic"></i> Start Customizing
     </a>
   </div>
@@ -899,7 +899,7 @@ function addToCart(packageData) {
   // Store in session via POST for server-side access
   const form = document.createElement('form');
   form.method = 'POST';
-  form.action = '/SINTA/public/index.php?route=checkout';
+  form.action = '/index.php?route=checkout';
   const cartInput = document.createElement('input');
   cartInput.type = 'hidden';
   cartInput.name = 'cart_data';
@@ -915,7 +915,7 @@ function toggleDropdown() {
 }
 
 function selectOccasion(occasion) {
- window.location.href = '/SINTA/public/index.php?route=packages&occasion=' + occasion;
+ window.location.href = '/index.php?route=packages&occasion=' + occasion;
 }
 
 // Close dropdown when clicking outside

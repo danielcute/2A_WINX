@@ -1,6 +1,13 @@
 <?php
 if (!defined('ROOT_PATH')) {
-    define('ROOT_PATH', dirname(dirname(__DIR__)));
+    // Check if app folder exists at current level (production) or parent level (local)
+    $appDir = dirname(dirname(__DIR__));
+    if (is_dir($appDir . '/app')) {
+        define('ROOT_PATH', $appDir);
+    } else {
+        // Go up 3 levels from controllers folder
+        define('ROOT_PATH', $appDir);
+    }
 }
 require_once ROOT_PATH . '/config/database.php';
 
@@ -16,7 +23,7 @@ class CustomizeController {
         $customization = new Customization();
         $allOptions = $customization->getAllOptions();
         // Filter to only main categories
-        $mainCategories = ['Theme', 'Venue', 'Catering', 'Extras'];
+        $mainCategories = ['Theme', 'Color Combinations', 'Venue', 'Food', 'Sweets', 'Catering', 'Pastries', 'Beverages', 'Add-ons'];
         $options = array_filter($allOptions, function($opt) use ($mainCategories) {
             return in_array($opt['category'], $mainCategories);
         });
@@ -29,7 +36,7 @@ class CustomizeController {
         $customization = new Customization();
         $allOptions = $customization->getAllOptions();
         // Filter to only main categories
-        $mainCategories = ['Theme', 'Venue', 'Catering', 'Extras'];
+        $mainCategories = ['Theme', 'Color Combinations', 'Venue', 'Food', 'Sweets', 'Catering', 'Pastries', 'Beverages', 'Add-ons'];
         $options = array_filter($allOptions, function($opt) use ($mainCategories) {
             return in_array($opt['category'], $mainCategories);
         });
@@ -103,7 +110,7 @@ class CustomizeController {
 
         $allOptions = $customization->getAllOptions();
         // Filter to only main categories
-        $mainCategories = ['Theme', 'Venue', 'Catering', 'Extras'];
+        $mainCategories = ['Theme', 'Venue Deco', 'Color Combinations', 'Venue', 'Food', 'Catering', 'Pastries', 'Beverages', 'Add-ons'];
         $options = array_filter($allOptions, function($opt) use ($mainCategories) {
             return in_array($opt['category'], $mainCategories);
         });
@@ -120,9 +127,7 @@ class CustomizeController {
 
         $optionId = isset($_POST['option_id']) ? (int)$_POST['option_id'] : 0;
         if ($optionId <= 0) {
-            $_SESSION['error'] = 'Invalid customization option ID.';
-            header('Location: ' . BASE_URL . '/index.php?route=admin-customize');
-            exit;
+            $this->returnJSON(false, 'Invalid customization option ID.', 400);
         }
 
         $imageData = null;
@@ -148,10 +153,17 @@ class CustomizeController {
             $data['image_type'] = $imageType;
         }
 
+        // Handle colors_json for Color Combinations
+        if (!empty($_POST['colors_json'])) {
+            $colors_json = trim($_POST['colors_json']);
+            // Validate that it's valid JSON
+            if (json_decode($colors_json, true) !== null) {
+                $data['colors_json'] = $colors_json;
+            }
+        }
+
         if (empty($data['category']) || empty($data['name'])) {
-            $_SESSION['error'] = 'Category and name are required.';
-            header('Location: ' . BASE_URL . '/index.php?route=admin-customize-edit&id=' . $optionId);
-            exit;
+            $this->returnJSON(false, 'Category and name are required.', 400);
         }
 
         require_once ROOT_PATH . '/app/models/Customization.php';
@@ -159,13 +171,33 @@ class CustomizeController {
         $result = $customization->update($optionId, $data);
 
         if ($result) {
-            $_SESSION['success'] = 'Customization option updated successfully.';
+            // Handle color palette images if this is a Color Combinations option
+            if ($data['category'] === 'Color Combinations' && !empty($_POST['colors']) && isset($_FILES['color_images'])) {
+                $colors = $_POST['colors'];
+                $files = $_FILES['color_images'];
+                
+                // Process each color image
+                foreach ($colors as $index => $hex) {
+                    if (isset($files['error'][$index]) && $files['error'][$index] === UPLOAD_ERR_OK) {
+                        $imageData = file_get_contents($files['tmp_name'][$index]);
+                        $imageType = $files['type'][$index];
+                        
+                        // Save color palette image
+                        $customization->saveColorPaletteImage(
+                            $optionId,
+                            $hex,
+                            '',  // color name (optional)
+                            $imageData,
+                            $imageType
+                        );
+                    }
+                }
+            }
+            
+            $this->returnJSON(true, 'Customization option updated successfully.');
         } else {
-            $_SESSION['error'] = 'Failed to update customization option.';
+            $this->returnJSON(false, 'Failed to update customization option.', 500);
         }
-
-        header('Location: ' . BASE_URL . '/index.php?route=admin-customize');
-        exit;
     }
 
     public function delete() {
@@ -465,6 +497,19 @@ class CustomizeController {
         } catch (PDOException $e) {
             return ['success' => false, 'message' => 'Database error: ' . $e->getMessage()];
         }
+    }
+    
+    /**
+     * Helper method to return JSON responses
+     */
+    private function returnJSON($success, $message = '', $statusCode = 200) {
+        header('Content-Type: application/json');
+        http_response_code($statusCode);
+        echo json_encode([
+            'success' => $success,
+            'message' => $message
+        ]);
+        exit;
     }
     
     /**

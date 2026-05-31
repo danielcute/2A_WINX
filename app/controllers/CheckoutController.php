@@ -101,6 +101,7 @@ class CheckoutController {
             ], JSON_UNESCAPED_UNICODE);
 
             require_once ROOT_PATH . '/app/models/Plan.php';
+            require_once ROOT_PATH . '/app/models/Customization.php';
             
             $planModel = new Plan();
             $planId = $planModel->create([
@@ -123,6 +124,17 @@ class CheckoutController {
             ]);
 
             if ($planId) {
+                // Store custom colors if they exist
+                foreach ($cartItems as $item) {
+                    if (isset($item['customColors']) && $item['category'] === 'Color Combinations') {
+                        $customization = new Customization();
+                        $customColors = json_decode($item['customColors'], true);
+                        $customDescription = $item['customDescription'] ?? 'Custom color combination';
+                        $customization->storeCustomColors($planId, $customColors, $customDescription);
+                        break;
+                    }
+                }
+
                 // Plan is the main booking record - no separate booking entry needed
                 unset($_SESSION['checkout_cart']);
                 echo json_encode(['success' => true, 'plan_id' => $planId, 'message' => 'Booking saved successfully']);

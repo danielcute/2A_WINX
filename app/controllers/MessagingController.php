@@ -5,7 +5,14 @@
  */
 
 if (!defined('ROOT_PATH')) {
-    define('ROOT_PATH', dirname(dirname(__DIR__)));
+    // Check if app folder exists at current level (production) or parent level (local)
+    $appDir = dirname(dirname(__DIR__));
+    if (is_dir($appDir . '/app')) {
+        define('ROOT_PATH', $appDir);
+    } else {
+        // Go up 3 levels from controllers folder
+        define('ROOT_PATH', $appDir);
+    }
 }
 require_once ROOT_PATH . '/config/database.php';
 require_once ROOT_PATH . '/app/models/Notification.php';

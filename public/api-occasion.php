@@ -10,8 +10,12 @@
 header('Content-Type: application/json');
 session_start();
 
-require_once dirname(__FILE__) . '/../config/database.php';
-require_once dirname(__FILE__) . '/../app/models/Notification.php';
+if (!defined('ROOT_PATH')) {
+    define('ROOT_PATH', dirname(__DIR__));
+}
+
+require_once ROOT_PATH . '/config/database.php';
+require_once ROOT_PATH . '/app/models/Notification.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
 $db = Database::getInstance()->getConnection();

@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="/SINTA/public/assets/css/global.css">
+  <link rel="stylesheet" href="/assets/css/global.css">
   <style>
     .app-shell {
       padding-top: 76px;
@@ -332,7 +332,7 @@
         <h1>My <em>Plans</em></h1>
         <p class="plans-header__sub">Track all your upcoming and past celebrations in one place.</p>
       </div>
-      <a href="/SINTA/public/index.php?route=occasions" class="btn btn--primary"><i class="fas fa-plus"></i> New Event</a>
+      <a href="/index.php?route=occasions" class="btn btn--primary"><i class="fas fa-plus"></i> New Event</a>
     </div>
     
     <?php
@@ -397,15 +397,15 @@
             $price = '₱' . number_format((float)$plan['total_price'], 0);
             $eventText = strtolower(trim(($plan['occasion_name'] ?? '') . ' ' . ($plan['package_name'] ?? '') . ' ' . ($plan['event_name'] ?? '')));
             $eventImageMap = [
-                'wedding' => '/SINTA/public/assets/img/wedding3.jpg',
-                'debut' => '/SINTA/public/assets/img/debut.jpg',
-                'birthday' => '/SINTA/public/assets/img/birthday2.jpg',
-                'corporate' => '/SINTA/public/assets/img/corporate2.jpg',
-                'anniversary' => '/SINTA/public/assets/img/anniversary.jpg',
-                'beach' => '/SINTA/public/assets/img/beach.jpg',
-                'garden' => '/SINTA/public/assets/img/garden.jpg',
+                'wedding' => '/assets/img/wedding3.jpg',
+                'debut' => '/assets/img/debut.jpg',
+                'birthday' => '/assets/img/birthday2.jpg',
+                'corporate' => '/assets/img/corporate2.jpg',
+                'anniversary' => '/assets/img/anniversary.jpg',
+                'beach' => '/assets/img/beach.jpg',
+                'garden' => '/assets/img/garden.jpg',
             ];
-            $imageUrl = '/SINTA/public/assets/img/event-placeholder.jpg';
+            $imageUrl = '/assets/img/event-placeholder.jpg';
             foreach ($eventImageMap as $keyword => $url) {
                 if ($keyword && strpos($eventText, $keyword) !== false) {
                     $imageUrl = $url;
@@ -413,7 +413,7 @@
                 }
             }
           ?>
-          <a href="/SINTA/public/index.php?route=event-detail&id=<?= $plan['plan_id'] ?>" class="plan-card" data-status="<?= htmlspecialchars($status) ?>">
+          <a href="/index.php?route=event-detail&id=<?= $plan['plan_id'] ?>" class="plan-card" data-status="<?= htmlspecialchars($status) ?>">
             <div class="plan-card__img" style="background-image:url('<?= $imageUrl ?>')">
               <span class="badge <?= $badgeMap[$status] ?>"><?= $labelMap[$status] ?></span>
               <?php if ($status === 'confirmed' && ($plan['payment_status'] ?? 'pending') === 'pending'): ?>
@@ -451,14 +451,6 @@
                     >
                       <i class="fas fa-ban"></i> Cancel
                     </button>
-                  <?php elseif ($status === 'completed'): ?>
-                    <button 
-                      class="btn-delete-plan" 
-                      onclick="deletePlan(event, <?= $plan['plan_id'] ?>, '<?= htmlspecialchars($eventName) ?>')"
-                      title="Delete this completed plan"
-                    >
-                      <i class="fas fa-trash"></i> Delete
-                    </button>
                   <?php endif; ?>
                   <span class="plan-card__link">View Details <i class="fas fa-arrow-right"></i></span>
                 </div>
@@ -495,7 +487,7 @@ function deletePlan(event, planId, eventName) {
   event.stopPropagation();
   
   if (confirm(`Are you sure you want to delete "${eventName}"? This action cannot be undone.`)) {
-    fetch('/SINTA/public/index.php?route=delete-plan', {
+    fetch('/index.php?route=delete-plan', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -523,7 +515,7 @@ function cancelPlan(event, planId, eventName) {
   event.stopPropagation();
   
   // First check if cancellation is still available (within 30 minutes)
-  fetch('/SINTA/public/api-plan.php?action=check_cancellation&plan_id=' + planId)
+  fetch('/api-plan.php?action=check_cancellation&plan_id=' + planId)
     .then(response => {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -545,7 +537,7 @@ function cancelPlan(event, planId, eventName) {
           formData.append('action', 'cancel_plan');
           formData.append('plan_id', planId);
           
-          fetch('/SINTA/public/api-plan.php', {
+          fetch('/api-plan.php', {
             method: 'POST',
             body: formData
           })

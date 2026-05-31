@@ -12,7 +12,7 @@ if (!defined('ROOT_PATH')) {
 require_once ROOT_PATH . '/app/models/Feedback.php';
 
 if (!isset($_SESSION['user_logged_in']) || !isset($_SESSION['user_id'])) {
-    header('Location: /SINTA/public/index.php?route=signin');
+    header('Location: /index.php?route=signin');
     exit;
 }
 
@@ -80,7 +80,7 @@ $userFeedbacks = $feedbackModel->getUserFeedback($userId);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $page_title; ?> | Sinta</title>
-    <link rel="stylesheet" href="/SINTA/public/assets/css/global.css">
+    <link rel="stylesheet" href="/assets/css/global.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         .feedback-container { max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
@@ -295,7 +295,7 @@ document.getElementById('feedbackForm').addEventListener('submit', function(e) {
     formData.append('message', document.getElementById('message').value);
     formData.append('rating', document.getElementById('rating-value').value);
     
-    fetch('/SINTA/public/index.php?route=feedback', {
+    fetch('/index.php?route=feedback', {
         method: 'POST',
         body: formData,
         credentials: 'same-origin'
@@ -325,7 +325,7 @@ function addReply(feedbackId) {
     formData.append('feedback_id', feedbackId);
     formData.append('message', message);
     
-    fetch('/SINTA/public/index.php?route=feedback', {
+    fetch('/index.php?route=feedback', {
         method: 'POST',
         body: formData,
         credentials: 'same-origin'

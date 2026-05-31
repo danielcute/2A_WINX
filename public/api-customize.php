@@ -4,8 +4,12 @@ header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
 
-require_once '../controllers/CustomizeController.php';
-require_once '../middleware/AuthMiddleware.php';
+if (!defined('ROOT_PATH')) {
+    define('ROOT_PATH', dirname(__DIR__));
+}
+
+require_once ROOT_PATH . '/app/controllers/CustomizeController.php';
+require_once ROOT_PATH . '/app/middleware/AuthMiddleware.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
 $action = isset($_GET['action']) ? $_GET['action'] : '';

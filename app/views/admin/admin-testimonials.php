@@ -1,8 +1,10 @@
 <?php 
-require_once dirname(__DIR__, 2) . '/models/Testimonial.php';
-
+if (!defined('ROOT_PATH')) {
+    define('ROOT_PATH', dirname(dirname(dirname(__DIR__))));
+}
+require_once ROOT_PATH . '/app/models/Testimonial.php';
 if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-    header('Location: /SINTA/public/index.php?route=signin');
+    header('Location: /index.php?route=signin');
     exit;
 }
 
@@ -62,7 +64,7 @@ $pendingCount = $testimonialModel->getPendingCount();
 <head>
     <meta charset="UTF-8">
     <title>Admin - Testimonial Management | Sinta</title>
-    <link rel="stylesheet" href="/SINTA/public/assets/css/global.css">
+    <link rel="stylesheet" href="/assets/css/global.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         .admin-container { max-width: 1000px; margin: 0 auto; padding: 2rem; }

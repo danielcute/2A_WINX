@@ -32,7 +32,7 @@ $planSummaryItems = [
     'Flowers & Centrepieces',
     'Full Event Coordination'
 ];
-$heroImageUrl = '/SINTA/public/assets/img/event-placeholder.jpg';
+$heroImageUrl = '/assets/img/event-placeholder.jpg';
 $programLines = [];
 $orderRows = [];
 $serviceFee = 0;
@@ -143,15 +143,15 @@ if ($plan) {
 
     $eventText = strtolower(trim(($plan['occasion_name'] ?? '') . ' ' . ($plan['package_name'] ?? '') . ' ' . ($plan['event_name'] ?? '')));
     $eventImageMap = [
-        'wedding' => '/SINTA/public/assets/img/wedding3.jpg',
-        'debut' => '/SINTA/public/assets/img/debut.jpg',
-        'birthday' => '/SINTA/public/assets/img/birthday2.jpg',
-        'corporate' => '/SINTA/public/assets/img/corporate2.jpg',
-        'anniversary' => '/SINTA/public/assets/img/anniversary.jpg',
-        'beach' => '/SINTA/public/assets/img/beach.jpg',
-        'garden' => '/SINTA/public/assets/img/garden.jpg',
+        'wedding' => '/assets/img/wedding3.jpg',
+        'debut' => '/assets/img/debut.jpg',
+        'birthday' => '/assets/img/birthday2.jpg',
+        'corporate' => '/assets/img/corporate2.jpg',
+        'anniversary' => '/assets/img/anniversary.jpg',
+        'beach' => '/assets/img/beach.jpg',
+        'garden' => '/assets/img/garden.jpg',
     ];
-    $heroImageUrl = '/SINTA/public/assets/img/event-placeholder.jpg';
+    $heroImageUrl = '/assets/img/event-placeholder.jpg';
     foreach ($eventImageMap as $keyword => $url) {
         if ($keyword && strpos($eventText, $keyword) !== false) {
             $heroImageUrl = $url;
@@ -170,7 +170,7 @@ if ($plan) {
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="/SINTA/public/assets/css/global.css">
+  <link rel="stylesheet" href="/assets/css/global.css">
   <style>
     /* Event Detail Specific Styles */
     .breadcrumb {
@@ -380,7 +380,7 @@ if ($plan) {
   <main class="evd-main">
 
     <nav class="breadcrumb">
-      <a href="/SINTA/public/index.php?route=plans"><i class="fas fa-arrow-left"></i> My Plans</a>
+      <a href="/index.php?route=plans"><i class="fas fa-arrow-left"></i> My Plans</a>
       <span>/</span>
       <span><?= htmlspecialchars($planTitle) ?></span>
     </nav>
@@ -492,17 +492,21 @@ if ($plan) {
           </div>
           <div class="evd-card__body">
             <?php 
-              // Calculate payment status based on plan data
+              // Calculate payment status based on plan data - CRITICAL FIX
               $depositAmount = round($totalPrice * 0.5);
               $balanceAmount = $totalPrice - $depositAmount;
               $balanceDueDate = $plan['event_date'] ? date('F j, Y', strtotime($plan['event_date'] . ' -1 day')) : 'TBD';
               $paymentStatus = $plan['payment_status'] ?? 'pending';
               $isConfirmed = $planStatus === 'confirmed' || $planStatus === 'approved';
-              $isDepositPaid = $paymentStatus === 'paid';
               
-              // Calculate paid and remaining amounts
-              $paidAmount = $isDepositPaid ? $depositAmount : 0;
-              $remainingAmount = $totalPrice - $paidAmount;
+              // FIXED: Use database values for accurate payment tracking
+              $paidAmount = !empty($plan['total_paid']) ? (float)$plan['total_paid'] : 0;
+              $remainingAmount = !empty($plan['balance_remaining']) ? (float)$plan['balance_remaining'] : ($totalPrice - $paidAmount);
+              
+              // FIXED: Determine payment status based on actual amounts paid
+              $isDepositPaid = $paidAmount >= $depositAmount;  // Deposit = 50%
+              $isFullyPaid = $paymentStatus === 'fully_paid' && $remainingAmount <= 0;  // Fully paid when status is fully_paid AND balance is 0
+              
               $paymentPercentage = $totalPrice > 0 ? round(($paidAmount / $totalPrice) * 100) : 0;
             ?>
             <div class="evd-payment-progress">
@@ -521,16 +525,20 @@ if ($plan) {
               </span>
             </div>
             <div class="evd-pay-row">
-              <span><i class="fas fa-clock"></i> Balance (Due <?= $balanceDueDate ?>)</span>
-              <span class="badge badge--<?= ($isDepositPaid || !$isConfirmed) ? 'warning' : 'info' ?>">
-                <?= $isDepositPaid ? 'Due Soon' : 'Pending' ?>
+              <span><i class="fas fa-<?= $isFullyPaid ? 'circle-check' : 'clock' ?>"></i> Balance (Due <?= $balanceDueDate ?>)</span>
+              <span class="badge badge--<?= $isFullyPaid ? 'green' : ($isDepositPaid ? 'warning' : 'info') ?>">
+                <?= $isFullyPaid ? 'Paid' : ($isDepositPaid ? 'Due Soon' : 'Pending') ?>
               </span>
             </div>
             <div style="display: flex; gap: 1rem; margin-top: 1rem;">
-              <?php if ($isConfirmed && !$isDepositPaid): ?>
-                <a href="#" class="btn btn--gold" style="flex: 1; text-align: center;"><i class="fas fa-credit-card"></i> Pay Deposit (₱<?= number_format($depositAmount, 0) ?>)</a>
-              <?php elseif ($isDepositPaid): ?>
-                <a href="#" class="btn btn--gold" style="flex: 1; text-align: center;"><i class="fas fa-credit-card"></i> Pay Balance (₱<?= number_format($balanceAmount, 0) ?>)</a>
+              <?php if ($isFullyPaid): ?>
+                <div style="flex: 1; background: rgba(46, 125, 50, 0.1); border: 1px solid #2e7d32; padding: 1rem; border-radius: 8px; text-align: center; color: #2e7d32; font-weight: 600;">
+                  <i class="fas fa-check-circle"></i> Fully Paid
+                </div>
+              <?php elseif ($isConfirmed && !$isDepositPaid): ?>
+                <button onclick="showPaymentModal(<?= $id ?>, 'deposit', <?= $depositAmount ?>)" class="btn btn--gold" style="flex: 1; text-align: center;"><i class="fas fa-credit-card"></i> Pay Deposit (₱<?= number_format($depositAmount, 0) ?>)</button>
+              <?php elseif ($isDepositPaid && !$isFullyPaid): ?>
+                <button onclick="showPaymentModal(<?= $id ?>, 'balance', <?= $remainingAmount ?>)" class="btn btn--gold" style="flex: 1; text-align: center;"><i class="fas fa-credit-card"></i> Pay Balance (₱<?= number_format($remainingAmount, 0) ?>)</button>
               <?php else: ?>
                 <button class="btn btn--gold" style="flex: 1; text-align: center; opacity: 0.5; cursor: not-allowed;" disabled title="Booking must be confirmed first"><i class="fas fa-credit-card"></i> Payment</button>
               <?php endif; ?>
@@ -548,19 +556,31 @@ if ($plan) {
           </div>
         </div>
 
+        <div class="card" id="receiptCard" style="display: none;">
+          <div class="evd-card__head">
+            <h4><i class="fas fa-receipt"></i> Payment Receipt</h4>
+          </div>
+          <div class="evd-card__body" id="receiptContent">
+            <div style="text-align: center; padding: 2rem;">
+              <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: #8A7650;"></i>
+              <p style="color: #6B6463;">Loading receipt...</p>
+            </div>
+          </div>
+        </div>
+
         <div class="card">
           <div class="evd-card__head">
             <h4><i class="fas fa-headset"></i> Your Coordinator</h4>
           </div>
           <div class="evd-card__body">
             <div class="evd-coord">
-              <img src="/SINTA/public/assets/img/logo.png" alt="SINTA Coordinator">
+              <img src="/assets/img/logo.png" alt="SINTA Coordinator">
               <div>
                 <strong>SINTA Event Team</strong>
                 <span>Official Event Coordinator & Organizer</span>
               </div>
             </div>
-            <a href="/SINTA/public/index.php?route=messages" class="btn btn--ghost" style="width:100%;margin-top:1rem; display: inline-block; text-align: center;">
+            <a href="/index.php?route=messages&plan_id=<?= $plan['plan_id'] ?? 0 ?>" class="btn btn--ghost" style="width:100%;margin-top:1rem; display: inline-block; text-align: center;">
               <i class="fas fa-message"></i> Send Message
             </a>
           </div>
@@ -585,12 +605,140 @@ if ($plan) {
     window.addEventListener('scroll', () => nav.classList.toggle('scrolled', window.scrollY > 10));
   }
   
+  // Load receipt data
+  function loadReceipt(planId) {
+    fetch(`/api-receipt.php?action=get_latest_receipt&plan_id=${planId}&t=${Date.now()}`)
+      .then(response => response.json())
+      .then(data => {
+        if (data.success && data.receipt) {
+          displayReceipt(data.receipt);
+        }
+      })
+      .catch(error => {
+        console.error('Error loading receipt:', error);
+      });
+  }
+  
+  // Display receipt in the card
+  function displayReceipt(receipt) {
+    const receiptCard = document.getElementById('receiptCard');
+    const receiptContent = document.getElementById('receiptContent');
+    
+    if (!receiptCard || !receiptContent) return;
+    
+    const paidAtDate = new Date(receipt.paid_at).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+    
+    const paidAtTime = new Date(receipt.paid_at).toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+    
+    // Determine receipt type label
+    const receiptTypeLabel = receipt.receipt_type === 'partial' ? 'Deposit Payment Receipt' : 'Full Payment Receipt';
+    const paymentMethodDisplay = receipt.payment_method
+      .split('_')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+    
+    // Build items list HTML with comprehensive display
+    let itemsHtml = '';
+    if (receipt.items_purchased) {
+      try {
+        const items = typeof receipt.items_purchased === 'string' ? JSON.parse(receipt.items_purchased) : receipt.items_purchased;
+        if (Array.isArray(items) && items.length > 0) {
+          itemsHtml += '<div style="margin-bottom: 1.5rem; background: #F5F0E8; padding: 1rem; border-radius: 8px;"><div style="color: #6B6463; font-weight: 600; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;"><i class="fas fa-box"></i> Items Purchased</div>';
+          let itemTotal = 0;
+          items.forEach(item => {
+            const itemName = item.category ? `${item.category}: ${item.name}` : item.name;
+            const itemPrice = Number(item.price || 0);
+            itemTotal += itemPrice;
+            itemsHtml += `<div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #E2D9C8; font-size: 0.9rem;"><span>${itemName}</span><span>₱${itemPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></div>`;
+          });
+          itemsHtml += '</div>';
+        }
+      } catch (e) {
+        console.error('Error parsing items:', e);
+      }
+    }
+    
+    receiptContent.innerHTML = `
+      <div style="background: linear-gradient(135deg, #8A7650 0%, #A69170 100%); color: white; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; text-align: center;">
+        <div style="font-size: 0.85rem; opacity: 0.9;">Receipt Number</div>
+        <div style="font-size: 1.3rem; font-weight: bold; font-family: 'Courier New', monospace;">${receipt.receipt_number}</div>
+      </div>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; font-size: 0.85rem;">
+        <div>
+          <span style="color: #6B6463; display: block; margin-bottom: 0.25rem;">Receipt Type</span>
+          <strong>${receiptTypeLabel}</strong>
+        </div>
+        <div>
+          <span style="color: #6B6463; display: block; margin-bottom: 0.25rem;">Payment Method</span>
+          <strong>${paymentMethodDisplay}</strong>
+        </div>
+        <div>
+          <span style="color: #6B6463; display: block; margin-bottom: 0.25rem;">Date Paid</span>
+          <strong>${paidAtDate}</strong>
+        </div>
+        <div>
+          <span style="color: #6B6463; display: block; margin-bottom: 0.25rem;">Time Paid</span>
+          <strong>${paidAtTime}</strong>
+        </div>
+      </div>
+      
+      ${itemsHtml}
+      
+      <div style="border: 1px solid #E2D9C8; border-radius: 6px; padding: 1rem; margin-bottom: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #E2D9C8;">
+          <span style="color: #6B6463;">Subtotal:</span>
+          <strong>₱${Number(receipt.subtotal).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #E2D9C8;">
+          <span style="color: #6B6463;">Service Fee (3%):</span>
+          <strong>₱${Number(receipt.service_fee).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #E2D9C8; font-weight: bold;">
+          <span style="color: #6B6463;">Total Amount:</span>
+          <strong>₱${Number(receipt.total_amount).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #E2D9C8;">
+          <span style="color: #6B6463;">Amount Paid This Transaction:</span>
+          <strong style="color: #8A7650;">₱${Number(receipt.amount_paid).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; padding: 0.5rem 0;">
+          <span style="color: #6B6463;">Balance Remaining:</span>
+          <strong style="color: ${Number(receipt.balance_remaining) > 0 ? '#F57F17' : '#2e7d32'};">₱${Number(receipt.balance_remaining).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong>
+        </div>
+      </div>
+      
+      <div style="background: rgba(46, 125, 50, 0.1); border: 1px solid #2e7d32; padding: 0.75rem; border-radius: 6px; text-align: center; font-size: 0.8rem; color: #2e7d32;">
+        <i class="fas fa-check-circle"></i> Payment successfully processed and verified
+      </div>
+    `;
+    
+    receiptCard.style.display = 'block';
+  }
+  
+  // Call this on page load to show receipt if payment was made
+  document.addEventListener('DOMContentLoaded', function() {
+    const planId = new URLSearchParams(window.location.search).get('id');
+    if (planId) {
+      // Check if receipt exists (with a small delay to ensure page is ready)
+      setTimeout(() => loadReceipt(planId), 500);
+    }
+  });
+  
   // Cancel event plan
   function cancelEventPlan(event, planId, eventName) {
     event.preventDefault();
     
     // Check current cancellation status
-    fetch('/SINTA/public/api-plan.php?action=check_cancellation&plan_id=' + planId)
+    fetch('/api-plan.php?action=check_cancellation&plan_id=' + planId)
       .then(response => response.json())
       .then(data => {
         if (data.success && data.can_cancel) {
@@ -600,7 +748,7 @@ if ($plan) {
             formData.append('action', 'cancel_plan');
             formData.append('plan_id', planId);
             
-            fetch('/SINTA/public/api-plan.php', {
+            fetch('/api-plan.php', {
               method: 'POST',
               body: formData
             })
@@ -609,7 +757,7 @@ if ($plan) {
               if (data.success) {
                 showToast('Plan cancelled successfully! Redirecting...', 'success');
                 setTimeout(() => {
-                  window.location.href = '/SINTA/public/index.php?route=plans';
+                  window.location.href = '/index.php?route=plans';
                 }, 1500);
               } else {
                 showToast(data.message || 'Failed to cancel plan', 'error');
@@ -629,6 +777,196 @@ if ($plan) {
         alert('An error occurred while checking cancellation status');
       });
   }
+  
+  // Payment modal function
+  function showPaymentModal(planId, paymentType, amount) {
+    const modal = document.getElementById('paymentModal');
+    if (!modal) {
+      console.error('Payment modal not found');
+      return;
+    }
+    
+    document.getElementById('paymentPlanId').value = planId;
+    document.getElementById('paymentType').value = paymentType;
+    document.getElementById('paymentAmount').value = amount;
+    
+    const typeLabel = paymentType === 'deposit' ? 'Deposit Payment' : 'Balance Payment';
+    document.getElementById('paymentTypeLabel').textContent = typeLabel;
+    document.getElementById('paymentAmountDisplay').textContent = '₱' + Number(amount).toLocaleString('en-US', {maximumFractionDigits: 0});
+    
+    // Reset payment method selection
+    document.querySelectorAll('input[name="paymentMethod"]').forEach(input => input.checked = false);
+    
+    // Show modal
+    modal.style.display = 'flex';
+  }
+  
+  function closePaymentModal() {
+    const modal = document.getElementById('paymentModal');
+    if (modal) {
+      modal.style.display = 'none';
+    }
+  }
+  
+  function processPayment(event) {
+    event.preventDefault();
+    
+    const planId = document.getElementById('paymentPlanId').value;
+    const paymentType = document.getElementById('paymentType').value;
+    const amount = document.getElementById('paymentAmount').value;
+    const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value;
+    
+    if (!paymentMethod) {
+      showToast('Please select a payment method', 'error');
+      return;
+    }
+    
+    const submitBtn = document.getElementById('submitPaymentBtn');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+    
+    // Send payment request to backend
+    const formData = new FormData();
+    formData.append('action', 'process_payment');
+    formData.append('plan_id', planId);
+    formData.append('payment_type', paymentType);
+    formData.append('amount', amount);
+    formData.append('payment_method', paymentMethod);
+    
+    fetch('/api-payment.php', {
+      method: 'POST',
+      body: formData
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log('Payment response:', data);
+      
+      if (data.success) {
+        let successMessage = 'Payment initiated successfully! ';
+        
+        // Add method-specific message
+        if (paymentMethod === 'gcash') {
+          successMessage += 'Please check your GCash app for the payment prompt.';
+        } else if (paymentMethod === 'paymaya') {
+          successMessage += 'Please check your PayMaya app for the payment prompt.';
+        } else if (paymentMethod === 'bank_transfer') {
+          successMessage += 'Bank transfer details have been prepared. Reference: ' + (data.reference_number || 'N/A');
+        } else if (paymentMethod === 'debit_card') {
+          successMessage += 'Payment processing...';
+        }
+        
+        showToast(successMessage, 'success');
+        closePaymentModal();
+        
+        // Reload page after delay to show updated payment status
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      } else {
+        const errorMsg = data.error || data.message || 'Failed to process payment';
+        showToast(errorMsg, 'error');
+        console.error('Payment error:', data);
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-check"></i> Pay Now';
+      }
+    })
+    .catch(error => {
+      console.error('Fetch error:', error);
+      showToast('An error occurred while processing payment: ' + error.message, 'error');
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="fas fa-check"></i> Pay Now';
+    });
+  }
+  
+  // Close modal when clicking outside of it
+  window.addEventListener('click', function(event) {
+    const modal = document.getElementById('paymentModal');
+    if (event.target === modal) {
+      closePaymentModal();
+    }
+  });
 </script>
+
+<!-- Payment Modal -->
+<div id="paymentModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 9999;">
+  <div class="modal-content" style="background: white; padding: 2rem; border-radius: 12px; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+      <h2 id="paymentTypeLabel" style="margin: 0; font-size: 1.5rem;">Deposit Payment</h2>
+      <button onclick="closePaymentModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #999;">&times;</button>
+    </div>
+    
+    <div style="background: #f5f0e8; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; text-align: center;">
+      <div style="font-size: 0.9rem; color: #6b6463; margin-bottom: 0.5rem;">Amount Due</div>
+      <div id="paymentAmountDisplay" style="font-size: 2rem; font-weight: bold; color: #8a7650;">₱0</div>
+    </div>
+    
+    <div style="margin-bottom: 1.5rem;">
+      <label style="display: block; margin-bottom: 1rem; font-weight: 600; color: #333;">Select Payment Method:</label>
+      
+      <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+        <label style="display: flex; align-items: center; padding: 0.75rem; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; transition: all 0.2s ease;">
+          <input type="radio" name="paymentMethod" value="gcash" style="margin-right: 1rem; width: 20px; height: 20px; cursor: pointer;">
+          <div>
+            <div style="font-weight: 600; color: #333;">GCash</div>
+            <div style="font-size: 0.85rem; color: #999;">Mobile wallet - instant transfer</div>
+          </div>
+        </label>
+        
+        <label style="display: flex; align-items: center; padding: 0.75rem; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; transition: all 0.2s ease;">
+          <input type="radio" name="paymentMethod" value="paymaya" style="margin-right: 1rem; width: 20px; height: 20px; cursor: pointer;">
+          <div>
+            <div style="font-weight: 600; color: #333;">PayMaya</div>
+            <div style="font-size: 0.85rem; color: #999;">Digital wallet - secure payment</div>
+          </div>
+        </label>
+        
+        <label style="display: flex; align-items: center; padding: 0.75rem; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; transition: all 0.2s ease;">
+          <input type="radio" name="paymentMethod" value="bank_transfer" style="margin-right: 1rem; width: 20px; height: 20px; cursor: pointer;">
+          <div>
+            <div style="font-weight: 600; color: #333;">Bank Transfer</div>
+            <div style="font-size: 0.85rem; color: #999;">Direct bank to bank transfer</div>
+          </div>
+        </label>
+        
+        <label style="display: flex; align-items: center; padding: 0.75rem; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; transition: all 0.2s ease;">
+          <input type="radio" name="paymentMethod" value="debit_card" style="margin-right: 1rem; width: 20px; height: 20px; cursor: pointer;">
+          <div>
+            <div style="font-weight: 600; color: #333;">Debit Card</div>
+            <div style="font-size: 0.85rem; color: #999;">Visa / Mastercard debit card</div>
+          </div>
+        </label>
+      </div>
+    </div>
+    
+    <form onsubmit="processPayment(event)" style="margin-top: 1.5rem;">
+      <input type="hidden" id="paymentPlanId">
+      <input type="hidden" id="paymentType">
+      <input type="hidden" id="paymentAmount">
+      
+      <button type="submit" id="submitPaymentBtn" class="btn btn--primary btn--full" style="font-size: 1rem; padding: 0.75rem;">
+        <i class="fas fa-check"></i> Pay Now
+      </button>
+      <button type="button" onclick="closePaymentModal()" class="btn btn--outline btn--full" style="font-size: 1rem; padding: 0.75rem; margin-top: 0.5rem;">Cancel</button>
+    </form>
+  </div>
+</div>
+
+<style>
+  input[type="radio"]:checked + div {
+    color: #8a7650;
+    font-weight: 600;
+  }
+  
+  label:has(input[type="radio"]:checked) {
+    border-color: #8a7650;
+    background: rgba(138, 118, 80, 0.05);
+  }
+</style>
+
 </body>
 </html>

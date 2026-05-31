@@ -15,7 +15,7 @@ unset($_SESSION['signup_success']);
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="/SINTA/public/assets/css/global.css">
+  <link rel="stylesheet" href="/assets/css/global.css">
   <style>
     body {
       background: linear-gradient(135deg, #f5f0e8 0%, #fff 100%);
@@ -40,7 +40,7 @@ unset($_SESSION['signup_success']);
       border: 1px solid #E2D9C8;
     }
     .auth-brand {
-      background-image: url('/SINTA/public/assets/img/signinimg.jpg');
+      background-image: url('/assets/img/signinimg.jpg');
       background-size: cover;
       background-position: center;
       padding: 3rem;
@@ -309,7 +309,7 @@ unset($_SESSION['signup_success']);
     <div class="auth-brand">
       <div>
         <div class="logo">
-          <img src="/SINTA/public/assets/img/logo.png" alt="Sinta">
+          <img src="/assets/img/logo.png" alt="Sinta">
           <span>Sinta</span>
         </div>
         <div class="auth-quote">
@@ -367,11 +367,11 @@ unset($_SESSION['signup_success']);
         </div>
       <?php endif; ?>
       
-      <form method="POST" action="/SINTA/public/index.php?route=signin">
+<form id="signinForm" onsubmit="return handleSignin(event)">
         <input type="hidden" name="action" value="login">
         <div class="form-group">
           <label>Email address</label>
-          <input type="email" name="email" placeholder="you@example.com" required>
+          <input type="email" name="email" id="signinEmail" placeholder="you@example.com" required>
         </div>
         <div class="form-group">
           <label>Password</label>
@@ -386,11 +386,14 @@ unset($_SESSION['signup_success']);
           </label>
           <a href="#" class="forgot-link">Forgot password?</a>
         </div>
-        <button type="submit" class="btn btn--primary btn--full btn--lg">Sign In</button>
+        <button type="submit" class="btn btn--primary btn--full btn--lg" id="signinBtn">Sign In</button>
       </form>
       
+      <!-- Hidden error container for AJAX responses -->
+      <div id="signinError" class="error-message" style="display: none;"></div>
+      
       <div class="auth-footer">
-        <p>Don't have an account? <a href="/SINTA/public/index.php?route=signup">Create one free →</a></p>
+        <p>Don't have an account? <a href="/index.php?route=signup">Create one free →</a></p>
       </div>
     </div>
     
@@ -413,6 +416,118 @@ document.getElementById('toggleSigninPassword').addEventListener('click', functi
     icon.classList.add('fa-eye');
   }
 });
+
+// AJAX Signin handler - no page refresh on invalid credentials
+async function handleSignin(event) {
+  event.preventDefault();
+  
+  const form = document.getElementById('signinForm');
+  const errorDiv = document.getElementById('signinError');
+  const btn = document.getElementById('signinBtn');
+  
+  const email = document.getElementById('signinEmail').value;
+  const password = document.getElementById('signinPassword').value;
+  
+  // Hide any existing error
+  errorDiv.style.display = 'none';
+  
+  // Show loading state
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing In...';
+  
+  try {
+    const formData = new FormData();
+    formData.append('action', 'login');
+    formData.append('email', email);
+    formData.append('password', password);
+    
+    const response = await fetch('/index.php', {
+      method: 'POST',
+      body: formData,
+      credentials: 'same-origin'
+    });
+    
+    // Try to get response text first
+    const responseText = await response.text();
+    
+    // Check if redirected (success) - if so, responseText might be empty or redirect page
+    if (response.redirected || response.url.includes('homepage') || response.url.includes('admin-dashboard')) {
+      window.location.href = response.url;
+      return;
+    }
+    
+    // Try to parse as JSON
+    try {
+      const data = JSON.parse(responseText);
+      
+      if (data && data.success === false) {
+        // Login failed - show error without refresh
+        errorDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + data.message;
+        errorDiv.style.display = 'flex';
+        
+        // Clear password field
+        document.getElementById('signinPassword').value = '';
+        
+        // Shake animation
+        form.style.animation = 'shake 0.5s';
+        setTimeout(() => form.style.animation = '', 500);
+        
+        // Focus on password field for retry
+        document.getElementById('signinPassword').focus();
+        return;
+      }
+    } catch (e) {
+      // Not JSON - check if response contains login error redirect
+      if (responseText.includes('login_error') || responseText.includes('Invalid email or password')) {
+        // Server side rendered error - extract message
+        const match = responseText.match(/login_error.*?>([^<]+)</);
+        const message = match ? match[1] : 'Invalid email or password';
+        
+        errorDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + message.trim();
+        errorDiv.style.display = 'flex';
+        
+        // Clear password field
+        document.getElementById('signinPassword').value = '';
+        
+        // Shake animation
+        form.style.animation = 'shake 0.5s';
+        setTimeout(() => form.style.animation = '', 500);
+        return;
+      }
+    }
+    
+    // Fallback - if response seems like HTML (redirect to homepage), go there
+    if (responseText.includes('<!DOCTYPE') || responseText.includes('<html')) {
+      window.location.href = '/index.php?route=homepage';
+      return;
+    }
+    
+    // Unknown response - show error
+    errorDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> Invalid email or password';
+    errorDiv.style.display = 'flex';
+    document.getElementById('signinPassword').value = '';
+    form.style.animation = 'shake 0.5s';
+    setTimeout(() => form.style.animation = '', 500);
+    
+  } catch (error) {
+    errorDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> An error occurred. Please try again.';
+    errorDiv.style.display = 'flex';
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = 'Sign In';
+  }
+}
+
+// Add shake animation
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+  }
+`;
+document.head.appendChild(style);
 </script>
 
 </body>

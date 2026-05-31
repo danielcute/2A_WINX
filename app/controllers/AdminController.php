@@ -3,7 +3,7 @@ class AdminController {
     private function checkAuth() {
         // Proper auth check
         if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-            header('Location: /SINTA/public/index.php?route=signin');
+            header('Location: /index.php?route=signin');
             exit;
         }
     }
@@ -77,7 +77,7 @@ class AdminController {
     
     public function logout() {
         session_destroy();
-        header('Location: /SINTA/public/index.php?route=signin');
+        header('Location: /index.php?route=signin');
         exit;
     }
 }

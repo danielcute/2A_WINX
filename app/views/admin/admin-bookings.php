@@ -2,15 +2,19 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 0);
 
-require_once dirname(__DIR__, 2) . '/models/Booking.php';
-require_once dirname(__DIR__, 2) . '/models/User.php';
-require_once dirname(__DIR__, 2) . '/models/PlanAutoConfirmation.php';
+if (!defined('ROOT_PATH')) {
+    define('ROOT_PATH', dirname(dirname(dirname(__DIR__))));
+}
+require_once ROOT_PATH . '/app/models/Booking.php';
+require_once ROOT_PATH . '/app/models/User.php';
+require_once ROOT_PATH . '/app/models/PlanAutoConfirmation.php';
 
 if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-    header('Location: /SINTA/public/index.php?route=signin');
+    header('Location: /index.php?route=signin');
     exit;
 }
 
+$page = 'admin-bookings';
 $page_title = 'Booking Management';
 
 // Handle AJAX requests BEFORE doing any output
@@ -109,12 +113,12 @@ $stats = $bookingModel->getStats();
 <head>
     <meta charset="UTF-8">
     <title>Admin - Booking Management | Sinta</title>
-    <link rel="stylesheet" href="/SINTA/public/assets/css/global.css">
+    <link rel="stylesheet" href="/assets/css/global.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .admin-container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+        .admin-container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
         .bookings-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
-        .bookings-header h1 { font-family: 'Cormorant Garamond', serif; font-size: 1.9rem; color: #2C2820; margin: 0; display: flex; align-items: center; gap: 1rem; letter-spacing: -0.03em; font-weight: 700; }
+        .bookings-header h1 { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; color: #2C2820; margin: 0; display: flex; align-items: center; gap: 1rem; letter-spacing: -0.03em; font-weight: 200; }
         .bookings-header h1 em { color: #8A7650; font-style: italic; font-weight: 400; }
         .animated-icon { display: inline-flex; color: #8A7650; animation: pulse 1.4s ease-in-out infinite; font-size: 1.6rem; }
         @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
@@ -123,19 +127,27 @@ $stats = $bookingModel->getStats();
         .stat-card:hover { border-color: #8A7650; box-shadow: 0 10px 30px rgba(138, 118, 80, 0.15); }
         .stat-card h3 { font-size: 1.8rem; margin: 0 0 0.5rem; color: #8A7650; font-weight: 700; }
         .stat-card p { color: #8B7355; margin: 0; font-weight: 600; }
-        .admin-table { width: 100%; border-collapse: collapse; background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
-        .admin-table th, .admin-table td { padding: 1.25rem; text-align: left; border-bottom: 1px solid #E2D9C8; }
-        .admin-table th { background: #F5F0E8; font-weight: 600; color: #2C2820; }
-        .booking-actions { display: flex; gap: 0.5rem; }
-        .booking-actions .btn { flex: 1; min-width: 120px; }
+        .table-wrapper { overflow-x: auto; border-radius: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); max-width: 100%; }
+        .admin-table { width: 100%; border-collapse: collapse; background: white; min-width: 1100px; }
+        .admin-table th, .admin-table td { padding: 0.7rem 0.6rem; text-align: left; border-bottom: 1px solid #827660; font-size: 0.85rem; }
+        .admin-table th { background: #b5a584; font-weight: 600; color: #2C2820; white-space: nowrap; }
+        .admin-table td { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .admin-table td:nth-child(1) { width: 50px; }
+        .admin-table td:nth-child(2) { max-width: 110px; }
+        .admin-table td:nth-child(3) { max-width: 130px; }
+        .admin-table td:nth-child(4) { max-width: 120px; }
+        .admin-table td:nth-child(5) { max-width: 100px; }
+        .admin-table td:nth-child(10) { min-width: 130px; white-space: normal; }
+        .booking-actions { display: flex; gap: 0.3rem; flex-wrap: wrap; }
+        .booking-actions .btn { font-size: 0.75rem; padding: 0.4rem 0.6rem; white-space: nowrap; }
         .btn-delete-custom { color: #f44336; border-color: #f44336; }
         .btn-delete-custom:hover { background: rgba(244, 67, 54, 0.15); color: #d32f2f; border-color: #d32f2f; }
-        .status-select { padding: 0.6rem 1rem; border-radius: 12px; border: 2px solid #E2D9C8; background: white; color: #2C2820; font-weight: 600; cursor: pointer; transition: all 0.2s ease; }
+        .status-select { padding: 0.5rem 0.75rem; border-radius: 8px; border: 2px solid #E2D9C8; background: white; color: #2C2820; font-weight: 600; cursor: pointer; transition: all 0.2s ease; font-size: 0.9rem; }
         .status-select:hover { border-color: #8A7650; }
         .status-select:focus { outline: none; border-color: #8A7650; box-shadow: 0 0 0 3px rgba(138, 118, 80, 0.1); }
         .status-select:disabled { background: #F5F0E8; color: #A39B8B; border-color: #D4CAB8; cursor: not-allowed; opacity: 0.7; }
         .status-select:disabled:hover { border-color: #D4CAB8; }
-        .completed-indicator { display: block; color: #8A7650; margin-top: 0.25rem; font-weight: 600; font-size: 0.85rem; }
+        .completed-indicator { display: block; color: #8A7650; margin-top: 0.25rem; font-weight: 600; font-size: 0.75rem; }
         .btn-delete-custom:disabled { opacity: 0.5; cursor: not-allowed; }
         .btn-delete-custom:disabled:hover { background: transparent; color: #f44336; border-color: #f44336; }
         .toast { position: fixed; bottom: 2rem; right: 2rem; background: #333; color: white; padding: 0.75rem 1.5rem; border-radius: 8px; z-index: 3000; animation: slideIn 0.3s ease; }
@@ -169,10 +181,7 @@ $stats = $bookingModel->getStats();
         </div>
     </div>
     
-    <div class="admin-page-header bookings-header">
-        <h1 class="admin-page-title"><i class="fas fa-calendar-check animated-icon"></i> Booking <em>Management</em></h1>
-    </div>
-    
+    <div class="table-wrapper">
     <table class="admin-table">
         <thead>
             <tr>
@@ -182,24 +191,45 @@ $stats = $bookingModel->getStats();
                 <th>Event</th>
                 <th>Event Date</th>
                 <th>Total (₱)</th>
-                <th>Status</th>
+                <th>Paid (₱)</th>
+                <th>Payment Status</th>
+                <th>Booking Status</th>
                 <th>Actions</th>
             </tr>
         </thead>
         <tbody id="bookingsTableBody">
             <?php if (empty($bookings)): ?>
                 <tr>
-                    <td colspan="8" style="text-align: center; padding: 2rem;">No bookings yet</td>
+                    <td colspan="10" style="text-align: center; padding: 2rem;">No bookings yet</td>
                 </tr>
             <?php else: ?>
                 <?php foreach ($bookings as $book): ?>
                     <tr id="booking-row-<?= $book['checkout_id'] ?>">
                         <td><?= $book['checkout_id'] ?></td>
                         <td><?= htmlspecialchars($book['first_name'] . ' ' . ($book['last_name'] ?? '')) ?></td>
-                        <td><?= htmlspecialchars($book['email'] ?? 'N/A') ?></td>
-                        <td><?= htmlspecialchars($book['event_name'] ?? 'Custom Event') ?></td>
+                        <td title="<?= htmlspecialchars($book['email'] ?? 'N/A') ?>" style="cursor: help;"><?= substr(htmlspecialchars($book['email'] ?? 'N/A'), 0, 18) ?><?= strlen($book['email'] ?? '') > 18 ? '...' : '' ?></td>
+                        <td title="<?= htmlspecialchars($book['event_name'] ?? 'Custom Event') ?>" style="cursor: help;"><?= substr(htmlspecialchars($book['event_name'] ?? 'Custom Event'), 0, 20) ?><?= strlen($book['event_name'] ?? '') > 20 ? '...' : '' ?></td>
                         <td><?= !empty($book['event_date']) ? date('M d, Y', strtotime($book['event_date'])) : 'TBD' ?></td>
                         <td><?= number_format($book['total_amount'], 0) ?></td>
+                        <td><?= number_format($book['total_paid'] ?? 0, 0) ?></td>
+                        <td>
+                            <?php 
+                                $paymentPercent = ($book['total_amount'] > 0) ? round(($book['total_paid'] ?? 0) / $book['total_amount'] * 100) : 0;
+                                if ($paymentPercent == 100) {
+                                    $paymentBadgeClass = 'badge--green';
+                                    $paymentText = 'Fully Paid';
+                                } elseif ($paymentPercent >= 50) {
+                                    $paymentBadgeClass = 'badge--warning';
+                                    $paymentText = '50% Paid';
+                                } else {
+                                    $paymentBadgeClass = 'badge--danger';
+                                    $paymentText = 'Unpaid';
+                                }
+                            ?>
+                            <span class="badge <?= $paymentBadgeClass ?>" style="display: inline-block; padding: 0.3rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">
+                                <?= $paymentText ?>
+                            </span>
+                        </td>
                         <td>
                             <select class="status-select" 
                                     id="status-select-<?= $book['checkout_id'] ?>"
@@ -212,7 +242,7 @@ $stats = $bookingModel->getStats();
                                 <option value="canceled" <?= $book['status'] == 'canceled' ? 'selected' : '' ?>>Canceled</option>
                             </select>
                             <?php if ($book['status'] == 'completed'): ?>
-                                <small style="display: block; color: #8A7650; margin-top: 0.25rem; font-weight: 600;">
+                                <small style="display: block; color: #8A7650; margin-top: 0.25rem; font-weight: 600; font-size: 0.7rem;">
                                     <i class="fas fa-lock"></i> Settled
                                 </small>
                             <?php endif; ?>
@@ -234,6 +264,7 @@ $stats = $bookingModel->getStats();
             <?php endif; ?>
         </tbody>
     </table>
+    </div>
 </div>
 
 <script>

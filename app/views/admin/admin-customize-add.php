@@ -15,7 +15,7 @@ if (!$admin || $admin['role'] !== 'admin') {
 }
 
 // Predefined main categories for SINTA customize
-$mainCategories = ['Theme', 'Venue', 'Catering', 'Extras'];
+$mainCategories = ['Theme', 'Color Combinations', 'Venue', 'Food', 'Sweets', 'Catering', 'Pastries', 'Beverages', 'Add-ons'];
 $categories = $categories ?? $mainCategories;
 // Ensure only main categories are shown
 $allCategories = array_intersect($mainCategories, array_merge($categories, $mainCategories));

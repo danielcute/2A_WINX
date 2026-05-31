@@ -7,7 +7,7 @@
 header('Content-Type: application/json');
 
 if (!defined('ROOT_PATH')) {
-    define('ROOT_PATH', dirname(__DIR__));
+    define('ROOT_PATH', __DIR__);
 }
 
 require_once ROOT_PATH . '/config/database.php';

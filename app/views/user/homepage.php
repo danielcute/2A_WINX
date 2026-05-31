@@ -39,8 +39,7 @@ if (!empty($_SESSION['user_id'])) {
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="/SINTA/public/assets/css/global.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css' rel='stylesheet' />  <link rel="stylesheet" href="/assets/css/global.css">
   <style>
     /* Styles remain the same as before */
     .app-shell {
@@ -360,7 +359,123 @@ if (!empty($_SESSION['user_id'])) {
         grid-template-columns: 1fr;
       }
     }
+
+    /* Event Calendar Styles */
+    .event-calendar { 
+      background: var(--bg-card); 
+      border-radius: var(--radius-2xl); 
+      padding: 1.5rem; 
+      margin-bottom: 2rem; 
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-md);
+    }
+    
+    .event-calendar h2 { 
+      margin-top: 0; 
+      font-size: 1.3rem; 
+      color: var(--text-primary); 
+      display: flex; 
+      align-items: center; 
+      gap: 0.75rem; 
+      margin-bottom: 1rem;
+    }
+    
+    .event-calendar h2 i { 
+      color: var(--primary); 
+    }
+
+    /* FullCalendar Customization */
+    .fc { 
+      font-family: 'Inter', -apple-system, sans-serif; 
+    }
+
+    .fc .fc-button-primary { 
+      background-color: var(--primary); 
+      border-color: var(--primary); 
+    }
+
+    .fc .fc-button-primary:hover, 
+    .fc .fc-button-primary:active { 
+      background-color: #6B5A3E; 
+      border-color: #6B5A3E; 
+    }
+
+    .fc .fc-button-primary.fc-button-active { 
+      background-color: #6B5A3E; 
+      border-color: #6B5A3E; 
+    }
+
+    .fc .fc-col-header-cell { 
+      background-color: var(--bg-secondary); 
+      color: var(--primary); 
+      font-weight: 600;
+      border-color: var(--border);
+      padding: 6px 0;
+      font-size: 0.8rem;
+    }
+
+    .fc .fc-daygrid-day { 
+      border-color: var(--border); 
+      padding: 2px;
+    }
+
+    .fc .fc-daygrid-day:hover { 
+      background-color: var(--bg-secondary); 
+    }
+
+    .fc .fc-daygrid-day.fc-day-other { 
+      background-color: #FAFAF7; 
+    }
+
+    .fc .fc-event { 
+      border: none;
+      cursor: pointer;
+    }
+
+    .fc .fc-event-title { 
+      font-weight: 500; 
+      padding: 0.15rem 0.3rem;
+      font-size: 0.75rem;
+    }
+
+    .fc .fc-daygrid-day-number { 
+      color: var(--primary); 
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+
+    /* Legend */
+    .calendar-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.9rem;
+    }
+
+    .legend-color {
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+    }
+
+    .legend-item.confirmed .legend-color {
+      background-color: rgba(76, 175, 80, 0.7);
+    }
+
+    .legend-item.pending .legend-color {
+      background-color: rgba(255, 193, 7, 0.7);
+    }
   </style>
+  <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
 </head>
 <body>
 
@@ -376,8 +491,8 @@ if (!empty($_SESSION['user_id'])) {
         <h1 class="home-hero__title">Good Day, <em><?= htmlspecialchars($_SESSION['user_name'] ?? 'Guest') ?>!</em></h1>
         <p class="home-hero__sub">What kind of celebration are we planning today?</p>
         <div class="home-hero__actions">
-        <a href="/SINTA/public/index.php?route=occasions" class="btn btn--primary btn--lg"><i class="fas fa-sparkles"></i> Start Planning</a>
-          <a href="/SINTA/public/index.php?route=packages" class="btn btn--outline btn--lg"><i class="fas fa-box"></i> Browse Packages</a>
+        <a href="/index.php?route=occasions" class="btn btn--primary btn--lg"><i class="fas fa-sparkles"></i> Start Planning</a>
+          <a href="/index.php?route=packages" class="btn btn--outline btn--lg"><i class="fas fa-box"></i> Browse Packages</a>
         </div>
       </div>
       <div class="home-hero__visual animate-float">
@@ -419,50 +534,50 @@ if (!empty($_SESSION['user_id'])) {
           <div class="eyebrow"><span class="rule"></span> Step 1</div>
           <h2>Choose an <em>Occasion</em></h2>
         </div>
-       <a href="/SINTA/public/index.php?route=occasions" class="btn btn--ghost btn--sm">View All <i class="fas fa-arrow-right"></i></a>
+       <a href="/index.php?route=occasions" class="btn btn--ghost btn--sm">View All <i class="fas fa-arrow-right"></i></a>
       </div>
       <div class="occasions-grid stagger">
-       <a href="/SINTA/public/index.php?route=packages&occasion=wedding" class="occasion-card">
-          <div class="occasion-card__image" style="background-image: url('/SINTA/public/assets/img/wedding.jpg')"></div>
+       <a href="/index.php?route=packages&occasion=wedding" class="occasion-card">
+          <div class="occasion-card__image" style="background-image: url('/assets/img/wedding.jpg')"></div>
           <div class="occasion-card__content">
             <div class="occasion-card__icon"><i class="fas fa-ring"></i></div>
             <h4>Wedding</h4>
             <span class="occasion-card__price">From ₱150K</span>
           </div>
         </a>
-        <a href="/SINTA/public/index.php?route=packages&occasion=birthday" class="occasion-card">
-          <div class="occasion-card__image" style="background-image: url('/SINTA/public/assets/img/birthday.jpg')"></div>
+        <a href="/index.php?route=packages&occasion=birthday" class="occasion-card">
+          <div class="occasion-card__image" style="background-image: url('/assets/img/birthday.jpg')"></div>
           <div class="occasion-card__content">
             <div class="occasion-card__icon"><i class="fas fa-cake-candles"></i></div>
             <h4>Birthday</h4>
             <span class="occasion-card__price">From ₱50K</span>
           </div>
         </a>
-        <a href="/SINTA/public/index.php?route=packages&occasion=debut" class="occasion-card">
-          <div class="occasion-card__image" style="background-image: url('/SINTA/public/assets/img/debut.jpg')"></div>
+        <a href="/index.php?route=packages&occasion=debut" class="occasion-card">
+          <div class="occasion-card__image" style="background-image: url('/assets/img/debut.jpg')"></div>
           <div class="occasion-card__content">
             <div class="occasion-card__icon"><i class="fas fa-crown"></i></div>
             <h4>Debut</h4>
             <span class="occasion-card__price">From ₱80K</span>
           </div>
         </a>
-        <a href="/SINTA/public/index.php?route=packages&occasion=corporate" class="occasion-card">
-          <div class="occasion-card__image" style="background-image: url('/SINTA/public/assets/img/corporate.jpg')"></div>
+        <a href="/index.php?route=packages&occasion=corporate" class="occasion-card">
+          <div class="occasion-card__image" style="background-image: url('/assets/img/corporate.jpg')"></div>
           <div class="occasion-card__content">
             <div class="occasion-card__icon"><i class="fas fa-briefcase"></i></div>
             <h4>Corporate</h4>
             <span class="occasion-card__price">From ₱200K</span>
           </div>
         </a>
-        <a href="/SINTA/public/index.php?route=packages&occasion=anniversary" class="occasion-card">
-          <div class="occasion-card__image" style="background-image: url('/SINTA/public/assets/img/anniversary.jpg')"></div>
+        <a href="/index.php?route=packages&occasion=anniversary" class="occasion-card">
+          <div class="occasion-card__image" style="background-image: url('/assets/img/anniversary.jpg')"></div>
           <div class="occasion-card__content">
             <div class="occasion-card__icon"><i class="fas fa-heart"></i></div>
             <h4>Anniversary</h4>
             <span class="occasion-card__price">From ₱60K</span>
           </div>
         </a>
-        <a href="/SINTA/public/index.php?route=packages&occasion=other" class="occasion-card occasion-card--more">
+        <a href="/index.php?route=packages&occasion=other" class="occasion-card occasion-card--more">
           <div class="occasion-card__content">
             <div class="occasion-card__icon"><i class="fas fa-plus"></i></div>
             <h4>More Events</h4>
@@ -479,7 +594,7 @@ if (!empty($_SESSION['user_id'])) {
           <div class="eyebrow"><span class="rule"></span> Your Plans</div>
           <h2>Upcoming <em>Events</em></h2>
         </div>
-        <a href="/SINTA/public/index.php?route=plans" class="btn btn--ghost btn--sm">View All <i class="fas fa-arrow-right"></i></a>
+        <a href="/index.php?route=plans" class="btn btn--ghost btn--sm">View All <i class="fas fa-arrow-right"></i></a>
       </div>
       <div class="events-list stagger">
         <?php if (!empty($homePlans)): ?>
@@ -510,18 +625,18 @@ if (!empty($_SESSION['user_id'])) {
               $eventTitle = htmlspecialchars($plan['event_name'] ?: ($plan['occasion_name'] ?: 'Your Event'));
               $eventDate = $plan['event_date'] ? date('M j, Y', strtotime($plan['event_date'])) : 'TBD';
               $eventLocation = htmlspecialchars($plan['venue'] ?: 'TBD');
-              $eventLink = '/SINTA/public/index.php?route=event-detail&id=' . urlencode($plan['plan_id']);
+              $eventLink = '/index.php?route=event-detail&id=' . urlencode($plan['plan_id']);
               $eventText = strtolower(trim(($plan['occasion_name'] ?? '') . ' ' . ($plan['package_name'] ?? '') . ' ' . ($plan['event_name'] ?? '')));
               $eventImageMap = [
-                  'wedding' => '/SINTA/public/assets/img/wedding3.jpg',
-                  'debut' => '/SINTA/public/assets/img/debut.jpg',
-                  'birthday' => '/SINTA/public/assets/img/birthday2.jpg',
-                  'corporate' => '/SINTA/public/assets/img/corporate2.jpg',
-                  'anniversary' => '/SINTA/public/assets/img/anniversary.jpg',
-                  'beach' => '/SINTA/public/assets/img/beach.jpg',
-                  'garden' => '/SINTA/public/assets/img/garden.jpg',
+                  'wedding' => '/assets/img/wedding3.jpg',
+                  'debut' => '/assets/img/debut.jpg',
+                  'birthday' => '/assets/img/birthday2.jpg',
+                  'corporate' => '/assets/img/corporate2.jpg',
+                  'anniversary' => '/assets/img/anniversary.jpg',
+                  'beach' => '/assets/img/beach.jpg',
+                  'garden' => '/assets/img/garden.jpg',
               ];
-              $imageUrl = '/SINTA/public/assets/img/event-placeholder.jpg';
+              $imageUrl = '/assets/img/event-placeholder.jpg';
               foreach ($eventImageMap as $keyword => $url) {
                   if ($keyword && strpos($eventText, $keyword) !== false) {
                       $imageUrl = $url;
@@ -544,7 +659,7 @@ if (!empty($_SESSION['user_id'])) {
           <?php endforeach; ?>
         <?php else: ?>
           <a href="event-detail.php?id=1" class="event-card">
-            <div class="event-card__image" style="background-image: url('/SINTA/public/assets/img/wedding.jpg')"></div>
+            <div class="event-card__image" style="background-image: url('/assets/img/wedding.jpg')"></div>
             <div class="event-card__info">
               <h4>Santos Wedding</h4>
               <div class="event-card__meta">
@@ -556,7 +671,7 @@ if (!empty($_SESSION['user_id'])) {
             <i class="fas fa-chevron-right event-card__arrow"></i>
           </a>
           <a href="event-detail.php?id=2" class="event-card">
-            <div class="event-card__image" style="background-image: url('/SINTA/public/assets/img/70.jpg')"></div>
+            <div class="event-card__image" style="background-image: url('/assets/img/70.jpg')"></div>
             <div class="event-card__info">
               <h4>Mom's 70th Birthday</h4>
               <div class="event-card__meta">
@@ -568,7 +683,7 @@ if (!empty($_SESSION['user_id'])) {
             <i class="fas fa-chevron-right event-card__arrow"></i>
           </a>
           <a href="event-detail.php?id=3" class="event-card">
-            <div class="event-card__image" style="background-image: url('/SINTA/public/assets/img/ayala.jpg')"></div>
+            <div class="event-card__image" style="background-image: url('/assets/img/ayala.jpg')"></div>
             <div class="event-card__info">
               <h4>Ayala Gala Night</h4>
               <div class="event-card__meta">
@@ -580,6 +695,41 @@ if (!empty($_SESSION['user_id'])) {
             <i class="fas fa-chevron-right event-card__arrow"></i>
           </a>
         <?php endif; ?>
+      </div>
+    </section>
+    
+    <!-- Event Calendar Section -->
+    <section class="home-section">
+      <div class="home-section__head">
+        <div>
+          <div class="eyebrow"><span class="rule"></span> Plan Overview</div>
+          <h2>Event <em>Calendar</em></h2>
+        </div>
+      </div>
+      <div class="event-calendar">
+        <h2><i class="fas fa-calendar-check"></i> Your Event Schedule</h2>
+        <div id="weatherInfo" style="padding: 0.75rem; background: #f9f7f3; border-radius: 8px; margin-bottom: 1rem; display: none;">
+          <div style="display: flex; align-items: center; gap: 0.75rem; font-size: 0.9rem;">
+            <span id="weatherIcon" style="font-size: 1.5rem;">🌡️</span>
+            <div style="flex: 1;">
+              <strong id="weatherCondition">Loading weather...</strong>
+              <div style="font-size: 0.85rem; color: #666; margin-top: 0.25rem;">
+                <span id="weatherTemp">--°C</span> | <span id="weatherAvailability">Checking availability...</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="userEventCalendar" style="height: 280px;"></div>
+        <div class="calendar-legend">
+          <div class="legend-item confirmed">
+            <div class="legend-color"></div>
+            <span>Confirmed Events</span>
+          </div>
+          <div class="legend-item pending">
+            <div class="legend-color"></div>
+            <span>Pending Events</span>
+          </div>
+        </div>
       </div>
     </section>
     
@@ -658,7 +808,7 @@ if (!empty($_SESSION['user_id'])) {
     formData.append('message', document.getElementById('home-feedback-message').value);
     formData.append('rating', document.getElementById('home-feedback-rating-value').value);
     
-    fetch('/SINTA/public/index.php?route=feedback', {
+    fetch('/index.php?route=feedback', {
       method: 'POST',
       body: formData,
       credentials: 'same-origin'
@@ -697,6 +847,111 @@ if (!empty($_SESSION['user_id'])) {
     `;
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 3000);
+  }
+
+  // Initialize Event Calendar
+  document.addEventListener('DOMContentLoaded', function() {
+    const calendarEl = document.getElementById('userEventCalendar');
+    if (!calendarEl) return;
+    
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+      initialView: 'dayGridMonth',
+      headerToolbar: {
+        left: 'prev,next today',
+        center: 'title',
+        right: 'dayGridMonth,listMonth'
+      },
+      events: function(info, successCallback, failureCallback) {
+        fetch('/api-calendar.php?action=getUserBookings&userId=<?= $_SESSION["user_id"] ?? 0 ?>')
+          .then(response => response.json())
+          .then(data => successCallback(data))
+          .catch(error => {
+            console.error('Error loading events:', error);
+            failureCallback(error);
+          });
+      },
+      dateClick: function(info) {
+        // Fetch weather for the clicked date
+        fetchWeatherForDate(info.dateStr);
+      },
+      eventClick: function(info) {
+        const event = info.event;
+        const props = event.extendedProps;
+        
+        let detailsHTML = `
+          <div style="background: white; border-radius: 12px; padding: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-width: 300px;">
+            <h4 style="margin: 0 0 0.5rem; color: #8A7650;">${event.title}</h4>
+            <div style="display: flex; gap: 0.5rem; margin: 0.5rem 0;">
+              <span style="font-weight: 600; color: #2C2820; min-width: 70px;">Status:</span>
+              <span style="text-transform: capitalize;">${props.status}</span>
+            </div>
+            ${props.time ? `<div style="display: flex; gap: 0.5rem; margin: 0.5rem 0;">
+              <span style="font-weight: 600; color: #2C2820; min-width: 70px;">Time:</span>
+              <span>${props.time}</span>
+            </div>` : ''}
+            ${props.venue ? `<div style="display: flex; gap: 0.5rem; margin: 0.5rem 0;">
+              <span style="font-weight: 600; color: #2C2820; min-width: 70px;">Venue:</span>
+              <span>${props.venue}</span>
+            </div>` : ''}
+            ${props.price ? `<div style="display: flex; gap: 0.5rem; margin: 0.5rem 0;">
+              <span style="font-weight: 600; color: #2C2820; min-width: 70px;">Amount:</span>
+              <span>₱${new Intl.NumberFormat('en-PH').format(props.price)}</span>
+            </div>` : ''}
+            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #E2D9C8;">
+              <a href="/index.php?route=event-detail&id=${event.id}" style="display: inline-block; background: #8A7650; color: white; padding: 0.5rem 1rem; border-radius: 8px; text-decoration: none; font-size: 0.85rem;">View Details</a>
+            </div>
+          </div>
+        `;
+        
+        // Create and show popup
+        const popup = document.createElement('div');
+        popup.innerHTML = detailsHTML;
+        popup.style.position = 'absolute';
+        popup.style.top = info.jsEvent.pageY + 10 + 'px';
+        popup.style.left = info.jsEvent.pageX + 10 + 'px';
+        popup.style.zIndex = '1000';
+        document.body.appendChild(popup);
+        
+        // Remove popup on click outside
+        function removePopup() {
+          popup.remove();
+          document.removeEventListener('click', removePopup);
+        }
+        
+        setTimeout(() => {
+          document.addEventListener('click', removePopup);
+        }, 10);
+      }
+    });
+    
+    calendar.render();
+  });
+
+  function fetchWeatherForDate(dateStr) {
+    const weatherInfo = document.getElementById('weatherInfo');
+    if (!weatherInfo) return;
+    
+    fetch(`/api-weather.php?action=getForecast&date=${dateStr}`)
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          document.getElementById('weatherIcon').textContent = data.icon;
+          document.getElementById('weatherCondition').textContent = data.condition;
+          document.getElementById('weatherTemp').textContent = `${data.tempMin}°C - ${data.tempMax}°C`;
+          
+          const availElement = document.getElementById('weatherAvailability');
+          availElement.textContent = data.availability.message;
+          availElement.style.color = data.availability.color;
+          
+          weatherInfo.style.display = 'block';
+        } else {
+          weatherInfo.style.display = 'none';
+        }
+      })
+      .catch(error => {
+        console.error('Weather fetch error:', error);
+        weatherInfo.style.display = 'none';
+      });
   }
 </script>
 </body>

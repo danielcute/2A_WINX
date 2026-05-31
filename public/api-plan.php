@@ -5,7 +5,12 @@
  */
 
 if (!defined('ROOT_PATH')) {
+    // Check if app folder exists at current level (production) or parent level (local)
+if (is_dir(__DIR__ . '/app')) {
+    define('ROOT_PATH', __DIR__);
+} else {
     define('ROOT_PATH', dirname(__DIR__));
+}
 }
 
 session_start();

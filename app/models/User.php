@@ -7,6 +7,9 @@ if (!defined('ROOT_PATH')) {
     define('ROOT_PATH', dirname(dirname(__DIR__)));
 }
 require_once ROOT_PATH . '/config/database.php';
+require_once ROOT_PATH . '/vendor/autoload.php';
+
+use PragmaRX\Google2FA\Google2FA;
 
 class User {
     private $db;
@@ -17,6 +20,8 @@ class User {
     
     public function findByEmail($email) {
         $email = strtolower(trim($email)); // Ensure lowercase
+        error_log("Finding user by email: " . $email);
+        
         $stmt = $this->db->prepare("SELECT * FROM users_tbl WHERE LOWER(email) = ?");
         if (!$stmt) {
             error_log("Prepare failed: " . $this->db->error);
@@ -25,7 +30,15 @@ class User {
         $stmt->bind_param("s", $email);
         $stmt->execute();
         $result = $stmt->get_result();
-        return $result->fetch_assoc();
+        $user = $result->fetch_assoc();
+        
+        if ($user) {
+            error_log("User found - ID: " . $user['user_id'] . ", Email: " . $user['email']);
+        } else {
+            error_log("No user found with email: " . $email);
+        }
+        
+        return $user;
     }
     
     public function findById($id) {
@@ -154,9 +167,27 @@ class User {
     
     public function authenticate($email, $password) {
         $user = $this->findByEmail($email);
+        
+        // Debug logging
+        error_log("=== AUTHENTICATE DEBUG ===");
+        error_log("Email provided: " . $email);
+        error_log("User found: " . ($user ? "YES (ID: " . $user['user_id'] . ")" : "NO"));
+        
+        if ($user) {
+            error_log("Stored password hash: " . substr($user['password'], 0, 20) . "...");
+            error_log("Password verify result: " . (password_verify($password, $user['password']) ? "TRUE" : "FALSE"));
+            
+            // Extra check: verify the hash is valid
+            $info = password_get_info($user['password']);
+            error_log("Hash algo: " . $info['algo'] . ", Valid hash: " . ($info['algo'] !== 0 ? "YES" : "NO"));
+        }
+        
         if ($user && password_verify($password, $user['password'])) {
+            error_log("Authentication SUCCESSFUL");
             return $user;
         }
+        
+        error_log("Authentication FAILED");
         return false;
     }
     
@@ -214,6 +245,120 @@ class User {
         $row = $result->fetch_assoc();
         $stmt->close();
         return $row['count'] > 0;
+    }
+    
+    /**
+     * Generate a new 2FA secret for user
+     */
+    public function generateTwoFactorSecret() {
+        $google2fa = new Google2FA();
+        return $google2fa->generateSecretKey(32);
+    }
+    
+    /**
+     * Enable 2FA for a user
+     */
+    public function enableTwoFactor($userId, $secret) {
+        $userId = (int)$userId;
+        $stmt = $this->db->prepare("UPDATE users_tbl SET two_factor_secret = ?, two_factor_enabled = 1 WHERE user_id = ?");
+        if (!$stmt) {
+            error_log("Prepare failed: " . $this->db->error);
+            return false;
+        }
+        $stmt->bind_param("si", $secret, $userId);
+        $result = $stmt->execute();
+        $stmt->close();
+        return $result;
+    }
+    
+    /**
+     * Disable 2FA for a user
+     */
+    public function disableTwoFactor($userId) {
+        $userId = (int)$userId;
+        $stmt = $this->db->prepare("UPDATE users_tbl SET two_factor_secret = NULL, two_factor_enabled = 0 WHERE user_id = ?");
+        if (!$stmt) {
+            error_log("Prepare failed: " . $this->db->error);
+            return false;
+        }
+        $stmt->bind_param("i", $userId);
+        $result = $stmt->execute();
+        $stmt->close();
+        return $result;
+    }
+    
+    /**
+     * Check if 2FA is enabled for a user
+     */
+    public function isTwoFactorEnabled($userId) {
+        $userId = (int)$userId;
+        $stmt = $this->db->prepare("SELECT two_factor_enabled, two_factor_secret FROM users_tbl WHERE user_id = ?");
+        if (!$stmt) {
+            error_log("Prepare failed: " . $this->db->error);
+            return false;
+        }
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        $stmt->close();
+        return $row && $row['two_factor_enabled'] == 1 ? $row : false;
+    }
+    
+    /**
+     * Get 2FA secret for a user
+     */
+    public function getTwoFactorSecret($userId) {
+        $userId = (int)$userId;
+        $stmt = $this->db->prepare("SELECT two_factor_secret FROM users_tbl WHERE user_id = ?");
+        if (!$stmt) {
+            error_log("Prepare failed: " . $this->db->error);
+            return null;
+        }
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        $stmt->close();
+        return $row ? $row['two_factor_secret'] : null;
+    }
+    
+    /**
+     * Verify 2FA code (TOTP compatible with Google Authenticator)
+     * @param $userId - The user ID
+     * @param $code - The 6-digit code to verify
+     * @param $tempSecret - Optional temporary secret (for setup phase). If not provided, fetches from database.
+     */
+    public function verifyTwoFactorCode($userId, $code, $tempSecret = null) {
+        // Use provided secret or fetch from database
+        $secret = $tempSecret ?? $this->getTwoFactorSecret($userId);
+        
+        if (!$secret) {
+            error_log("2FA verification failed: No secret found for user $userId");
+            return false;
+        }
+        
+        // Sanitize the code - remove any spaces and ensure it's 6 digits
+        $code = trim($code);
+        $code = preg_replace('/\s+/', '', $code);
+        
+        if (!preg_match('/^\d{6}$/', $code)) {
+            error_log("2FA verification failed for user $userId: Invalid code format: $code");
+            return false;
+        }
+        
+        try {
+            $google2fa = new Google2FA();
+            
+            // verifyKey() uses default settings: SHA1 algorithm, 6 digits, 30-second window
+            $result = $google2fa->verifyKey($secret, $code);
+            
+            error_log("2FA Code Verification for user $userId: code=$code, result=" . ($result ? "VALID" : "INVALID"));
+            return $result;
+        } catch (\Exception $e) {
+            error_log("2FA verification exception for user $userId: " . $e->getMessage());
+            return false;
+        }
     }
 }
 ?>

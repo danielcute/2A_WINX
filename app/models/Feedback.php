@@ -94,9 +94,10 @@ class Feedback {
         $userId = (int)$data['user_id'];
         $subject = $this->db->real_escape_string($data['subject']);
         $message = $this->db->real_escape_string($data['message']);
+        $rating = isset($data['rating']) ? (int)$data['rating'] : 0;
         
-        $sql = "INSERT INTO feedback_tbl (user_id, subject, message, status) 
-                VALUES ($userId, '$subject', '$message', 'open')";
+        $sql = "INSERT INTO feedback_tbl (user_id, subject, message, rating, status) 
+                VALUES ($userId, '$subject', '$message', $rating, 'open')";
         
         if ($this->db->query($sql)) {
             return $this->db->insert_id;

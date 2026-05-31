@@ -3,11 +3,9 @@
  * Admin Package Management Page
  */
 
-$page = 'admin-packages';
-
 // Check if admin
 if (!isset($_SESSION['admin_logged_in'])) {
-    header('Location: /SINTA/public/index.php?route=signin');
+    header('Location: /index.php?route=signin');
     exit;
 }
 
@@ -16,6 +14,10 @@ if (!defined('ROOT_PATH')) {
 }
 require_once ROOT_PATH . '/app/controllers/AdminPackageController.php';
 require_once ROOT_PATH . '/config/database.php';
+
+// Set page info for navigation
+$page = 'admin-packages';
+$page_title = 'Package Management';
 
 $packageController = new AdminPackageController();
 $db = Database::getInstance()->getConnection();
@@ -213,7 +215,7 @@ $sectionOrder = ['Wedding', 'Birthday', 'Big Events / Gala', 'Other Events'];
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Manage Packages | Sinta</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="/SINTA/public/assets/css/global.css">
+    <link rel="stylesheet" href="/assets/css/global.css">
     <style>
         body { background: #f5f5f5; font-family: 'DM Sans', sans-serif; }
         body.modal-open { overflow: hidden; }
@@ -287,13 +289,16 @@ $sectionOrder = ['Wedding', 'Birthday', 'Big Events / Gala', 'Other Events'];
             width: 100%; 
             height: 100%; 
             background: rgba(0, 0, 0, 0.7); 
-            z-index: 99999; 
+            z-index: 500; 
             align-items: center; 
             justify-content: center; 
             backdrop-filter: blur(3px);
+            pointer-events: none;
         }
         .modal.active { 
             display: flex; 
+            z-index: 1000;
+            pointer-events: auto;
             animation: fadeIn 0.3s ease;
         }
         @keyframes fadeIn { 
@@ -310,7 +315,8 @@ $sectionOrder = ['Wedding', 'Birthday', 'Big Events / Gala', 'Other Events'];
             overflow-y: auto; 
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); 
             position: relative; 
-            z-index: 100000;
+            z-index: 1001;
+            pointer-events: auto;
             animation: slideUp 0.3s ease;
         }
         @keyframes slideUp {
@@ -366,7 +372,7 @@ $sectionOrder = ['Wedding', 'Birthday', 'Big Events / Gala', 'Other Events'];
                 <div class="packages-grid">
                     <?php foreach ($packageSections[$sectionName] as $pkg): ?>
                         <div class="package-card">
-                            <img src="<?= htmlspecialchars($pkg['image'] ?? '/SINTA/public/assets/img/placeholder.jpg') ?>" alt="<?= htmlspecialchars($pkg['name'] ?? 'Package') ?>" class="package-image">
+                            <img src="<?= htmlspecialchars($pkg['image'] ?? '/assets/img/placeholder.jpg') ?>" alt="<?= htmlspecialchars($pkg['name'] ?? 'Package') ?>" class="package-image">
                             <div class="package-info">
                                 <div class="package-name"><?= htmlspecialchars($pkg['package_name'] ?? $pkg['name'] ?? 'Unnamed') ?></div>
                                 <div class="package-price">₱<?= number_format($pkg['price'], 2) ?></div>
@@ -474,7 +480,7 @@ function openAddModal() {
 
 function editPackage(packageId) {
     // Fetch package data via AJAX
-    fetch('/SINTA/public/api-package.php?action=get_package&id=' + packageId)
+    fetch('/api-package.php?action=get_package&id=' + packageId)
         .then(response => response.json())
         .then(data => {
             if (data.success) {

@@ -13,6 +13,9 @@ if (!$admin || $admin['role'] !== 'admin') {
     header("Location: " . BASE_URL . "/index.php?route=home");
     exit;
 }
+
+$page = 'admin-customize';
+$page_title = 'Manage Customizations';
 ?>
 
 <!DOCTYPE html>
@@ -546,7 +549,7 @@ if (!$admin || $admin['role'] !== 'admin') {
         }
 
         .modal .form-actions button[type="button"]:hover {
-            background: #c8bfb4;
+            background: #e08414;
         }
 
         body.modal-open {
@@ -581,41 +584,54 @@ if (!$admin || $admin['role'] !== 'admin') {
                 if (!isset($grouped[$cat])) $grouped[$cat] = [];
                 $grouped[$cat][] = $opt;
             }
+            
+            // Helper function to create JSON-safe option data (includes base64 image data)
+            function getCleanOptionData($option) {
+                $imageData = null;
+                $imageType = null;
+                
+                if (!empty($option['image'])) {
+                    $imageData = base64_encode($option['image']);
+                    $imageType = $option['image_type'] ?? 'image/jpeg';
+                }
+                
+                return [
+                    'option_id' => $option['option_id'],
+                    'name' => $option['name'],
+                    'description' => $option['description'] ?? '',
+                    'price' => $option['price'],
+                    'is_active' => $option['is_active'],
+                    'category' => $option['category'],
+                    'colors_json' => $option['colors_json'] ?? null,
+                    'image' => $imageData,
+                    'image_type' => $imageType
+                ];
+            }
             ?>
             
-            <?php foreach (['Theme', 'Venue', 'Catering', 'Extras'] as $category): ?>
-                <?php if (isset($grouped[$category])): ?>
-                    <div class="category-section">
-                        <h2 class="category-title">
-                            <i class="fas <?php 
-                            if ($category === 'Theme') echo 'fa-palette';
-                            elseif ($category === 'Venue') echo 'fa-map-marker-alt';
-                            elseif ($category === 'Catering') echo 'fa-utensils';
-                            else echo 'fa-sparkles';
-                            ?>"></i>
-                            <?= htmlspecialchars($category) ?>
-                        </h2>
-                        
+            <!-- VENUE DECORATION SECTION -->
+            <?php if (isset($grouped['Theme']) || isset($grouped['Color Combinations']) || isset($grouped['Venue'])): ?>
+                <div class="category-section">
+                    <h2 class="category-title">
+                        <i class="fas fa-home"></i>
+                        Venue Decoration
+                    </h2>
+                    
+                    <!-- Theme -->
+                    <?php if (isset($grouped['Theme'])): ?>
+                        <h3 style="font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; color: #6B5A40; margin: 1.5rem 0 1rem 0;">
+                            <i class="fas fa-palette"></i> Theme
+                        </h3>
                         <div class="options-grid">
-                            <?php foreach ($grouped[$category] as $option): ?>
+                            <?php foreach ($grouped['Theme'] as $option): ?>
                                 <div class="option-card">
-                                    <!-- Image -->
                                     <div class="option-image">
                                         <?php if (!empty($option['image'])): ?>
                                             <img src="data:<?php echo htmlspecialchars($option['image_type'] ?? 'image/jpeg'); ?>;base64,<?php echo base64_encode($option['image']); ?>" alt="<?php echo htmlspecialchars($option['name']); ?>">
                                         <?php else: ?>
-                                            <div class="placeholder-image">
-                                                <i class="fas <?php 
-                                                    if ($category === 'Theme') echo 'fa-palette';
-                                                    elseif ($category === 'Venue') echo 'fa-map-marker-alt';
-                                                    elseif ($category === 'Catering') echo 'fa-utensils';
-                                                    else echo 'fa-sparkles';
-                                                ?>"></i>
-                                            </div>
+                                            <div class="placeholder-image"><i class="fas fa-palette"></i></div>
                                         <?php endif; ?>
                                     </div>
-                                    
-                                    <!-- Content -->
                                     <div class="option-content">
                                         <h3 class="option-name"><?php echo htmlspecialchars($option['name']); ?></h3>
                                         <?php if (!empty($option['description'])): ?>
@@ -628,12 +644,10 @@ if (!$admin || $admin['role'] !== 'admin') {
                                             </span>
                                         </div>
                                     </div>
-                                    
-                                    <!-- Actions -->
                                     <div class="option-actions">
-                                        <a href="<?php echo BASE_URL; ?>/index.php?route=admin-customize-edit&id=<?php echo $option['option_id']; ?>" class="btn btn--primary btn--sm">
+                                        <button onclick="openEditModal(this)" data-option='<?php echo json_encode(getCleanOptionData($option)); ?>' class="btn btn--primary btn--sm">
                                             <i class="fas fa-edit"></i> Edit
-                                        </a>
+                                        </button>
                                         <button onclick="confirmDelete(<?php echo $option['option_id']; ?>)" class="btn btn--ghost btn--sm btn-delete-custom">
                                             <i class="fas fa-trash"></i> Delete
                                         </button>
@@ -641,9 +655,378 @@ if (!$admin || $admin['role'] !== 'admin') {
                                 </div>
                             <?php endforeach; ?>
                         </div>
+                    <?php endif; ?>
+                    
+                    <!-- Color Combinations -->
+                    <?php if (isset($grouped['Color Combinations'])): ?>
+                        <h3 style="font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; color: #6B5A40; margin: 1.5rem 0 1rem 0;">
+                            <i class="fas fa-droplet"></i> Color Palette
+                        </h3>
+                        <div class="options-grid">
+                            <?php
+                            // Sort color combinations: preset/existing first, then organizer choice, then other
+                            $colorOptions = $grouped['Color Combinations'];
+                            usort($colorOptions, function($a, $b) {
+                                $nameA = $a['name'];
+                                $nameB = $b['name'];
+                                
+                                $orderA = 0;
+                                $orderB = 0;
+                                
+                                if ($nameA === 'Organizer Choice') $orderA = 2;
+                                elseif ($nameA === 'Other') $orderA = 3;
+                                else $orderA = 1;
+                                
+                                if ($nameB === 'Organizer Choice') $orderB = 2;
+                                elseif ($nameB === 'Other') $orderB = 3;
+                                else $orderB = 1;
+                                
+                                return $orderA - $orderB;
+                            });
+                            ?>
+                            <?php foreach ($colorOptions as $option): ?>
+                                <div class="option-card">
+                                    <div class="option-image">
+                                        <?php 
+                                        $showColorBars = false;
+                                        if (!empty($option['colors_json'])) {
+                                            $colors = json_decode($option['colors_json'], true);
+                                            if (is_array($colors) && !empty($colors)) {
+                                                $showColorBars = true;
+                                                echo '<div style="display: flex; width: 100%; height: 100%; gap: 0;">';
+                                                foreach ($colors as $color) {
+                                                    echo '<div style="flex: 1; background-color: ' . htmlspecialchars($color) . ';"></div>';
+                                                }
+                                                echo '</div>';
+                                            }
+                                        }
+                                        if (!$showColorBars && !empty($option['image'])): 
+                                    ?>
+                                            <img src="data:<?php echo htmlspecialchars($option['image_type'] ?? 'image/jpeg'); ?>;base64,<?php echo base64_encode($option['image']); ?>" alt="<?php echo htmlspecialchars($option['name']); ?>">
+                                    <?php elseif (!$showColorBars): ?>
+                                            <div class="placeholder-image"><i class="fas fa-fill-drip"></i></div>
+                                    <?php endif; ?>
+                                    </div>
+                                    <div class="option-content">
+                                        <h3 class="option-name"><?php echo htmlspecialchars($option['name']); ?></h3>
+                                        <?php if (!empty($option['description'])): ?>
+                                            <p class="option-desc"><?php echo htmlspecialchars($option['description']); ?></p>
+                                        <?php endif; ?>
+                                        <div class="option-price">₱<?php echo number_format($option['price'], 0); ?></div>
+                                        <div class="option-status">
+                                            <span class="status-badge <?php echo $option['is_active'] ? 'active' : 'inactive'; ?>">
+                                                <?php echo $option['is_active'] ? '<i class="fas fa-check-circle"></i> Active' : '<i class="fas fa-times-circle"></i> Inactive'; ?>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="option-actions">
+                                        <button onclick="openEditModal(this)" data-option='<?php echo json_encode(getCleanOptionData($option)); ?>' class="btn btn--primary btn--sm">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </button>
+                                        <button onclick="confirmDelete(<?php echo $option['option_id']; ?>)" class="btn btn--ghost btn--sm btn-delete-custom">
+                                            <i class="fas fa-trash"></i> Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                    
+                    <!-- Venue -->
+                    <?php if (isset($grouped['Venue'])): ?>
+                        <h3 style="font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; color: #6B5A40; margin: 1.5rem 0 1rem 0;">
+                            <i class="fas fa-map-marker-alt"></i> Venue
+                        </h3>
+                        <div class="options-grid">
+                            <?php foreach ($grouped['Venue'] as $option): ?>
+                                <div class="option-card">
+                                    <div class="option-image">
+                                        <?php if (!empty($option['image'])): ?>
+                                            <img src="data:<?php echo htmlspecialchars($option['image_type'] ?? 'image/jpeg'); ?>;base64,<?php echo base64_encode($option['image']); ?>" alt="<?php echo htmlspecialchars($option['name']); ?>">
+                                        <?php else: ?>
+                                            <div class="placeholder-image"><i class="fas fa-map-marker-alt"></i></div>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="option-content">
+                                        <h3 class="option-name"><?php echo htmlspecialchars($option['name']); ?></h3>
+                                        <?php if (!empty($option['description'])): ?>
+                                            <p class="option-desc"><?php echo htmlspecialchars($option['description']); ?></p>
+                                        <?php endif; ?>
+                                        <div class="option-price">₱<?php echo number_format($option['price'], 0); ?></div>
+                                        <div class="option-status">
+                                            <span class="status-badge <?php echo $option['is_active'] ? 'active' : 'inactive'; ?>">
+                                                <?php echo $option['is_active'] ? '<i class="fas fa-check-circle"></i> Active' : '<i class="fas fa-times-circle"></i> Inactive'; ?>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="option-actions">
+                                        <button onclick="openEditModal(this)" data-option='<?php echo json_encode(getCleanOptionData($option)); ?>' class="btn btn--primary btn--sm">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </button>
+                                        <button onclick="confirmDelete(<?php echo $option['option_id']; ?>)" class="btn btn--ghost btn--sm btn-delete-custom">
+                                            <i class="fas fa-trash"></i> Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
+            
+            <!-- FOOD SECTION -->
+            <?php if (isset($grouped['Food']) || isset($grouped['Catering']) || isset($grouped['Pastries']) || isset($grouped['Beverages'])): ?>
+                <div class="category-section">
+                    <h2 class="category-title">
+                        <i class="fas fa-utensils"></i>
+                        Food & Beverages
+                    </h2>
+                    
+                    <!-- Food -->
+                    <?php if (isset($grouped['Food'])): ?>
+                        <h3 style="font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; color: #6B5A40; margin: 1.5rem 0 1rem 0;">
+                            <i class="fas fa-drumstick-bite"></i> Food Stations
+                        </h3>
+                        <div class="options-grid">
+                            <?php foreach ($grouped['Food'] as $option): ?>
+                                <div class="option-card">
+                                    <div class="option-image">
+                                        <?php if (!empty($option['image'])): ?>
+                                            <img src="data:<?php echo htmlspecialchars($option['image_type'] ?? 'image/jpeg'); ?>;base64,<?php echo base64_encode($option['image']); ?>" alt="<?php echo htmlspecialchars($option['name']); ?>">
+                                        <?php else: ?>
+                                            <div class="placeholder-image"><i class="fas fa-drumstick-bite"></i></div>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="option-content">
+                                        <h3 class="option-name"><?php echo htmlspecialchars($option['name']); ?></h3>
+                                        <?php if (!empty($option['description'])): ?>
+                                            <p class="option-desc"><?php echo htmlspecialchars($option['description']); ?></p>
+                                        <?php endif; ?>
+                                        <div class="option-price">₱<?php echo number_format($option['price'], 0); ?></div>
+                                        <div class="option-status">
+                                            <span class="status-badge <?php echo $option['is_active'] ? 'active' : 'inactive'; ?>">
+                                                <?php echo $option['is_active'] ? '<i class="fas fa-check-circle"></i> Active' : '<i class="fas fa-times-circle"></i> Inactive'; ?>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="option-actions">
+                                        <button onclick="openEditModal(this)" data-option='<?php echo json_encode(getCleanOptionData($option)); ?>' class="btn btn--primary btn--sm">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </button>
+                                        <button onclick="confirmDelete(<?php echo $option['option_id']; ?>)" class="btn btn--ghost btn--sm btn-delete-custom">
+                                            <i class="fas fa-trash"></i> Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                    
+                    <!-- Sweets -->
+                    <?php if (isset($grouped['Sweets'])): ?>
+                        <h3 style="font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; color: #6B5A40; margin: 1.5rem 0 1rem 0;">
+                            <i class="fas fa-candy-cane"></i> Sweets Station
+                        </h3>
+                        <div class="options-grid">
+                            <?php foreach ($grouped['Sweets'] as $option): ?>
+                                <div class="option-card">
+                                    <div class="option-image">
+                                        <?php if (!empty($option['image'])): ?>
+                                            <img src="data:<?php echo htmlspecialchars($option['image_type'] ?? 'image/jpeg'); ?>;base64,<?php echo base64_encode($option['image']); ?>" alt="<?php echo htmlspecialchars($option['name']); ?>">
+                                        <?php else: ?>
+                                            <div class="placeholder-image"><i class="fas fa-candy-cane"></i></div>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="option-content">
+                                        <h3 class="option-name"><?php echo htmlspecialchars($option['name']); ?></h3>
+                                        <?php if (!empty($option['description'])): ?>
+                                            <p class="option-desc"><?php echo htmlspecialchars($option['description']); ?></p>
+                                        <?php endif; ?>
+                                        <div class="option-price">₱<?php echo number_format($option['price'], 0); ?></div>
+                                        <div class="option-status">
+                                            <span class="status-badge <?php echo $option['is_active'] ? 'active' : 'inactive'; ?>">
+                                                <?php echo $option['is_active'] ? '<i class="fas fa-check-circle"></i> Active' : '<i class="fas fa-times-circle"></i> Inactive'; ?>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="option-actions">
+                                        <button onclick="openEditModal(this)" data-option='<?php echo json_encode(getCleanOptionData($option)); ?>' class="btn btn--primary btn--sm">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </button>
+                                        <button onclick="confirmDelete(<?php echo $option['option_id']; ?>)" class="btn btn--ghost btn--sm btn-delete-custom">
+                                            <i class="fas fa-trash"></i> Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                    
+                    <!-- Catering -->
+                    <?php if (isset($grouped['Catering'])): ?>
+                        <h3 style="font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; color: #6B5A40; margin: 1.5rem 0 1rem 0;">
+                            <i class="fas fa-utensils"></i> Catering
+                        </h3>
+                        <div class="options-grid">
+                            <?php foreach ($grouped['Catering'] as $option): ?>
+                                <div class="option-card">
+                                    <div class="option-image">
+                                        <?php if (!empty($option['image'])): ?>
+                                            <img src="data:<?php echo htmlspecialchars($option['image_type'] ?? 'image/jpeg'); ?>;base64,<?php echo base64_encode($option['image']); ?>" alt="<?php echo htmlspecialchars($option['name']); ?>">
+                                        <?php else: ?>
+                                            <div class="placeholder-image"><i class="fas fa-utensils"></i></div>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="option-content">
+                                        <h3 class="option-name"><?php echo htmlspecialchars($option['name']); ?></h3>
+                                        <?php if (!empty($option['description'])): ?>
+                                            <p class="option-desc"><?php echo htmlspecialchars($option['description']); ?></p>
+                                        <?php endif; ?>
+                                        <div class="option-price">₱<?php echo number_format($option['price'], 0); ?></div>
+                                        <div class="option-status">
+                                            <span class="status-badge <?php echo $option['is_active'] ? 'active' : 'inactive'; ?>">
+                                                <?php echo $option['is_active'] ? '<i class="fas fa-check-circle"></i> Active' : '<i class="fas fa-times-circle"></i> Inactive'; ?>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="option-actions">
+                                        <button onclick="openEditModal(this)" data-option='<?php echo json_encode(getCleanOptionData($option)); ?>' class="btn btn--primary btn--sm">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </button>
+                                        <button onclick="confirmDelete(<?php echo $option['option_id']; ?>)" class="btn btn--ghost btn--sm btn-delete-custom">
+                                            <i class="fas fa-trash"></i> Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                    
+                    <!-- Pastries -->
+                    <?php if (isset($grouped['Pastries'])): ?>
+                        <h3 style="font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; color: #6B5A40; margin: 1.5rem 0 1rem 0;">
+                            <i class="fas fa-birthday-cake"></i> Pastries & Cakes
+                        </h3>
+                        <div class="options-grid">
+                            <?php foreach ($grouped['Pastries'] as $option): ?>
+                                <div class="option-card">
+                                    <div class="option-image">
+                                        <?php if (!empty($option['image'])): ?>
+                                            <img src="data:<?php echo htmlspecialchars($option['image_type'] ?? 'image/jpeg'); ?>;base64,<?php echo base64_encode($option['image']); ?>" alt="<?php echo htmlspecialchars($option['name']); ?>">
+                                        <?php else: ?>
+                                            <div class="placeholder-image"><i class="fas fa-birthday-cake"></i></div>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="option-content">
+                                        <h3 class="option-name"><?php echo htmlspecialchars($option['name']); ?></h3>
+                                        <?php if (!empty($option['description'])): ?>
+                                            <p class="option-desc"><?php echo htmlspecialchars($option['description']); ?></p>
+                                        <?php endif; ?>
+                                        <div class="option-price">₱<?php echo number_format($option['price'], 0); ?></div>
+                                        <div class="option-status">
+                                            <span class="status-badge <?php echo $option['is_active'] ? 'active' : 'inactive'; ?>">
+                                                <?php echo $option['is_active'] ? '<i class="fas fa-check-circle"></i> Active' : '<i class="fas fa-times-circle"></i> Inactive'; ?>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="option-actions">
+                                        <button onclick="openEditModal(this)" data-option='<?php echo json_encode(getCleanOptionData($option)); ?>' class="btn btn--primary btn--sm">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </button>
+                                        <button onclick="confirmDelete(<?php echo $option['option_id']; ?>)" class="btn btn--ghost btn--sm btn-delete-custom">
+                                            <i class="fas fa-trash"></i> Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                    
+                    <!-- Beverages -->
+                    <?php if (isset($grouped['Beverages'])): ?>
+                        <h3 style="font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; color: #6B5A40; margin: 1.5rem 0 1rem 0;">
+                            <i class="fas fa-wine-glass"></i> Beverages
+                        </h3>
+                        <div class="options-grid">
+                            <?php foreach ($grouped['Beverages'] as $option): ?>
+                                <div class="option-card">
+                                    <div class="option-image">
+                                        <?php if (!empty($option['image'])): ?>
+                                            <img src="data:<?php echo htmlspecialchars($option['image_type'] ?? 'image/jpeg'); ?>;base64,<?php echo base64_encode($option['image']); ?>" alt="<?php echo htmlspecialchars($option['name']); ?>">
+                                        <?php else: ?>
+                                            <div class="placeholder-image"><i class="fas fa-wine-glass"></i></div>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="option-content">
+                                        <h3 class="option-name"><?php echo htmlspecialchars($option['name']); ?></h3>
+                                        <?php if (!empty($option['description'])): ?>
+                                            <p class="option-desc"><?php echo htmlspecialchars($option['description']); ?></p>
+                                        <?php endif; ?>
+                                        <div class="option-price">₱<?php echo number_format($option['price'], 0); ?></div>
+                                        <div class="option-status">
+                                            <span class="status-badge <?php echo $option['is_active'] ? 'active' : 'inactive'; ?>">
+                                                <?php echo $option['is_active'] ? '<i class="fas fa-check-circle"></i> Active' : '<i class="fas fa-times-circle"></i> Inactive'; ?>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="option-actions">
+                                        <button onclick="openEditModal(this)" data-option='<?php echo json_encode(getCleanOptionData($option)); ?>' class="btn btn--primary btn--sm">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </button>
+                                        <button onclick="confirmDelete(<?php echo $option['option_id']; ?>)" class="btn btn--ghost btn--sm btn-delete-custom">
+                                            <i class="fas fa-trash"></i> Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
+            
+            <!-- ADD-ONS SECTION -->
+            <?php if (isset($grouped['Add-ons'])): ?>
+                <div class="category-section">
+                    <h2 class="category-title">
+                        <i class="fas fa-sparkles"></i>
+                        Add-Ons
+                    </h2>
+                    
+                    <div class="options-grid">
+                        <?php foreach ($grouped['Add-ons'] as $option): ?>
+                            <div class="option-card">
+                                <div class="option-image">
+                                    <?php if (!empty($option['image'])): ?>
+                                        <img src="data:<?php echo htmlspecialchars($option['image_type'] ?? 'image/jpeg'); ?>;base64,<?php echo base64_encode($option['image']); ?>" alt="<?php echo htmlspecialchars($option['name']); ?>">
+                                    <?php else: ?>
+                                        <div class="placeholder-image"><i class="fas fa-sparkles"></i></div>
+                                    <?php endif; ?>
+                                </div>
+                                <div class="option-content">
+                                    <h3 class="option-name"><?php echo htmlspecialchars($option['name']); ?></h3>
+                                    <?php if (!empty($option['description'])): ?>
+                                        <p class="option-desc"><?php echo htmlspecialchars($option['description']); ?></p>
+                                    <?php endif; ?>
+                                    <div class="option-price">₱<?php echo number_format($option['price'], 0); ?></div>
+                                    <div class="option-status">
+                                        <span class="status-badge <?php echo $option['is_active'] ? 'active' : 'inactive'; ?>">
+                                            <?php echo $option['is_active'] ? '<i class="fas fa-check-circle"></i> Active' : '<i class="fas fa-times-circle"></i> Inactive'; ?>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="option-actions">
+                                    <button onclick="openEditModal(this)" data-option='<?php echo json_encode(getCleanOptionData($option)); ?>' class="btn btn--primary btn--sm">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </button>
+                                    <button onclick="confirmDelete(<?php echo $option['option_id']; ?>)" class="btn btn--ghost btn--sm btn-delete-custom">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
                     </div>
-                <?php endif; ?>
-            <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
         <?php else: ?>
             <div class="empty-state">
                 <div class="empty-state__icon"><i class="fas fa-inbox"></i></div>
@@ -652,6 +1035,155 @@ if (!$admin || $admin['role'] !== 'admin') {
             </div>
         <?php endif; ?>
     </div>
+
+    <!-- Edit Modal for Customization Options -->
+    <div class="modal" id="editModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-edit"></i> Edit Customization Option</h2>
+                <button type="button" class="close-btn" onclick="closeEditModal()">✕</button>
+            </div>
+            <form id="editForm" method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="option_id" id="editOptionId">
+                <input type="hidden" name="category" id="editOptionCategory">
+                
+                <div class="form-group">
+                    <label for="editOptionName">Option Name *</label>
+                    <input type="text" id="editOptionName" name="name" required placeholder="e.g., Garden Venue">
+                </div>
+                
+                <div class="form-group">
+                    <label for="editOptionDesc">Description</label>
+                    <textarea id="editOptionDesc" name="description" placeholder="Add a detailed description" rows="4"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editOptionPrice">Price (₱) *</label>
+                    <input type="number" id="editOptionPrice" name="price" required step="100" min="0" placeholder="0">
+                </div>
+                
+                <div class="form-group">
+                    <label for="editOptionImage">Image</label>
+                    <div id="currentImageContainer" style="margin-bottom: 10px; display: none;">
+                        <img id="currentImagePreview" style="max-width: 100%; max-height: 200px; border-radius: 8px; border: 2px solid #E2D9C8;">
+                        <p style="font-size: 12px; color: #666; margin-top: 5px;">Current image</p>
+                    </div>
+                    <input type="file" id="editOptionImage" name="image" accept="image/*">
+                    <small>Upload a new image to replace (optional)</small>
+                </div>
+
+                <!-- Color Palette Images Section -->
+                <div id="colorImagesSection" style="display: none; padding: 1rem; background: #f9f7f3; border-radius: 8px; border-left: 4px solid #8A7650; margin: 1rem 0;">
+                    <h4 style="margin-top: 0; margin-bottom: 0.5rem; color: #2C2820; font-size: 0.95rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fas fa-images"></i> Color Images
+                    </h4>
+                    <p style="font-size: 0.8rem; color: #666; margin: 0 0 0.75rem;">Upload one image per color</p>
+                    <div id="colorImagesContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 0.75rem; padding: 0.75rem; background: white; border-radius: 6px; border: 1px solid #E2D9C8;"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="editOptionActive" name="is_active" value="1">
+                        Active
+                    </label>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" class="btn btn--ghost" onclick="closeEditModal()">Cancel</button>
+                    <button type="submit" class="btn btn--primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toastNotification" style="position: fixed; bottom: 30px; right: 30px; background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); color: white; padding: 16px 24px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 10000; display: none; animation: slideInRight 0.3s ease-out; max-width: 400px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <span id="toastIcon">✓</span>
+            <span id="toastMessage"></span>
+        </div>
+    </div>
+
+    <style>
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+
+        #toastNotification.error {
+            background: linear-gradient(135deg, #f44336 0%, #da190b 100%);
+        }
+
+        #toastNotification.success {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+        }
+
+        #toastNotification.hide {
+            animation: slideOutRight 0.3s ease-out;
+        }
+
+        @keyframes cameraPulse {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.7;
+                transform: scale(1.1);
+            }
+        }
+
+        @keyframes cameraZoom {
+            0%, 100% {
+                r: 3px;
+                opacity: 0.8;
+            }
+            50% {
+                r: 4px;
+                opacity: 1;
+            }
+        }
+
+        @keyframes checkmark {
+            0% {
+                stroke-dashoffset: 50;
+                stroke-dasharray: 50;
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                stroke-dashoffset: 0;
+                stroke-dasharray: 50;
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .animated-camera-icon {
+            display: inline-block;
+            margin-right: 4px;
+        }
+    </style>
 
     <!-- Modal for Add Customization - Moved outside admin-container for proper z-index stacking -->
     <div class="modal" id="customizationModal">
@@ -666,10 +1198,21 @@ if (!$admin || $admin['role'] !== 'admin') {
                     <label for="category">Category *</label>
                     <select id="category" name="category" required>
                         <option value="">-- Select Category --</option>
-                        <option value="Theme">Theme</option>
-                        <option value="Venue">Venue</option>
-                        <option value="Catering">Catering</option>
-                        <option value="Extras">Extras</option>
+                        <optgroup label="Venue Decoration">
+                            <option value="Theme">Theme</option>
+                            <option value="Color Combinations">Color Combinations</option>
+                            <option value="Venue">Venue</option>
+                        </optgroup>
+                        <optgroup label="Food & Beverages">
+                            <option value="Food">Food Stations</option>
+                            <option value="Sweets">Sweets Station</option>
+                            <option value="Catering">Catering</option>
+                            <option value="Pastries">Pastries & Cakes</option>
+                            <option value="Beverages">Beverages</option>
+                        </optgroup>
+                        <optgroup label="Add-Ons">
+                            <option value="Add-ons">Add-Ons</option>
+                        </optgroup>
                     </select>
                 </div>
 
@@ -713,6 +1256,212 @@ if (!$admin || $admin['role'] !== 'admin') {
     </button>
 
     <script>
+        // Toast Notification Function
+        function showNotification(message, type = 'success', duration = 3000) {
+            const toast = document.getElementById('toastNotification');
+            const toastMessage = document.getElementById('toastMessage');
+            const toastIcon = document.getElementById('toastIcon');
+            
+            toastMessage.textContent = message;
+            toast.className = type;
+            
+            if (type === 'error') {
+                toastIcon.textContent = '✕';
+            } else {
+                toastIcon.textContent = '✓';
+            }
+            
+            toast.style.display = 'flex';
+            toast.classList.remove('hide');
+            
+            setTimeout(() => {
+                toast.classList.add('hide');
+                setTimeout(() => {
+                    toast.style.display = 'none';
+                }, 300);
+            }, duration);
+        }
+
+        function openEditModal(buttonElement) {
+            // Get the data from the data-option attribute
+            const optionDataString = buttonElement.getAttribute('data-option');
+            
+            try {
+                const optionData = JSON.parse(optionDataString);
+                const optionId = optionData.option_id;
+                
+                document.getElementById('editOptionId').value = optionId || '';
+                document.getElementById('editOptionCategory').value = optionData.category || '';
+                document.getElementById('editOptionName').value = optionData.name || '';
+                document.getElementById('editOptionDesc').value = optionData.description || '';
+                document.getElementById('editOptionPrice').value = optionData.price || 0;
+                document.getElementById('editOptionActive').checked = optionData.is_active == 1;
+                
+                // Clear the image preview
+                document.getElementById('currentImageContainer').style.display = 'none';
+                document.getElementById('editOptionImage').value = '';
+                
+                // Display the current image if available
+                if (optionData.image && optionData.image_type) {
+                    const imagePreview = document.getElementById('currentImagePreview');
+                    imagePreview.src = `data:${optionData.image_type};base64,${optionData.image}`;
+                    document.getElementById('currentImageContainer').style.display = 'block';
+                }
+
+                // Handle color palette images for Color Combinations
+                const colorImagesSection = document.getElementById('colorImagesSection');
+                const container = document.getElementById('colorImagesContainer');
+                
+                if (optionData.category === 'Color Combinations') {
+                    colorImagesSection.style.display = 'block';
+                    
+                    // Parse colors_json if available
+                    if (optionData.colors_json) {
+                        try {
+                            const colors = JSON.parse(optionData.colors_json);
+                            if (Array.isArray(colors)) {
+                                renderColorImageInputs(colors, container);
+                            } else {
+                                container.innerHTML = '<p style="grid-column: 1/-1; color: #999; text-align: center;">Invalid colors format</p>';
+                            }
+                        } catch (e) {
+                            container.innerHTML = '<p style="grid-column: 1/-1; color: #999; text-align: center;">No colors set</p>';
+                        }
+                    } else {
+                        container.innerHTML = '<p style="grid-column: 1/-1; color: #999; text-align: center;">No colors set</p>';
+                    }
+                } else {
+                    colorImagesSection.style.display = 'none';
+                    container.innerHTML = '';
+                }
+                
+                document.getElementById('editModal').classList.add('active');
+                document.body.classList.add('modal-open');
+            } catch(error) {
+                console.error('Error parsing option data:', error);
+                showNotification('Error loading option data. Please try again.', 'error');
+            }
+        }
+
+        function renderColorImageInputs(colors, container) {
+            container.innerHTML = '';
+            colors.forEach((hex, index) => {
+                const colorBox = document.createElement('div');
+                colorBox.style.cssText = `
+                    border: 2px solid #E2D9C8;
+                    border-radius: 6px;
+                    padding: 0.75rem;
+                    text-align: center;
+                    background: white;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                `;
+                colorBox.onmouseover = function() {
+                    this.style.boxShadow = '0 2px 8px rgba(138, 118, 80, 0.2)';
+                };
+                colorBox.onmouseout = function() {
+                    this.style.boxShadow = 'none';
+                };
+
+                const inputId = `color_image_${index}`;
+                colorBox.innerHTML = `
+                    <div style="margin-bottom: 0.5rem;">
+                        <div class="color-swatch-${index}" style="
+                            width: 100%;
+                            height: 60px;
+                            background-color: ${hex};
+                            border-radius: 4px;
+                            border: 1px solid rgba(0,0,0,0.1);
+                            margin-bottom: 0.4rem;
+                        "></div>
+                        <p style="margin: 0.3rem 0 0; font-weight: 600; color: #2C2820; font-size: 0.75rem;">${hex}</p>
+                    </div>
+                    <input type="hidden" name="colors[]" value="${hex}">
+                    <input type="file" id="${inputId}" name="color_images[]" accept="image/*" style="display: none;">
+                    <button type="button" class="upload-color-btn" data-index="${index}" style="
+                        width: 100%;
+                        padding: 0.4rem 0.5rem;
+                        background: linear-gradient(135deg, #8A7650 0%, #6B5E4A 100%);
+                        color: white;
+                        border: none;
+                        border-radius: 4px;
+                        cursor: pointer;
+                        font-weight: 600;
+                        font-size: 0.7rem;
+                        transition: all 0.3s ease;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        min-height: 32px;
+                    "><svg class="animated-camera-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation: cameraPulse 2s ease-in-out infinite;">
+                        <path d="M14.5 4h-5L7 2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2h-3l-2.5-2z"></path>
+                        <circle cx="12" cy="13" r="3" style="animation: cameraZoom 2s ease-in-out infinite;"></circle>
+                    </svg></button>
+                `;
+
+                container.appendChild(colorBox);
+
+                const uploadBtn = colorBox.querySelector('.upload-color-btn');
+                const fileInput = colorBox.querySelector(`#${inputId}`);
+                
+                uploadBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    fileInput.click();
+                });
+
+                fileInput.addEventListener('change', function(e) {
+                    if (e.target.files && e.target.files[0]) {
+                        const file = e.target.files[0];
+                        const reader = new FileReader();
+                        
+                        reader.onload = function(event) {
+                            const colorSwatch = colorBox.querySelector(`.color-swatch-${index}`);
+                            colorSwatch.style.backgroundImage = `url('${event.target.result}')`;
+                            colorSwatch.style.backgroundSize = 'cover';
+                            colorSwatch.style.backgroundPosition = 'center';
+                            uploadBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation: checkmark 0.6s ease-out;"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+                            uploadBtn.style.background = 'linear-gradient(135deg, #50C878 0%, #2d7a3f 100%)';
+                        };
+                        
+                        reader.readAsDataURL(file);
+                    }
+                });
+            });
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.remove('active');
+            document.body.classList.remove('modal-open');
+            document.getElementById('editForm').reset();
+            document.getElementById('currentImageContainer').style.display = 'none';
+        }
+
+        // Handle edit form submission
+        document.getElementById('editForm')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const optionId = document.getElementById('editOptionId').value;
+            const formData = new FormData(this);
+            
+            fetch('<?php echo BASE_URL; ?>/index.php?route=admin-customize-update', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification('Customization option updated successfully!', 'success');
+                    closeEditModal();
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showNotification('Error: ' + (data.message || 'Failed to update'), 'error');
+                }
+            })
+            .catch(error => {
+                showNotification('Error: ' + error.message, 'error');
+            });
+        });
+
         function openCustomizationModal() {
             document.getElementById('customizationModal').classList.add('active');
             document.body.classList.add('modal-open');
@@ -739,4 +1488,6 @@ if (!$admin || $admin['role'] !== 'admin') {
         }
     </script>
 </body>
-</html>
+<?php include 'admin-footer.php'; ?>
+
+

@@ -2,7 +2,7 @@
 /**
  * Real-time Messaging API
  * Provides JSON responses for real-time message updates
- * Access: /SINTA/public/api-messages.php
+ * Access: /api-messages.php
  */
 
 error_reporting(E_ALL);

@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>About Us — Sinta</title>
- <link rel="stylesheet" href="/SINTA/public/assets/css/global.css" />
+ <link rel="stylesheet" href="/assets/css/global.css" />
   <style>
     .about-intro {
       display: grid;
@@ -120,18 +120,18 @@
 <body>
 <nav class="nav">
   <div class="nav__inner">
-    <a href="/SINTA/public/index.php?route=landing" class="nav__logo">Sint<em>a</em></a>
+    <a href="/index.php?route=landing" class="nav__logo">Sint<em>a</em></a>
     <div class="nav__links">
-      <a href="/SINTA/public/index.php?route=landing">Home</a>
-      <a href="/SINTA/public/index.php?route=occasions">Occasions</a>
-      <a href="/SINTA/public/index.php?route=bundles">Bundles</a>
-      <a href="/SINTA/public/index.php?route=gallery">Gallery</a>
-      <a href="/SINTA/public/index.php?route=about" class="active">About</a>
-      <a href="/SINTA/public/index.php?route=contact">Contact</a>
+      <a href="/index.php?route=landing">Home</a>
+      <a href="/index.php?route=occasions">Occasions</a>
+      <a href="/index.php?route=bundles">Bundles</a>
+      <a href="/index.php?route=gallery">Gallery</a>
+      <a href="/index.php?route=about" class="active">About</a>
+      <a href="/index.php?route=contact">Contact</a>
     </div>
     <div class="nav__actions">
-      <a href="/SINTA/public/index.php?route=signin" class="btn btn--ghost btn--sm">Sign In</a>
-      <a href="/SINTA/public/index.php?route=signup" class="btn btn--dark btn--sm">Get Started</a>
+      <a href="/index.php?route=signin" class="btn btn--ghost btn--sm">Sign In</a>
+      <a href="/index.php?route=signup" class="btn btn--dark btn--sm">Get Started</a>
     </div>
   </div>
 </nav>

@@ -10,15 +10,15 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="/SINTA/public/assets/css/landing.css">
+  <link rel="stylesheet" href="/assets/css/landing.css">
 </head>
 <body>
 
 <!-- Navigation -->
 <nav class="nav" id="navbar">
   <div class="nav__inner">
-    <a href="/SINTA/public/index.php?route=landing" class="nav__logo">
-      <img src="/SINTA/public/assets/img/logo.png" alt="Sinta Logo" class="nav__logo-img" onerror="this.src='https://placehold.co/38x38/8A7650/white?text=S'">
+    <a href="/index.php?route=landing" class="nav__logo">
+      <img src="/assets/img/logo.png" alt="Sinta Logo" class="nav__logo-img" onerror="this.src='https://placehold.co/38x38/8A7650/white?text=S'">
       <span class="nav__logo-text">Sinta</span>
     </a>
     <button class="nav__toggle" id="navToggle" aria-label="Menu">
@@ -32,8 +32,8 @@
       <a href="#contact">Contact</a>
     </div>
     <div class="nav__actions">
-      <a href="/SINTA/public/index.php?route=signin" class="btn btn--ghost btn--sm">Sign In</a>
-      <a href="/SINTA/public/index.php?route=signup" class="btn btn--primary btn--sm">Get Started</a>
+      <a href="/index.php?route=signin" class="btn btn--ghost btn--sm">Sign In</a>
+      <a href="/index.php?route=signup" class="btn btn--primary btn--sm">Get Started</a>
     </div>
   </div>
 </nav>
@@ -49,7 +49,7 @@
       <h1 class="hero__title">Crafting moments<br>worth <em>remembering</em></h1>
       <p class="hero__sub">From intimate weddings to grand galas — we design extraordinary celebrations with meticulous care and flawless execution.</p>
       <div class="hero__actions">
-        <a href="/SINTA/public/index.php?route=signup" class="btn btn--primary btn--lg">Start Planning</a>
+        <a href="/index.php?route=signup" class="btn btn--primary btn--lg">Start Planning</a>
         <a href="#bundles" class="btn btn--outline btn--lg">View Packages</a>
       </div>
       <div class="hero__stats">
@@ -105,7 +105,7 @@
     <div class="container">
       <div class="about__grid">
         <div class="about__visual reveal">
-          <img src="/SINTA/public/assets/img/sinta eventsjpg.jpg" alt="About Sinta Events">
+          <img src="/assets/img/sinta eventsjpg.jpg" alt="About Sinta Events">
           <div class="about__visual-badge animate-float-delayed">
             <span class="about__visual-badge-num">8</span>
             <span class="about__visual-badge-label">Years of Excellence</span>
@@ -160,7 +160,7 @@
             </ul>
             <div class="bundle__footer">
               <div class="bundle__price">From ₱150K</div>
-              <a href="/SINTA/public/index.php?route=signup" class="btn btn--primary btn--sm">Inquire</a>
+              <a href="/index.php?route=signup" class="btn btn--primary btn--sm">Inquire</a>
             </div>
           </div>
         </div>
@@ -181,7 +181,7 @@
             </ul>
             <div class="bundle__footer">
               <div class="bundle__price">From ₱200K</div>
-              <a href="/SINTA/public/index.php?route=signup" class="btn btn--primary btn--sm">Inquire</a>
+              <a href="/index.php?route=signup" class="btn btn--primary btn--sm">Inquire</a>
             </div>
           </div>
         </div>
@@ -201,7 +201,7 @@
             </ul>
             <div class="bundle__footer">
               <div class="bundle__price">From ₱50K</div>
-              <a href="/SINTA/public/index.php?route=signup" class="btn btn--primary btn--sm">Inquire</a>
+              <a href="/index.php?route=signup" class="btn btn--primary btn--sm">Inquire</a>
             </div>
           </div>
         </div>
@@ -240,7 +240,7 @@
         </div>
         <div class="featured__card">
           <div class="featured__image-wrap">
-            <img src="/SINTA/public/assets/img/30th.png" alt="Magical 30th Birthday">
+            <img src="/assets/img/30th.png" alt="Magical 30th Birthday">
             <div class="featured__overlay">
               <div class="featured__category">Birthday</div>
               <h3 class="featured__title">Magical 30th Birthday</h3>
@@ -250,7 +250,7 @@
         </div>
         <div class="featured__card">
           <div class="featured__image-wrap">
-            <img src="/SINTA/public/assets/img/golden.jpg" alt="Golden Anniversary Gala">
+            <img src="/assets/img/golden.jpg" alt="Golden Anniversary Gala">
             <div class="featured__overlay">
               <div class="featured__category">Anniversary</div>
               <h3 class="featured__title">Golden Anniversary Gala</h3>
@@ -426,7 +426,7 @@
         <h2>Ready to create your<br><em>perfect event?</em></h2>
         <p>Let's build something unforgettable together. Book a free consultation today.</p>
         <div class="cta__actions">
-          <a href="/SINTA/public/index.php?route=signup" class="btn btn--primary btn--lg">Get Started <i class="fas fa-arrow-right"></i></a>
+          <a href="/index.php?route=signup" class="btn btn--primary btn--lg">Get Started <i class="fas fa-arrow-right"></i></a>
           <a href="#contact" class="btn btn--outline-light btn--lg">Contact Us</a>
         </div>
       </div>
@@ -483,8 +483,8 @@
   <div class="container">
     <div class="footer__top">
       <div>
-        <a href="/SINTA/public/index.php?route=landing" class="footer__logo">
-          <img src="/SINTA/public/assets/img/logo.png" alt="Sinta" class="footer__logo-img" onerror="this.src='https://placehold.co/32x32/8A7650/white?text=S'">
+        <a href="/index.php?route=landing" class="footer__logo">
+          <img src="/assets/img/logo.png" alt="Sinta" class="footer__logo-img" onerror="this.src='https://placehold.co/32x32/8A7650/white?text=S'">
           <span>Sinta</span>
         </a>
         <p class="footer__desc">Crafting extraordinary event experiences across the Philippines. Every occasion deserves to be unforgettable.</p>
@@ -502,8 +502,8 @@
       <div class="footer__col">
         <div class="footer__col-title">Account</div>
         <ul>
-          <li><a href="/SINTA/public/index.php?route=signin">Sign In</a></li>
-          <li><a href="/SINTA/public/index.php?route=signup">Get Started</a></li>
+          <li><a href="/index.php?route=signin">Sign In</a></li>
+          <li><a href="/index.php?route=signup">Get Started</a></li>
         </ul>
       </div>
       <div class="footer__col">
@@ -576,7 +576,7 @@
   // Load client feedback
   async function loadClientFeedback() {
     try {
-      const response = await fetch('/SINTA/public/api-feedback.php');
+      const response = await fetch('/api-feedback.php');
       const data = await response.json();
       
       const container = document.getElementById('feedbackContainer');

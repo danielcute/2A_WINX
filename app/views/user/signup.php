@@ -16,7 +16,7 @@ unset($_SESSION['signup_form_data']);
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="/SINTA/public/assets/css/global.css">
+  <link rel="stylesheet" href="/assets/css/global.css">
   <style>
     body {
       background: linear-gradient(135deg, #f5f0e8 0%, #fff 100%);
@@ -41,7 +41,7 @@ unset($_SESSION['signup_form_data']);
       border: 1px solid #E2D9C8;
     }
     .auth-brand {
-      background-image: url('/SINTA/public/assets/img/signupimg.jpg');
+      background-image: url('/assets/img/signupimg.jpg');
       background-size: cover;
       background-position: center;
       padding: 3rem;
@@ -347,7 +347,7 @@ unset($_SESSION['signup_form_data']);
     <div class="auth-brand">
       <div>
         <div class="logo">
-          <img src="/SINTA/public/assets/img/logo.png" alt="Sinta">
+          <img src="/assets/img/logo.png" alt="Sinta">
           <span>Sinta</span>
         </div>
         <div class="auth-quote">
@@ -413,7 +413,7 @@ unset($_SESSION['signup_form_data']);
         </div>
       <?php endif; ?>
       
-      <form method="POST" action="/SINTA/public/index.php?route=signup" id="signupForm">
+      <form method="POST" action="/index.php?route=signup" id="signupForm">
         <input type="hidden" name="action" value="signup">
         <div class="form-row">
           <div class="form-group">
@@ -480,7 +480,7 @@ unset($_SESSION['signup_form_data']);
       </form>
       
       <div class="auth-footer">
-        <p>Already have an account? <a href="/SINTA/public/index.php?route=signin">Sign in →</a></p>
+        <p>Already have an account? <a href="/index.php?route=signin">Sign in →</a></p>
       </div>
     </div>
     

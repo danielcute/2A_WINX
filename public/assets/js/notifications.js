@@ -88,6 +88,11 @@ class NotificationSystem {
             'feedback_reply': 'fas fa-comments',
             'payment_due': 'fas fa-credit-card',
             'system_update': 'fas fa-star',
+            'booking_confirmation': 'fas fa-calendar-check',
+            'receipt': 'fas fa-receipt',
+            'ratings': 'fas fa-star-half-alt',
+            'new_updates': 'fas fa-refresh',
+            'realtime': 'fas fa-circle-notch',
             'default': 'fas fa-bell'
         };
         

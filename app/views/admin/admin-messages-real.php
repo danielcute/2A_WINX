@@ -5,7 +5,7 @@
 $page = 'admin-messages';
 
 if (!isset($_SESSION['admin_logged_in'])) {
-    header('Location: /SINTA/public/index.php?route=signin');
+    header('Location: /index.php?route=signin');
     exit;
 }
 
@@ -111,7 +111,7 @@ $users = $messagingController->getAllUsers();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Messages | Sinta</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="/SINTA/public/assets/css/global.css">
+    <link rel="stylesheet" href="/assets/css/global.css">
     <style>
         /* (same CSS as before - keep unchanged) */
         body { background: #f5f5f5; font-family: 'DM Sans', sans-serif; }
@@ -391,7 +391,7 @@ window.onclick = function(e) { if (e.target === modal) modal.style.display = 'no
 // Auto-refresh (optional)
 let lastMessageCount = <?= count($messages) ?>;
 setInterval(() => {
-    fetch('/SINTA/public/api-messages.php?action=get-count')
+    fetch('/api-messages.php?action=get-count')
         .then(r => r.json())
         .then(data => {
             if (data.success && data.messageCount > lastMessageCount) {
