@@ -812,6 +812,16 @@ case 'admin-feedback':
         }
         include VIEW_PATH . '/admin/admin-profile.php';
         break;
+    case 'logout':
+        session_destroy();
+        header('Location: index.php?route=landing');
+        exit;
+        break;
+    case 'admin-logout':
+        session_destroy();
+        header('Location: index.php?route=signin');
+        exit;
+        break;
     default:
         include VIEW_PATH . '/landing/landing.php';
 }

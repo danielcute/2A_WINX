@@ -451,6 +451,17 @@ switch ($route) {
         require ROOT_PATH . '/app/views/admin/admin-testimonials.php';
         break;
     
+    case 'logout':
+        require_once ROOT_PATH . '/app/controllers/AuthController.php';
+        $auth = new AuthController();
+        $auth->logout();
+        break;
+
+    case 'admin-logout':
+        session_destroy();
+        header('Location: ' . BASE_URL . '/index.php?route=signin');
+        exit;
+
     // ── 404 DEFAULT ──
     default:
         http_response_code(404);
