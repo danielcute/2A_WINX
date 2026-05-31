@@ -273,7 +273,7 @@ body {
     left: 0;
     box-shadow: var(--shadow-lg);
     border-right: none;
-    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.4s;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), visibility 0s linear 0.4s;
     will-change: transform;
     visibility: hidden;
   }
@@ -281,6 +281,7 @@ body {
   .admin-sidebar.open {
     transform: translate3d(0, 0, 0);
     visibility: visible;
+    transition-delay: 0s;
   }
   
   .admin-sidebar::before {
@@ -331,9 +332,9 @@ body {
   .admin-mobile-toggle {
     display: flex;
     position: fixed;
-    top: 18px;
+    top: 15px;
     left: 15px;
-    z-index: 3100;
+    z-index: 4000; /* Ensure it stays above topbar */
     background: var(--gold);
     color: white;
     border: none;

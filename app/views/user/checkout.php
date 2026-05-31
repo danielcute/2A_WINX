@@ -1638,12 +1638,12 @@ function confirmBooking() {
         deposit: <?= $depositRequired ?>
     };
 
-    // Redirect to Payment Gateway flow
-    if (typeof openPaymentModal === 'function') {
-        openPaymentModal(bookingData);
+    // Open Agreement Modal first
+    if (typeof openAgreementModal === 'function') {
+        openAgreementModal();
         return;
     }
-
+    
     fetch('index.php?route=checkout-submit', {
         method: 'POST',
         headers: {

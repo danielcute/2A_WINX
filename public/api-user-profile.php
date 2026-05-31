@@ -221,7 +221,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Generate unique filename
             $filename = 'avatar_' . $userId . '_' . time() . '.' . $ext;
             $file_path = $upload_dir . $filename;
-            $relative_path = '/uploads/avatars/' . $filename;
+            $relative_path = '/public/uploads/avatars/' . $filename;
             
             // Save cropped image
             switch ($ext) {
@@ -245,7 +245,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Delete old avatar if it exists
             $user = $userModel->findById($userId);
             if ($user && !empty($user['image'])) {
-                $old_image_path = ROOT_PATH . $user['image'];
+                $old_image_path = ROOT_PATH . '/public' . $user['image'];
                 if (file_exists($old_image_path)) {
                     unlink($old_image_path);
                 }
