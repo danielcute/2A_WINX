@@ -703,13 +703,14 @@ if (!defined('APP_URL')) {
                         <thead>
                             <tr>
                                 <th style="width: 8%;">Image</th>
-                                <th style="width: 18%;">Name</th>
-                                <th style="width: 18%;">Description</th>
+                                <th style="width: 15%;">Name</th>
+                                <th style="width: 15%;">Description</th>
                                 <th style="width: 10%;">Rental Price</th>
                                 <th style="width: 10%;">Stock</th>
                                 <th style="width: 10%;">Duration</th>
                                 <th style="width: 10%;">Sizes</th>
-                                <th style="width: 16%;">Actions</th>
+                                <th style="width: 4%;">Category</th>
+                                <th style="width: 18%;">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -749,6 +750,25 @@ if (!defined('APP_URL')) {
                                                 }
                                             ?>
                                         </div>
+                                    </td>
+                                    <td data-label="Category" style="text-align: center; font-size: 1.2rem; color: #8A7650;">
+                                        <?php 
+                                            $categoryIcons = [
+                                                'Gown' => 'fas fa-person-dress',
+                                                'Suit' => 'fas fa-person-hiking',
+                                                'Shoes' => 'fas fa-shoe-prints',
+                                                'Accessories' => 'fas fa-ring',
+                                                'Bag' => 'fas fa-bag-shopping',
+                                                'Hat' => 'fas fa-hat-wizard',
+                                                'Veil' => 'fas fa-fan',
+                                                'Cape' => 'fas fa-book',
+                                                'Jewelry' => 'fas fa-gem',
+                                                'Tie' => 'fas fa-face-smile',
+                                                'default' => 'fas fa-shirt'
+                                            ];
+                                            $icon = $categoryIcons[$wardrobe['category']] ?? $categoryIcons['default'];
+                                        ?>
+                                        <i class="<?php echo $icon; ?>" title="<?php echo htmlspecialchars($wardrobe['category']); ?>"></i>
                                     </td>
                                     <td data-label="Actions">
                                         <div class="action-buttons">

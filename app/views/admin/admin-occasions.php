@@ -669,22 +669,35 @@ function editOccasion(id) {
 // Delete occasion
 function deleteOccasion(id) {
     if (confirm('Are you sure you want to delete this occasion? This will affect all associated packages.')) {
+        console.log('Deleting occasion:', id);
+        
         fetch('/api-occasion.php', {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ occasion_id: id })
+            body: JSON.stringify({ occasion_id: id }),
+            credentials: 'same-origin'
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                location.reload();
-            } else {
-                alert('Error: ' + (data.message || 'Failed to delete'));
+        .then(response => {
+            console.log('Delete response status:', response.status);
+            if (!response.ok && response.status === 401) {
+                alert('Session expired. Please login again.');\n                window.location.href = '/index.php?route=signin';
+                return null;
             }
+            return response.json();
         })
-        .catch(error => console.error('Error:', error));
+        .then(data => {
+            if (!data) return;
+            console.log('Delete response:', data);
+            if (data.success) {
+                alert('Occasion deleted successfully!');\n                location.reload();
+            } else {
+                alert('Error: ' + (data.message || 'Failed to delete'));\n            }
+        })
+        .catch(error => {
+            console.error('Delete error:', error);
+            alert('Error deleting occasion: ' + error.message);\n        });
     }
 }
 
@@ -718,19 +731,36 @@ occasionForm.addEventListener('submit', (e) => {
     // since PUT doesn't work well with FormData in all browsers
     const url = occasion_id ? '/api-occasion.php?action=update' : '/api-occasion.php';
     
+    console.log('Submitting occasion form:', { occasion_id, url, hasImage: !!formData.get('image') });
+    
     fetch(url, {
         method: 'POST',
-        body: formData
+        body: formData,
+        credentials: 'same-origin'
     })
-    .then(response => response.json())
+    .then(response => {
+        console.log('Occasion response status:', response.status);
+        if (!response.ok && response.status === 401) {
+            alert('Session expired. Please login again.');
+            window.location.href = '/index.php?route=signin';
+            return null;
+        }
+        return response.json();
+    })
     .then(data => {
+        if (!data) return;
+        console.log('Occasion response:', data);
         if (data.success) {
+            alert('Occasion saved successfully!');
             location.reload();
         } else {
             alert('Error: ' + (data.message || 'Failed to save'));
         }
     })
-    .catch(error => console.error('Error:', error));
+    .catch(error => {
+        console.error('Occasion submission error:', error);
+        alert('Error: ' + error.message);
+    });
 });
 
 // Mobile toggle

@@ -350,12 +350,25 @@ $page_title = 'Edit Wardrobe';
                 }
             }
 
+            console.log('Submitting wardrobe update:', { wardrobeId: formData.get('wardrobe_id'), hasImage: !!imageFile });
+
             fetch('<?php echo APP_URL; ?>/admin-wardrobe-update', {
                 method: 'POST',
-                body: formData
+                body: formData,
+                credentials: 'same-origin'
             })
-            .then(response => response.json())
+            .then(response => {
+                console.log('Wardrobe update response status:', response.status);
+                if (!response.ok && response.status === 401) {
+                    alert('Session expired. Please login again.');
+                    window.location.href = '<?php echo APP_URL; ?>/index.php?route=signin';
+                    return null;
+                }
+                return response.json();
+            })
             .then(data => {
+                if (!data) return;
+                console.log('Wardrobe update response:', data);
                 if (data.success) {
                     alert('Wardrobe updated successfully!');
                     window.location.href = '<?php echo APP_URL; ?>/admin-wardrobe';
@@ -364,7 +377,7 @@ $page_title = 'Edit Wardrobe';
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
+                console.error('Wardrobe update error:', error);
                 alert('An error occurred while updating the wardrobe');
             });
         });
@@ -375,23 +388,32 @@ $page_title = 'Edit Wardrobe';
                 const formData = new FormData();
                 formData.append('wardrobe_id', wardrobeId);
 
+                console.log('Deleting wardrobe:', wardrobeId);
+
                 fetch('<?php echo APP_URL; ?>/admin-wardrobe-delete', {
                     method: 'POST',
-                    body: formData
+                    body: formData,
+                    credentials: 'same-origin'
                 })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Wardrobe deleted successfully!');
-                        window.location.href = '<?php echo APP_URL; ?>/admin-wardrobe';
-                    } else {
-                        alert('Error: ' + (data.message || 'Failed to delete wardrobe'));
+                .then(response => {
+                    console.log('Delete response status:', response.status);
+                    if (!response.ok && response.status === 401) {
+                        alert('Session expired. Please login again.');\n                        window.location.href = '<?php echo APP_URL; ?>/index.php?route=signin';
+                        return null;
                     }
+                    return response.json();
+                })
+                .then(data => {
+                    if (!data) return;
+                    console.log('Delete response:', data);
+                    if (data.success) {
+                        alert('Wardrobe deleted successfully!');\n                        window.location.href = '<?php echo APP_URL; ?>/admin-wardrobe';
+                    } else {
+                        alert('Error: ' + (data.message || 'Failed to delete wardrobe'));\n                    }
                 })
                 .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred while deleting the wardrobe');
-                });
+                    console.error('Delete error:', error);
+                    alert('An error occurred while deleting the wardrobe');\n                });
             }
         }
     </script>
