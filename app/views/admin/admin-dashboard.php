@@ -179,10 +179,39 @@ if ($recent_bookings && $recent_bookings->num_rows > 0) {
             }
         }
         
-        .recent-bookings { background: white; border-radius: 20px; overflow: hidden; border: 1px solid #E2D9C8; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .recent-bookings { background: white; border-radius: 20px; overflow: hidden; border: 1px solid #E2D9C8; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 2rem; }
         .recent-bookings table { width: 100%; border-collapse: collapse; }
         .recent-bookings th, .recent-bookings td { padding: 1rem; text-align: left; border-bottom: 1px solid #E2D9C8; }
         .recent-bookings th { background-color: #F5F0E8; font-weight: 600; color: #8A7650; }
+
+        @media (max-width: 768px) {
+            .stats-grid { 
+                grid-template-columns: repeat(2, 1fr); 
+                gap: 1rem;
+            }
+            .stat-card { padding: 1.25rem; }
+            .stat-card h3 { font-size: 1.5rem; }
+            
+            .recent-bookings thead { display: none; }
+            .recent-bookings table, .recent-bookings tbody, .recent-bookings tr, .recent-bookings td { 
+                display: block; width: 100%; 
+            }
+            .recent-bookings tr { border-bottom: 2px solid #F5F0E8; padding: 1rem 0; }
+            .recent-bookings td { 
+                text-align: right; 
+                padding: 0.5rem 1rem; 
+                border: none; 
+                position: relative; 
+                display: flex;
+                justify-content: space-between;
+                font-size: 0.9rem;
+            }
+            .recent-bookings td::before { 
+                content: attr(data-label); 
+                font-weight: 700; 
+                color: #8A7650;
+            }
+        }
         .status-badge { padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
         .status-pending { background: #FFF3CD; color: #856404; }
         .status-confirmed { background: #D1ECF1; color: #0c5460; }

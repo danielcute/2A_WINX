@@ -184,6 +184,11 @@ if ($occasion === 'other') {
       padding: 1.5rem;
     }
     
+    @media (max-width: 600px) {
+      .pkg-card__body { padding: 1.25rem; }
+      .pkg-card h3 { font-size: 1.15rem; }
+    }
+    
     .pkg-card h3 {
       font-size: 1.3rem;
       margin-bottom: 0.5rem;

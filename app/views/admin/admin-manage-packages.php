@@ -309,7 +309,7 @@ $sectionOrder = ['Wedding', 'Birthday', 'Big Events / Gala', 'Other Events'];
             background: white; 
             padding: 30px; 
             border-radius: 20px; 
-            max-width: 600px; 
+            max-width: 550px; 
             width: 90%; 
             max-height: 90vh; 
             overflow-y: auto; 

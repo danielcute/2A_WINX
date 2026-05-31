@@ -162,6 +162,8 @@
     <input type="hidden" name="phone" id="bookingPhone">
     <input type="hidden" name="contactMethod" id="bookingContactMethod">
     <input type="hidden" name="cart_data" id="bookingCartData">
+    <input type="hidden" name="latitude" id="bookingLatitude">
+    <input type="hidden" name="longitude" id="bookingLongitude">
     <input type="hidden" name="agreeTerms" value="1">
 </form>
 
@@ -606,6 +608,8 @@
         document.getElementById('bookingEmail').value = email;
         document.getElementById('bookingPhone').value = phone;
         document.getElementById('bookingContactMethod').value = document.getElementById('contactMethod').value;
+        document.getElementById('bookingLatitude').value = document.getElementById('latitude').value;
+        document.getElementById('bookingLongitude').value = document.getElementById('longitude').value;
 
         // Get cart data - reconstruct from cart items on page
         const cartItems = [];

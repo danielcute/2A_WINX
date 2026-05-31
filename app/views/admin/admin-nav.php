@@ -263,22 +263,24 @@ body {
   }
 
   .admin-sidebar {
-    transform: translateX(-100%);
+    transform: translate3d(-100%, 0, 0);
     width: 280px;
-    max-width: 80%;
+    max-width: 85%;
     height: 100vh;
     position: fixed;
-    z-index: 2100;
+    z-index: 3100;
     top: 0;
     left: 0;
     box-shadow: var(--shadow-lg);
     border-right: none;
-    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.4s;
     will-change: transform;
+    visibility: hidden;
   }
   
   .admin-sidebar.open {
-    transform: translateX(0);
+    transform: translate3d(0, 0, 0);
+    visibility: visible;
   }
   
   .admin-sidebar::before {
@@ -293,7 +295,7 @@ body {
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.3s;
-    z-index: 2050;
+    z-index: 3050;
   }
   
   .admin-sidebar.open::before {
@@ -303,8 +305,10 @@ body {
 
   .admin-main {
     margin-left: 0;
-    padding: calc(70px + 1rem) 1rem 2rem;
+    padding: calc(76px + 1rem) 1rem 2rem;
     min-height: calc(100vh - 60px);
+    width: 100%;
+    box-sizing: border-box;
   }
   
   .admin-topbar {
@@ -312,14 +316,15 @@ body {
     top: 0;
     left: 0;
     right: 0;
-    z-index: 2000;
+    z-index: 3000;
     border-radius: 0;
     margin-bottom: 0;
     background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(15px) saturate(180%);
     -webkit-backdrop-filter: blur(15px) saturate(180%);
     border-bottom: 1px solid var(--gray-light);
-    padding: 0.75rem 1rem;
+    padding: 0 1.25rem;
+    height: 76px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.03);
   }
   

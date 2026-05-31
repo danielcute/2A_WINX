@@ -560,7 +560,7 @@ if (session_status() === PHP_SESSION_NONE) {
   border: none;
   cursor: pointer;
   padding: 8px;
-  margin-left: auto;
+  margin-left: 0;
 }
 
 .app-nav__mobile-btn span {
