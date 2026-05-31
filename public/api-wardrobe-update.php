@@ -24,12 +24,23 @@ require_once ROOT_PATH . '/app/models/Wardrobe.php';
 header('Content-Type: application/json; charset=utf-8');
 
 try {
-    // Check authentication
-    if (!isset($_SESSION['admin_logged_in'])) {
+    // Check authentication (match WardrobeController::requireAdmin)
+    if (!isset($_SESSION['user_id'])) {
         http_response_code(401);
         echo json_encode(['success' => false, 'message' => 'Unauthorized']);
         exit;
     }
+
+    require_once ROOT_PATH . '/app/models/User.php';
+    $userModel = new User();
+    $admin = $userModel->findById((int)$_SESSION['user_id']);
+
+    if (!$admin || ($admin['role'] ?? null) !== 'admin') {
+        http_response_code(401);
+        echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+        exit;
+    }
+
 
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         http_response_code(405);
