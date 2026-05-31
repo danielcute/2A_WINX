@@ -202,8 +202,11 @@ $page_title = 'Edit Wardrobe';
         </div>
 
         <div class="form-card">
-            <form id="editWardrobeForm">
+<form id="editWardrobeForm">
                 <input type="hidden" name="wardrobe_id" value="<?php echo $wardrobe['wardrobe_id']; ?>">
+
+                <div class="alert alert-error" id="wardrobeEditError" style="display:none;"></div>
+
 
                 <div class="form-group">
                     <label for="category">
