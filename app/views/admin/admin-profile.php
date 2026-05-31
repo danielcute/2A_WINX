@@ -318,7 +318,7 @@ $avatar_path = !empty($admin_data['image']) ? $admin_data['image'] : '/assets/im
 </head>
 <body>
 
-<?php include VIEW_PATH . '/admin/admin-nav.php'; ?>
+<?php include ROOT_PATH . '/app/views/admin/admin-nav.php'; ?>
 
 <div class="app-shell">
     <main class="profile-main">
@@ -615,13 +615,36 @@ function closeAvatarModal() {
     document.getElementById('avatarModal').classList.remove('active');
 }
 
-function previewImage(input) {
+async function previewImage(input) {
     if (input.files && input.files[0]) {
         const reader = new FileReader();
         reader.onload = function(e) {
             document.getElementById('avatarPreview').src = e.target.result;
         };
         reader.readAsDataURL(input.files[0]);
+
+        const formData = new FormData();
+        formData.append('action', 'upload_avatar');
+        formData.append('avatar', input.files[0]);
+
+        try {
+            const response = await fetch('api-admin-profile.php', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+            if (data.success) {
+                alert('Profile picture updated!');
+                const newUrl = data.image_url + '?t=' + Date.now();
+                document.getElementById('profileAvatar').src = newUrl;
+                document.querySelectorAll('.admin-avatar img').forEach(img => img.src = newUrl);
+                closeAvatarModal();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        } catch (error) {
+            console.error('Upload error:', error);
+        }
     }
 }
 

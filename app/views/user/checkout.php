@@ -1083,7 +1083,7 @@ function setupCalendarNavigation() {
 function loadBookedDates() {
     console.log('Loading booked dates...');
     // Fetch booked dates from API
-    fetch('/api-calendar.php?action=getMonthBookings&month=' + (currentCalendarMonth.getMonth() + 1) + '&year=' + currentCalendarMonth.getFullYear(), { timeout: 5000 })
+    fetch('api-calendar.php?action=getMonthBookings&month=' + (currentCalendarMonth.getMonth() + 1) + '&year=' + currentCalendarMonth.getFullYear())
         .then(response => {
             if (!response.ok) throw new Error('API error: ' + response.status);
             return response.json();
@@ -1229,8 +1229,7 @@ async function checkAvailabilityAndShowTimes(selectedDate) {
     const timeSlots = generateTimeSlots();
     
     try {
-        // Fetch existing bookings for this date
-        const apiUrl = `/api-calendar.php?action=getDateBookings&date=${selectedDate}`;
+        const apiUrl = `api-calendar.php?action=getDateBookings&date=${selectedDate}`;
         console.log('Fetching bookings from:', apiUrl);
         
         const response = await fetch(apiUrl);
@@ -1447,7 +1446,7 @@ function fetchWeatherForDate(dateStr) {
     const weatherInfo = document.getElementById('weatherInfo');
     if (!weatherInfo) return;
     
-    fetch(`/api-weather.php?action=getForecast&date=${dateStr}`)
+    fetch(`api-weather.php?action=getForecast&date=${dateStr}`)
       .then(response => response.json())
       .then(data => {
         if (data.success) {

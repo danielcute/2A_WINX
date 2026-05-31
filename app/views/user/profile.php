@@ -1,7 +1,7 @@
 <?php 
 $page = 'profile';
 $page_title = 'Profile';
-
+if (session_status() === PHP_SESSION_NONE) { session_start(); }
 // Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
     header('Location: index.php?route=signin');
@@ -325,7 +325,7 @@ $avatar_path = !empty($user['image']) ? $user['image'] : '/assets/img/default-av
 </head>
 <body>
 
-<?php include VIEW_PATH . '/user/nav.php'; ?>
+<?php include ROOT_PATH . '/app/views/user/nav.php'; ?>
 
 <div class="app-shell">
     <main class="profile-main">
@@ -861,14 +861,15 @@ async function handleAvatarUpload() {
     formData.append('avatar', fileInput.files[0]);
 
     try {
-        const response = await fetch('api-user-profile.php', {
+            const response = await fetch('api-user-profile.php', {
             method: 'POST',
             body: formData
         });
         const data = await response.json();
 
         if (data.success) {
-            showToast('Profile picture updated successfully!', 'success');
+                showToast('Profile picture updated!', 'success');
+                document.querySelectorAll('.app-nav__avatar img, #profileAvatar, #avatarPreview').forEach(img => img.src = data.image_url + '?t=' + Date.now());
             profileAvatar.src = data.image_url;
             closeAvatarModal();
         } else {

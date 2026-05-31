@@ -50,6 +50,11 @@
         <div class="app-nav__profile" id="profileBtn">
           <div class="app-nav__avatar">
             <img src="<?php echo htmlspecialchars($_SESSION['user_avatar'] ?? '/assets/img/default-avatar.jpg'); ?>" alt="<?php echo htmlspecialchars($_SESSION['user_name'] ?? 'User'); ?>">
+            <?php if (!empty($_SESSION['user_avatar'])): ?>
+                <img src="<?php echo htmlspecialchars($_SESSION['user_avatar']); ?>" alt="Profile">
+            <?php else: ?>
+                <div style="width:100%; height:100%; background:var(--gold); color:white; display:flex; align-items:center; justify-content:center; font-weight:bold;"><?= substr($_SESSION['user_name'] ?? 'U', 0, 1) ?></div>
+            <?php endif; ?>
           </div>
           <span class="app-nav__profile-name"><?php echo htmlspecialchars(substr($_SESSION['user_name'] ?? 'User', 0, 1) . ' ' . $_SESSION['user_last_name'] ?? 'User'); ?></span>
           <i class="fas fa-chevron-down app-nav__chevron"></i>
