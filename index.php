@@ -48,6 +48,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $email = $_POST['email'] ?? '';
     $password = $_POST['password'] ?? '';
     
+}
+
+// Handle POST signup
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'signup') {
+    require_once ROOT_PATH . '/app/controllers/AuthController.php';
+    $auth = new AuthController();
+    $auth->handleSignup($_POST);
+    // handleSignup does redirect on success; on failure it redirects back to signup
+}
+
+// Continue with existing POST login flow
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'login') {
+    require_once ROOT_PATH . '/app/models/User.php';
+    
+    $email = $_POST['email'] ?? '';
+    $password = $_POST['password'] ?? '';
+    
+    
     // User login from database (checks both admin and regular users)
     $userModel = new User();
     $user = $userModel->authenticate($email, $password);
