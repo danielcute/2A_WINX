@@ -27,7 +27,7 @@ if (strpos($base_url, '/public') !== false) {
 define('BASE_URL', rtrim($base_url, '/'));
 
 // Get the route parameter
-$route = isset($_GET['route']) ? $_GET['route'] : 'landing';
+$route = isset($_GET['route']) ? trim($_GET['route']) : 'landing';
 
 // Handle POST login
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'login') {

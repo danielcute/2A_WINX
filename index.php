@@ -39,7 +39,7 @@ if (strpos($base_url, '/public') !== false) {
 define('BASE_URL', rtrim($base_url, '/'));
 
 // Get the route parameter
-$route = isset($_GET['route']) ? $_GET['route'] : 'landing';
+$route = isset($_GET['route']) ? trim($_GET['route']) : 'landing';
 
 // Handle POST login
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'login') {
@@ -139,7 +139,7 @@ if ($route === 'verify-2fa' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 switch ($route) {
     // ── PUBLIC ROUTES (no auth required) ──
     case 'landing':
-        require ROOT_PATH . '/app/views/landing.php';
+        require ROOT_PATH . '/app/views/landing/landing.php';
         break;
     
     case 'signin':
@@ -452,9 +452,9 @@ switch ($route) {
         break;
     
     case 'logout':
-        require_once ROOT_PATH . '/app/controllers/AuthController.php';
-        $auth = new AuthController();
-        $auth->logout();
+        session_destroy();
+        header('Location: ' . BASE_URL . '/index.php?route=landing');
+        exit;
         break;
 
     case 'admin-logout':
