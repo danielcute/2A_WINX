@@ -30,7 +30,7 @@ $is_localhost = (
 if ($is_localhost || gethostname() === 'DESKTOP' || getenv('ENV') === 'local') {
     // LOCAL DEVELOPMENT (XAMPP)
     define('DB_HOST', 'localhost');
-    define('DB_PORT', 3306);              // Standard MySQL port
+    define('DB_PORT', 3307);              // Your XAMPP custom port
     define('DB_USER', 'root');            // XAMPP default user
     define('DB_PASS', '');                // XAMPP default (no password)
     define('DB_NAME', 'sinta_db');        // Local database name
@@ -38,7 +38,7 @@ if ($is_localhost || gethostname() === 'DESKTOP' || getenv('ENV') === 'local') {
 } else {
     // PRODUCTION (Hostinger)
     define('DB_HOST', 'localhost');       // Hostinger uses localhost from their server
-    define('DB_PORT', 3306);              // Verify if Hostinger needs 3306 or 3307
+    define('DB_PORT', 3307);              // Production port (3307 as requested)
     define('DB_USER', 'u536627044_sinta');
     define('DB_PASS', 'Sinta2026');
     define('DB_NAME', 'u536627044_sinta');

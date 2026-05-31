@@ -2,8 +2,13 @@
 
 $page = 'signup';
 $errors = isset($_SESSION['signup_errors']) ? $_SESSION['signup_errors'] : [];
+$single_error = $_SESSION['signup_error'] ?? '';
+if ($single_error && empty($errors)) {
+    $errors = [$single_error];
+}
 $formData = isset($_SESSION['signup_form_data']) ? $_SESSION['signup_form_data'] : [];
 unset($_SESSION['signup_errors']);
+unset($_SESSION['signup_error']);
 unset($_SESSION['signup_form_data']);
 ?>
 <!DOCTYPE html>

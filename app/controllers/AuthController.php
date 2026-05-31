@@ -263,7 +263,7 @@ if ($user) {
         }
         
         if (!empty($errors)) {
-            $_SESSION['signup_error'] = implode('<br>', $errors);
+            $_SESSION['signup_errors'] = $errors;
             return false;
         }
         
