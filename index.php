@@ -157,7 +157,8 @@ switch ($route) {
             header('Location: ' . BASE_URL . '/index.php?route=signin');
             exit;
         }
-        require ROOT_PATH . '/app/views/user/plans.php';
+        require_once ROOT_PATH . '/app/controllers/PlanController.php';
+        (new PlanController())->index();
         break;
     
     case 'packages':
