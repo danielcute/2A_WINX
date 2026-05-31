@@ -50,13 +50,15 @@ if ($recent_bookings && $recent_bookings->num_rows > 0) {
     <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css' rel='stylesheet' />
     <style>
         /* Your existing dashboard specific styles (stats-grid, etc.) */
-        .dashboard-container { padding: 1rem 0; }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .dashboard-container { width: 100%; padding: 0.5rem 0; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.25rem; margin-bottom: 2rem; }
         .stat-card { background: white; border: 2px solid #E2D9C8; border-radius: 20px; padding: 1.5rem; transition: all 0.3s; }
         .stat-card:hover { border-color: #8A7650; transform: translateY(-5px); }
-        .stat-card h3 { font-size: 1.8rem; margin: 0; color: #8A7650; }
-        .quick-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 2rem 0; }
-        .action-btn { background: white; border: 2px solid #E2D9C8; border-radius: 15px; padding: 1rem; text-align: center; text-decoration: none; color: #2C2820; transition: all 0.3s; }
+        .stat-card h3 { font-size: 1.8rem; margin: 0; color: #8A7650; font-weight: 800; }
+        .stat-card p { color: #8B7355; font-weight: 600; margin-top: 0.25rem; }
+        
+        .quick-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin: 2rem 0; }
+        .action-btn { background: white; border: 2px solid #E2D9C8; border-radius: 15px; padding: 1.25rem 1rem; text-align: center; text-decoration: none; color: #2C2820; transition: all 0.3s; font-size: 0.9rem; font-weight: 600; }
         .action-btn:hover { border-color: #8A7650; transform: translateY(-3px); }
         
         /* Calendar Styles */
@@ -169,9 +171,19 @@ if ($recent_bookings && $recent_bookings->num_rows > 0) {
         }
         .dashboard-grid-2col {
             display: grid;
-            grid-template-columns: 2fr 1fr;
+            grid-template-columns: 1.5fr 1fr;
             gap: 1.5rem;
             margin-bottom: 2rem;
+        }
+        
+        /* Modernized Buttons */
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
         }
         @media (max-width: 1024px) {
             .dashboard-grid-2col {
@@ -280,12 +292,12 @@ if ($recent_bookings && $recent_bookings->num_rows > 0) {
                 <?php else: ?>
                     <?php foreach ($bookings_array as $booking): ?>
                         <tr>
-                            <td>#<?= str_pad($booking['checkout_id'] ?? 0, 5, '0', STR_PAD_LEFT) ?></td>
-                            <td><?= htmlspecialchars(($booking['first_name'] ?? '') . ' ' . ($booking['last_name'] ?? '')) ?></td>
-                            <td><?= htmlspecialchars($booking['event_name'] ?? 'Custom Event') ?></td>
-                            <td><?= !empty($booking['event_date']) ? date('M d, Y', strtotime($booking['event_date'])) : 'TBD' ?></td>
-                            <td>₱<?= number_format($booking['total_price'] ?? 0, 0) ?></td>
-                            <td><span class="status-badge status-<?= strtolower($booking['status'] ?? 'pending') ?>"><?= $booking['status'] ?? 'pending' ?></span></td>
+                            <td data-label="ID">#<?= str_pad($booking['checkout_id'] ?? 0, 5, '0', STR_PAD_LEFT) ?></td>
+                            <td data-label="Customer"><?= htmlspecialchars(($booking['first_name'] ?? '') . ' ' . ($booking['last_name'] ?? '')) ?></td>
+                            <td data-label="Event"><?= htmlspecialchars($booking['event_name'] ?? 'Custom Event') ?></td>
+                            <td data-label="Date"><?= !empty($booking['event_date']) ? date('M d, Y', strtotime($booking['event_date'])) : 'TBD' ?></td>
+                            <td data-label="Amount">₱<?= number_format($booking['total_price'] ?? 0, 0) ?></td>
+                            <td data-label="Status"><span class="status-badge status-<?= strtolower($booking['status'] ?? 'pending') ?>"><?= $booking['status'] ?? 'pending' ?></span></td>
                         </tr>
                     <?php endforeach; ?>
                 <?php endif; ?>
