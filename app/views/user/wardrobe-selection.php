@@ -529,6 +529,7 @@ if (!isset($_SESSION['user_id'])) {
 
                 const response = await fetch('<?php echo APP_URL; ?>/app/controllers/WardrobeSelectionController.php?action=getByCategory&' + params);
 cte                if (!response.ok) throw new Error('Server returned ' + response.status);
+                if (!response.ok) throw new Error('Server returned ' + response.status);
                 
                 const contentType = response.headers.get('content-type');
                 if (!contentType || !contentType.includes('application/json')) {

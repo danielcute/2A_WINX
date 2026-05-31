@@ -82,7 +82,7 @@ class OccasionController {
             return ['success' => false, 'error' => $db->error];
         }
         
-        $stmt->bind_param("ssbs", $events, $descriptions, $image_data, $image_name);
+        $stmt->bind_param("ssss", $events, $descriptions, $image_data, $image_name);
         
         if ($stmt->execute()) {
             $id = $db->insert_id;
@@ -112,7 +112,7 @@ class OccasionController {
             if (!$stmt) {
                 return ['success' => false, 'error' => $db->error];
             }
-            $stmt->bind_param("ssbsi", $events, $descriptions, $image_data, $image_name, $id);
+            $stmt->bind_param("ssssi", $events, $descriptions, $image_data, $image_name, $id);
         } else {
             // Update without image
             $stmt = $db->prepare("UPDATE occasions_tbl SET events = ?, descriptions = ? WHERE occasion_id = ?");

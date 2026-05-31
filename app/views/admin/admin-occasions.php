@@ -422,7 +422,7 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
 </div>
 
 <script>
-const baseUrl = '<?= BASE_URL ?>';
+if (typeof baseUrl === 'undefined') { window.baseUrl = '<?= BASE_URL ?>'; }
 const modal = document.getElementById('occasionModal');
 const addOccasionBtn = document.getElementById('addOccasionBtn');
 const occasionForm = document.getElementById('occasionForm');
@@ -582,4 +582,3 @@ document.getElementById('mobileToggle')?.addEventListener('click', function() {
 </script>
 
 <?php include 'admin-footer.php'; ?>
-

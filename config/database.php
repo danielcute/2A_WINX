@@ -38,7 +38,7 @@ if ($is_localhost || gethostname() === 'DESKTOP' || getenv('ENV') === 'local') {
 } else {
     // PRODUCTION (Hostinger)
     define('DB_HOST', 'localhost');       // Hostinger uses localhost from their server
-    define('DB_PORT', 3307);              // Hostinger custom port
+    define('DB_PORT', 3306);              // Hostinger standard internal port
     define('DB_USER', 'u536627044_sinta');
     define('DB_PASS', 'Sinta2026');
     define('DB_NAME', 'u536627044_sinta');

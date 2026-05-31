@@ -163,7 +163,6 @@ try {
             if ($action === 'update' && $occasion_id) {
                 if ($image_data !== null) {
                     $stmt = $db->prepare("UPDATE occasions_tbl SET events = ?, descriptions = ?, image = ?, image_name = ? WHERE occasion_id = ?");
-                    $stmt->bind_param("ssbsi", $events, $descriptions, $image_data, $image_name, $occasion_id);
                     $stmt->bind_param("ssssi", $events, $descriptions, $image_data, $image_name, $occasion_id);
                 } else {
                     $stmt = $db->prepare("UPDATE occasions_tbl SET events = ?, descriptions = ? WHERE occasion_id = ?");
@@ -182,7 +181,6 @@ try {
             // Create new occasion
             else {
                 $stmt = $db->prepare("INSERT INTO occasions_tbl (events, descriptions, image, image_name) VALUES (?, ?, ?, ?)");
-                $stmt->bind_param("ssbs", $events, $descriptions, $image_data, $image_name);
                 $stmt->bind_param("ssss", $events, $descriptions, $image_data, $image_name);
                 
                 if ($stmt->execute()) {
