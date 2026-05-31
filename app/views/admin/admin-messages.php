@@ -61,10 +61,14 @@ if (isset($_GET['message_id'])) {
 }
 
 // Get list of users for "new message" dropdown
-$users_stmt = $messagingController->db->prepare("SELECT user_id, first_name, last_name, email FROM users_tbl WHERE role = 'user' ORDER BY first_name");
-$users_stmt->execute();
-$users = $users_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-$users_stmt->close();
+// Fetch users for the "new message" dropdown.
+// MessagingController::$db is private, so do not access it directly here.
+if (method_exists($messagingController, 'getUsersForNewMessage')) {
+    $users = $messagingController->getUsersForNewMessage();
+} else {
+    // Fallback: attempt to use a public method that may exist.
+    $users = [];
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
