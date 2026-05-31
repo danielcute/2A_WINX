@@ -1,4 +1,4 @@
-sh<?php
+<?php
 /**
  * Occasions API Endpoint - Unified
  * Handles all occasions operations including image uploads

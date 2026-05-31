@@ -1,6 +1,8 @@
-    <?php
+<?php
 error_reporting(E_ALL);
-ini_set('display_errors', 1);
+// Only display errors on localhost to prevent breaking JSON responses in production
+$is_local = (isset($_SERVER['HTTP_HOST']) && (strpos($_SERVER['HTTP_HOST'], 'localhost') !== false || strpos($_SERVER['HTTP_HOST'], '127.0.0.1') !== false));
+ini_set('display_errors', $is_local ? 1 : 0);
 session_start();
 
 // Define base path - with better mobile/deployment support
@@ -81,14 +83,9 @@ if ($user['role'] === 'admin') {
                 exit;
             }
         }
-} else {
-        // Return JSON error instead of redirecting - AJAX will handle this without page refresh
-        header('Content-Type: application/json');
-        echo json_encode([
-            'success' => false, 
-            'message' => 'Invalid email or password',
-            'code' => 'invalid_credentials'
-        ]);
+    } else {
+        $_SESSION['login_error'] = 'Invalid email or password';
+        header('Location: /index.php?route=signin');
         exit;
     }
 }
