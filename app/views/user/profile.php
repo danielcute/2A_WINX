@@ -322,10 +322,11 @@ $avatar_path = !empty($user['image']) ? $user['image'] : '/assets/img/default-av
                 font-size: 1.5rem;
             }
         }
+    </style>
 </head>
 <body>
 
-<?php include ROOT_PATH . '/app/views/user/nav.php'; ?>
+<?php include __DIR__ . '/nav.php'; ?>
 
 <div class="app-shell">
     <main class="profile-main">
@@ -869,7 +870,7 @@ async function handleAvatarUpload() {
 
         if (data.success) {
                 showToast('Profile picture updated!', 'success');
-                document.querySelectorAll('.app-nav__avatar img, #profileAvatar, #avatarPreview').forEach(img => img.src = data.image_url + '?t=' + Date.now());
+                document.querySelectorAll('.app-nav__avatar img, .app-nav__avatar-placeholder, #profileAvatar, #avatarPreview').forEach(el => { if(el.tagName === 'IMG') el.src = data.image_url + '?t=' + Date.now(); else location.reload(); });
             profileAvatar.src = data.image_url;
             closeAvatarModal();
         } else {
