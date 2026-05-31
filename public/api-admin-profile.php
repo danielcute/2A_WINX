@@ -87,7 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // ===== UPLOAD ADMIN AVATAR WITH CROPPING =====
     if ($action === 'upload_avatar' && isset($_FILES['avatar'])) {
         $file = $_FILES['avatar'];
-        $upload_dir = ROOT_PATH . '/public/uploads/avatars/';
+        $upload_dir = ROOT_PATH . '/uploads/avatars/';
         
         // Create upload directory if it doesn't exist
         if (!file_exists($upload_dir)) {

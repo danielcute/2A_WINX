@@ -295,7 +295,7 @@ document.getElementById('feedbackForm').addEventListener('submit', function(e) {
     formData.append('message', document.getElementById('message').value);
     formData.append('rating', document.getElementById('rating-value').value);
     
-    fetch('/index.php?route=feedback', {
+    fetch('index.php?route=feedback', {
         method: 'POST',
         body: formData,
         credentials: 'same-origin'
@@ -305,7 +305,11 @@ document.getElementById('feedbackForm').addEventListener('submit', function(e) {
         showToast(data.message, data.success ? 'success' : 'error');
         if (data.success) {
             document.getElementById('feedbackForm').reset();
-            setTimeout(() => location.reload(), 1500);
+            // Real-time update: Refresh only the history tab content
+            if(window.loadClientFeedback) loadClientFeedback(); 
+            setTimeout(() => {
+                location.reload(); // Fallback to ensure state sync
+            }, 1000);
         }
     })
     .catch(err => showToast('Error: ' + err.message, 'error'));
