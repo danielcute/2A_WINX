@@ -9,7 +9,13 @@
 
 require_once ROOT_PATH . '/config/database.php';
 
+// Ensure session is available for AJAX routes that may bypass index.php session init.
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 class AdminNotificationController {
+
 
     private $db;
 
