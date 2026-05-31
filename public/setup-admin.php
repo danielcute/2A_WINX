@@ -2,13 +2,17 @@
 // Prevent any output buffering issues
 if (ob_get_level()) ob_end_clean();
 
-// Direct database connection (no index.php dependency)
-$db = new mysqli('localhost', 'root', '', 'sinta_db');
+if (!defined('ROOT_PATH')) {
+    define('ROOT_PATH', dirname(__DIR__));
+}
+require_once ROOT_PATH . '/config/database.php';
 
-if ($db->connect_error) {
+$db = Database::getInstance()->getConnection();
+
+if (!$db) {
     http_response_code(500);
     header('Content-Type: text/plain');
-    die("Connection failed: " . $db->connect_error);
+    die("Connection failed");
 }
 
 // Set content type
@@ -28,13 +32,16 @@ if ($result && $result->num_rows > 0) {
     echo "  Role: " . $user['role'] . "\n";
     echo "  Name: " . $user['first_name'] . "\n";
     echo "\n\nYou can log in with:\n";
-    echo "  Email: sinta2026@gmail.com\n";
-    echo "  Password: Sinta2026\n";
+    echo "  Email: " . $email . "\n";
+    
+    // Update password to match user's request
+    $new_password_hash = password_hash('sintaAdmins2026', PASSWORD_DEFAULT);
+    $db->query("UPDATE users_tbl SET password = '" . $db->real_escape_string($new_password_hash) . "' WHERE email = '" . $db->real_escape_string($email) . "'");
+    echo "✓ Password updated to: sintaAdmins2026\n";
 } else {
     echo "✗ Account not found. Creating...\n";
     
-    // Create admin account with hashed password
-    $password_hash = password_hash('Sinta2026', PASSWORD_DEFAULT);
+    $password_hash = password_hash('sintaAdmins2026', PASSWORD_DEFAULT);
     $first_name = 'Sinta';
     $last_name = 'Admin';
     $email = 'sinta2026@gmail.com';

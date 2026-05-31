@@ -41,15 +41,6 @@ define('BASE_URL', rtrim($base_url, '/'));
 // Get the route parameter
 $route = isset($_GET['route']) ? trim($_GET['route']) : 'landing';
 
-// Handle POST login
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'login') {
-    require_once ROOT_PATH . '/app/models/User.php';
-    
-    $email = $_POST['email'] ?? '';
-    $password = $_POST['password'] ?? '';
-    
-}
-
 // Handle POST signup
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'signup') {
     require_once ROOT_PATH . '/app/controllers/AuthController.php';
@@ -93,6 +84,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             $_SESSION['user_last_name'] = $user['last_name'];
             $_SESSION['email'] = $user['email'];
             $_SESSION['role'] = $user['role'];
+            if ($user['role'] === 'admin') {
+                $_SESSION['admin_logged_in'] = true;
+            }
             
             // Redirect to appropriate dashboard
             $redirectUrl = ($user['role'] === 'admin') ? '/index.php?route=admin-dashboard' : '/index.php?route=homepage';
