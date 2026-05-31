@@ -960,8 +960,14 @@ $extraIconMap = [
   function countSelectedItems() {
     let count = 0;
     if (selectedTheme) count++;
+    if (selectedVenueDeco) count++;
+    if (selectedColorCombination) count++;
     if (selectedVenue) count++;
+    if (selectedFood) count++;
+    if (selectedSweets) count++;
     if (selectedCatering) count++;
+    if (selectedPastries) count++;
+    if (selectedBeverages) count++;
     count += selectedAddons.size;
     return count;
   }

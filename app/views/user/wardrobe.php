@@ -1235,11 +1235,10 @@ $wardrobesByCategory = $wardrobeModel->getAllByCategory();
       });
 
       document.getElementById('proceedBtn').addEventListener('click', function() {
-        // First show the agreement modal
         if (typeof openAgreementModal === 'function') {
           openAgreementModal();
         } else {
-          this.handleCheckoutSubmission();
+          window.handleCheckoutSubmission();
         }
       });
 
@@ -1303,45 +1302,18 @@ $wardrobesByCategory = $wardrobeModel->getAllByCategory();
     }
 
     function loadWardrobes() {
-      fetch('api-wardrobe.php?action=getAll')
+      fetch('<?php echo BASE_URL; ?>/public/api-wardrobe.php?action=getAll')
         .then(response => {
           if (!response.ok) throw new Error('Server error: ' + response.status);
-          const contentType = response.headers.get('content-type');
-          if (!contentType || !contentType.includes('application/json')) throw new TypeError('Invalid response format');
           return response.json();
         })
         .then(data => {
           if (data.success) {
-            allWardrobes = data.data;
+            allWardrobes = data.data || data.wardrobes || [];
             displayWardrobes(allWardrobes);
           }
         })
         .catch(error => console.error('Error loading wardrobes:', error));
-    }
-
-    function filterByCategory(category) {
-      if (category === 'all') {
-        displayWardrobes(allWardrobes);
-      } else {
-        const filtered = allWardrobes.filter(w => w.category === category);
-        displayWardrobes(filtered);
-      }
-    }
-
-    function searchWardrobes(query) {
-      fetch('/api-wardrobe.php?action=search&q=' + encodeURIComponent(query))
-        .then(response => {
-          if (!response.ok) throw new Error('Search failed');
-          const contentType = response.headers.get('content-type');
-          if (!contentType || !contentType.includes('application/json')) throw new TypeError('Invalid search response');
-          return response.json();
-        })
-        .then(data => {
-          if (data.success) {
-            displayWardrobes(data.data);
-          }
-        })
-        .catch(error => console.error('Error searching wardrobes:', error));
     }
 
     function displayWardrobes(wardrobes) {
@@ -1360,18 +1332,18 @@ $wardrobesByCategory = $wardrobeModel->getAllByCategory();
       emptyState.style.display = 'none';
       
       container.innerHTML = wardrobes.map(wardrobe => `
-        <div class="wardrobe-card ${selectedWardrobes.find(w => w.wardrobe_id == wardrobe.wardrobe_id) ? 'selected' : ''}" 
+        <div class="wardrobe-card ${selectedWardrobes.some(w => String(w.wardrobe_id) === String(wardrobe.wardrobe_id)) ? 'selected' : ''}" 
              data-wardrobe-id="${wardrobe.wardrobe_id}">
           <div class="wardrobe-card__image">
-            ${wardrobe.image && wardrobe.image_type ? 
-              `<img src="data:${wardrobe.image_type};base64,${wardrobe.image}" alt="${escapeHtml(wardrobe.name)}" style="width: 100%; height: 100%; object-fit: cover; cursor: pointer;">` :
+            ${(wardrobe.has_image || wardrobe.image) ? 
+              `<img src="<?php echo BASE_URL; ?>/index.php?route=admin-wardrobe-image&id=${wardrobe.wardrobe_id}" alt="${escapeHtml(wardrobe.name)}" style="width: 100%; height: 100%; object-fit: cover; cursor: pointer;">` :
               `<i class="fas fa-tuxedo" style="cursor: pointer;"></i>`
             }
           </div>
           <div class="wardrobe-card__content">
             <div class="wardrobe-card__name">${escapeHtml(wardrobe.name)}</div>
             <div class="wardrobe-card__desc">${escapeHtml(wardrobe.description || '')}</div>
-            <div class="wardrobe-card__price">₱${parseFloat(wardrobe.rental_price || wardrobe.price || 0).toFixed(2)}</div>
+            <div class="wardrobe-card__price">₱${parseFloat(wardrobe.rental_price || 0).toLocaleString()}</div>
             <button class="wardrobe-card__button" onclick="event.stopPropagation(); openModalForCard(${wardrobe.wardrobe_id})">View Details</button>
           </div>
         </div>

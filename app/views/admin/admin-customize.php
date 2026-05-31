@@ -9,6 +9,12 @@ require_once ROOT_PATH . '/app/models/User.php';
 $user = new User();
 $admin = $user->findById($_SESSION['user_id']);
 
+require_once ROOT_PATH . '/app/models/Customization.php';
+$customizationModel = new Customization();
+if (!isset($options) || empty($options)) {
+    $options = $customizationModel->getAllOptions();
+}
+
 if (!$admin || $admin['role'] !== 'admin') {
     header("Location: " . BASE_URL . "/index.php?route=home");
     exit;
@@ -991,7 +997,13 @@ $page_title = 'Manage Customizations';
             <?php endif; ?>
             
             <!-- ADD-ONS SECTION -->
-            <?php if (isset($grouped['Add-ons'])): ?>
+            <?php 
+            $addOns = [];
+            if (isset($grouped['Add-ons'])) $addOns = array_merge($addOns, $grouped['Add-ons']);
+            if (isset($grouped['Extras'])) $addOns = array_merge($addOns, $grouped['Extras']);
+            
+            if (!empty($addOns)): 
+            ?>
                 <div class="category-section">
                     <h2 class="category-title">
                         <i class="fas fa-sparkles"></i>
@@ -999,7 +1011,7 @@ $page_title = 'Manage Customizations';
                     </h2>
                     
                     <div class="options-grid">
-                        <?php foreach ($grouped['Add-ons'] as $option): ?>
+                        <?php foreach ($addOns as $option): ?>
                             <div class="option-card">
                                 <div class="option-image">
                                     <?php if (!empty($option['image'])): ?>

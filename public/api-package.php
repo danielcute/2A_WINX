@@ -22,7 +22,11 @@ register_shutdown_function(function () {
 
 
 if (!defined('ROOT_PATH')) {
-    define('ROOT_PATH', __DIR__);
+    if (is_dir(__DIR__ . '/app')) {
+        define('ROOT_PATH', __DIR__);
+    } else {
+        define('ROOT_PATH', dirname(__DIR__));
+    }
 }
 
 require_once ROOT_PATH . '/config/database.php'; // Moved after shutdown function
