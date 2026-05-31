@@ -261,7 +261,7 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
             text-align: center;
             padding: 4rem 2rem;
             background: white;
-            border: 2px dashed #E2D9C8;
+            border: 2px solid #E2D9C8;
             border-radius: 20px;
         }
 
@@ -276,13 +276,49 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
             color: #8B7355;
             margin: 0;
         }
+
+        /* Category Summary Section Styles */
+        .category-summary {
+            background: white;
+            border: 2px solid #E2D9C8;
+            border-radius: 20px;
+            padding: 1.75rem;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+        }
+        .category-summary h3 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.6rem;
+            color: #2C2820;
+            margin: 0 0 1.25rem 0;
+            font-weight: 700;
+        }
+        .category-summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 1.25rem;
+        }
+        .category-card {
+            background: #f5f0e8;
+            padding: 1.25rem;
+            border-radius: 15px;
+            text-align: center;
+            border: 1px solid transparent;
+            transition: all 0.3s ease;
+        }
+        .category-card:hover { border-color: #8A7650; transform: translateY(-3px); box-shadow: 0 5px 15px rgba(138, 118, 80, 0.1); }
+        .category-card__title { font-weight: 700; font-size: 1rem; color: #8A7650; margin-bottom: 0.4rem; }
+        .category-card__count { font-size: 0.85rem; color: #6B6463; font-weight: 600; }
+        .category-summary-note { font-size: 0.9rem; color: #8B7355; margin: 0; line-height: 1.6; }
+        .category-summary-note a { color: #8A7650; font-weight: 700; text-decoration: none; border-bottom: 1px solid transparent; transition: all 0.2s; }
+        .category-summary-note a:hover { border-bottom-color: #8A7650; }
     </style>
 </head>
 <body>
 <?php include 'admin-nav.php'; ?>
 
-<div class="admin-content-wrapper">
-    <div class="occasions-container">
+    <div class="admin-container">
         <div class="occasions-header">
             <h1 class="occasions-title"><i class="fas fa-calendar-day animated-icon"></i> Manage Occasions</h1>
             <button class="btn btn--primary btn--sm" id="addOccasionBtn">
@@ -419,8 +455,6 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
         </div>
     </div>
 
-</div>
-
 <script>
 const modal = document.getElementById('occasionModal');
 const addOccasionBtn = document.getElementById('addOccasionBtn');
@@ -489,8 +523,7 @@ function deleteOccasion(id) {
             'Content-Type': 'application/json',
         },
         credentials: 'same-origin',
-        body: JSON.stringify({ occasion_id: id }),
-        credentials: 'same-origin'
+        body: JSON.stringify({ occasion_id: id })
     })
     .then(response => {
         if (response.status === 401) {
@@ -547,8 +580,7 @@ occasionForm?.addEventListener('submit', (e) => {
     fetch(url, {
         method: 'POST',
         credentials: 'same-origin',
-        body: formData,
-        credentials: 'same-origin'
+        body: formData
     })
     .then(response => {
         if (!response.ok && response.status === 401) {
