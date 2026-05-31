@@ -86,7 +86,7 @@ class Database {
      */
     public function getConnection(): mysqli {
         return $this->connection;
-    }
+    }u
 
     // Prevent cloning and unserialization
     private function __clone() {}

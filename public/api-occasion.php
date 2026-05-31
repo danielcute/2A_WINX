@@ -1,4 +1,4 @@
-<?php
+sh<?php
 /**
  * Occasions API Endpoint - Unified
  * Handles all occasions operations including image uploads
@@ -7,6 +7,10 @@
  * POST   /api-occasion.php              - Create or update occasion with image
  * DELETE /api-occasion.php              - Delete occasion
  */
+
+ini_set('display_errors', 0);
+error_reporting(E_ALL);
+
 // Prevent PHP from outputting HTML errors/warnings that break JSON parsing
 ini_set('display_errors', 0);
 error_reporting(E_ALL);
@@ -160,6 +164,7 @@ try {
                 if ($image_data !== null) {
                     $stmt = $db->prepare("UPDATE occasions_tbl SET events = ?, descriptions = ?, image = ?, image_name = ? WHERE occasion_id = ?");
                     $stmt->bind_param("ssbsi", $events, $descriptions, $image_data, $image_name, $occasion_id);
+                    $stmt->bind_param("ssssi", $events, $descriptions, $image_data, $image_name, $occasion_id);
                 } else {
                     $stmt = $db->prepare("UPDATE occasions_tbl SET events = ?, descriptions = ? WHERE occasion_id = ?");
                     $stmt->bind_param("ssi", $events, $descriptions, $occasion_id);
@@ -178,6 +183,7 @@ try {
             else {
                 $stmt = $db->prepare("INSERT INTO occasions_tbl (events, descriptions, image, image_name) VALUES (?, ?, ?, ?)");
                 $stmt->bind_param("ssbs", $events, $descriptions, $image_data, $image_name);
+                $stmt->bind_param("ssss", $events, $descriptions, $image_data, $image_name);
                 
                 if ($stmt->execute()) {
                     $newOccasionId = $db->insert_id;
