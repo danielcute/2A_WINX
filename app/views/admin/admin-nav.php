@@ -272,12 +272,12 @@ body {
     max-width: 80%;
     height: 100vh;
     position: fixed;
-    z-index: 1100;
+    z-index: 5000; /* Increased to ensure it's above topbar and overlay */
     top: 0;
     left: 0;
     box-shadow: var(--shadow-lg);
     border-right: none;
-    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), visibility 0s linear 0.4s;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), visibility 0s linear 0.3s;
     will-change: transform;
     visibility: hidden;
   }
@@ -293,7 +293,7 @@ body {
     inset: 0;
     background: rgba(0,0,0,0.4);
     backdrop-filter: blur(4px);
-    z-index: 1050;
+    z-index: 4500; /* Sits just below the sidebar */
     opacity: 0;
     visibility: hidden;
     transition: all 0.3s ease;
