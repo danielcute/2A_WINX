@@ -254,6 +254,7 @@ if (session_status() === PHP_SESSION_NONE) {
   background: transparent;
   border: 1px solid #E2D9C8;
   cursor: pointer;
+  margin-left: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -720,6 +721,7 @@ if (session_status() === PHP_SESSION_NONE) {
   }
   .app-nav__right {
     margin-left: auto;
+    gap: 0.6rem;
   }
 }
 

@@ -369,8 +369,14 @@ $extraIconMap = [
     }
     @media (max-width: 768px) {
       .customize-main { padding: 1.5rem 1rem 4rem; padding-top: calc(var(--nav-height) + 1rem); }
-      .photo-card-grid { grid-template-columns: 1fr; }
-      .addons-grid { grid-template-columns: 1fr; }
+      .photo-card-grid { 
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+      .addons-grid { 
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+      }
       .summary-panel { grid-template-columns: 1fr; }
       .customize-footer { flex-direction: column; text-align: center; }
       .summary-details { justify-content: center; }

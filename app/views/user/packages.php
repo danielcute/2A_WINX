@@ -560,7 +560,7 @@ if ($occasion === 'other') {
   </div>
   
   <!-- WEDDING PACKAGES -->
-  <div id="wedding-packages" class="occasion-packages" style="display: <?= $showWedding ? 'grid' : 'none' ?>; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;">
+  <div id="wedding-packages" class="pkg-grid" style="display: <?= $showWedding ? 'grid' : 'none' ?>;">
     <?php 
     $weddingPackages = $packagesByOccasion['wedding'] ?? [];
     $featuredIndex = 0; // Make first package featured
@@ -621,7 +621,7 @@ if ($occasion === 'other') {
   </div>
   
   <!-- BIRTHDAY PACKAGES -->
-  <div id="birthday-packages" class="occasion-packages" style="display: <?= $showBirthday ? 'grid' : 'none' ?>; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;">
+  <div id="birthday-packages" class="pkg-grid" style="display: <?= $showBirthday ? 'grid' : 'none' ?>;">
     <?php 
     $birthdayPackages = $packagesByOccasion['birthday'] ?? [];
     $featuredIndex = 0;
@@ -800,7 +800,7 @@ if ($occasion === 'other') {
   </div>
   
   <!-- BIG EVENTS / GALA PACKAGES -->
-  <div id="bigevents-packages" class="occasion-packages" style="display: <?= $showBigEvents ? 'grid' : 'none' ?>; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;">
+  <div id="bigevents-packages" class="pkg-grid" style="display: <?= $showBigEvents ? 'grid' : 'none' ?>;">
     <?php 
     $bigEventsPackages = array_merge(
         $packagesByOccasion['corporate'] ?? []
