@@ -151,6 +151,14 @@ switch ($route) {
         }
         require ROOT_PATH . '/app/views/user/homepage.php';
         break;
+
+    case 'plans':
+        if (!isset($_SESSION['user_id']) || $_SESSION['role'] === 'admin') {
+            header('Location: ' . BASE_URL . '/index.php?route=signin');
+            exit;
+        }
+        require ROOT_PATH . '/app/views/user/plans.php';
+        break;
     
     case 'packages':
         if (!isset($_SESSION['user_id']) || $_SESSION['role'] === 'admin') {
