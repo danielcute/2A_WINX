@@ -521,13 +521,14 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
                                             img.style.display = 'block';
                                         }
                                     })
-                                    .catch(err => console.error('Error loading image:', err));
+        .catch(err => console.error('Error loading image:', err));
                             </script>
                             <i class="fas fa-image" style="display:block;"></i>
                         <?php else: ?>
                             <i class="fas fa-calendar-alt"></i>
                         <?php endif; ?>
                     </div>
+
 
                     <!-- Content -->
                     <div style="padding: 1.5rem 1.5rem 0 1.5rem;">
