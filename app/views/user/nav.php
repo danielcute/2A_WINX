@@ -776,7 +776,7 @@ const notificationTypes = {
   function loadNotifications() {
     if (!notifContainer) return;
 
-    fetch('public/api-notification.php?action=get_unread&limit=10')
+    fetch('api-notification.php?action=get_unread&limit=10')
       .then(response => {
         if (!response.ok) throw new Error('Failed to fetch notifications');
         const contentType = response.headers.get('content-type');

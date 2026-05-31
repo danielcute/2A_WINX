@@ -183,6 +183,19 @@ $avatar_path = !empty($user['image']) ? $user['image'] : '/assets/img/default-av
             height: 100%;
             object-fit: cover;
         }
+        .back-btn-mobile {
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--gold);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+        @media (max-width: 768px) {
+            .back-btn-mobile { display: flex; }
+        }
         .upload-area {
             border: 2px dashed var(--border);
             border-radius: var(--r-lg);
@@ -234,10 +247,6 @@ $avatar_path = !empty($user['image']) ? $user['image'] : '/assets/img/default-av
         
         /* Mobile responsive improvements */
         @media (max-width: 768px) {
-            .avatar-upload-modal {
-                display: flex !important;
-            }
-
             .avatar-upload-content {
                 max-width: 95%;
                 padding: 1.5rem;
@@ -321,6 +330,8 @@ $avatar_path = !empty($user['image']) ? $user['image'] : '/assets/img/default-av
 <div class="app-shell">
     <main class="profile-main">
         
+        <a href="index.php?route=homepage" class="back-btn-mobile"><i class="fas fa-chevron-left"></i> Back to Home</a>
+
         <!-- Success/Error Messages -->
         <?php if ($success_message): ?>
             <div class="alert alert--success animate-fade-up">
@@ -797,14 +808,14 @@ $avatar_path = !empty($user['image']) ? $user['image'] : '/assets/img/default-av
         </form>
         
         <div class="default-avatars">
-            <img src="/assets/images/aelarie.jpg" class="default-avatar" onclick="selectDefaultAvatar('/assets/images/avatars/default-avatar.jpg')">
-            <img src="/assets/images/elarie.jpg" class="default-avatar" onclick="selectDefaultAvatar('/assets/images/avatars/avatar-2.jpg')">
-            <img src="/assets/images/elarie.jpg" class="default-avatar" onclick="selectDefaultAvatar('/assets/images/avatars/avatar-3.jpg')">
-            <img src="/assets/images/elarie.jpg" class="default-avatar" onclick="selectDefaultAvatar('/assets/images/avatars/avatar-4.jpg')">
+            <img src="/assets/images/aelarie.jpg" class="default-avatar" onclick="selectDefaultAvatar('/assets/images/avatars/default-avatar.jpg', event)">
+            <img src="/assets/images/elarie.jpg" class="default-avatar" onclick="selectDefaultAvatar('/assets/images/avatars/avatar-2.jpg', event)">
+            <img src="/assets/images/elarie.jpg" class="default-avatar" onclick="selectDefaultAvatar('/assets/images/avatars/avatar-3.jpg', event)">
+            <img src="/assets/images/elarie.jpg" class="default-avatar" onclick="selectDefaultAvatar('/assets/images/avatars/avatar-4.jpg', event)">
         </div>
         
         <div class="modal-buttons">
-            <button type="submit" form="avatarUploadForm" class="btn btn--gold">Upload</button>
+            <button type="button" onclick="handleAvatarUpload()" class="btn btn--gold" id="confirmUploadBtn">Upload</button>
             <button type="button" class="btn btn--ghost" onclick="closeAvatarModal()">Cancel</button>
         </div>
     </div>
@@ -832,32 +843,43 @@ async function previewImage(input) {
             avatarPreview.src = e.target.result;
         };
         reader.readAsDataURL(input.files[0]);
+}
 
-        // Automatically upload when a file is selected
-        const formData = new FormData();
-        formData.append('action', 'upload_avatar');
-        formData.append('avatar', input.files[0]);
+async function handleAvatarUpload() {
+    const fileInput = document.getElementById('avatarInput');
+    if (!fileInput.files || !fileInput.files[0]) {
+        showToast('Please select a file first', 'error');
+        return;
+    }
 
-        try {
-            const response = await fetch('public/api-user-profile.php', {
-                method: 'POST',
-                body: formData
-            });
-            const data = await response.json();
+    const btn = document.getElementById('confirmUploadBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
 
-            if (data.success) {
-                showToast('Profile picture updated successfully!', 'success');
-                profileAvatar.src = data.image_url; // Update main avatar
-                closeAvatarModal();
-                // Optionally, reload the page to update session and other elements
-                // setTimeout(() => location.reload(), 1000);
-            } else {
-                showToast(data.message || 'Failed to upload image.', 'error');
-            }
-        } catch (error) {
-            console.error('Error uploading avatar:', error);
-            showToast('An error occurred during upload.', 'error');
+    const formData = new FormData();
+    formData.append('action', 'upload_avatar');
+    formData.append('avatar', fileInput.files[0]);
+
+    try {
+        const response = await fetch('api-user-profile.php', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await response.json();
+
+        if (data.success) {
+            showToast('Profile picture updated successfully!', 'success');
+            profileAvatar.src = data.image_url;
+            closeAvatarModal();
+        } else {
+            showToast(data.message || 'Failed to upload image.', 'error');
         }
+    } catch (error) {
+        console.error('Error uploading avatar:', error);
+        showToast('An error occurred during upload.', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = 'Upload';
     }
 }
 
@@ -866,7 +888,7 @@ document.getElementById('avatarUploadForm').addEventListener('submit', function(
     e.preventDefault(); // Prevent default form submission as we handle with JS
 });
 
-function selectDefaultAvatar(src) {
+function selectDefaultAvatar(src, event) {
     // Highlight selected
     document.querySelectorAll('.default-avatar').forEach(avatar => {
         avatar.classList.remove('selected');
@@ -878,7 +900,7 @@ function selectDefaultAvatar(src) {
     formData.append('action', 'upload_avatar_default'); // New action for default avatars
     formData.append('avatar_path', src);
 
-    fetch('public/api-user-profile.php', {
+    fetch('api-user-profile.php', {
         method: 'POST',
         body: formData
     })
