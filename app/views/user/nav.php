@@ -49,7 +49,6 @@
       <div class="app-nav__profile-wrapper" style="position: relative;">
         <div class="app-nav__profile" id="profileBtn">
           <div class="app-nav__avatar">
-            <img src="<?php echo htmlspecialchars($_SESSION['user_avatar'] ?? '/assets/img/default-avatar.jpg'); ?>" alt="<?php echo htmlspecialchars($_SESSION['user_name'] ?? 'User'); ?>">
             <?php if (!empty($_SESSION['user_avatar'])): ?>
                 <img src="<?php echo htmlspecialchars($_SESSION['user_avatar']); ?>" alt="Profile">
             <?php else: ?>
