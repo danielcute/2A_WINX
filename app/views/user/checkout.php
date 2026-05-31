@@ -80,21 +80,6 @@ $depositRequired = round($cartTotal * 0.5);
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600&family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/assets/css/global.css">
-<div id="map" style="height: 300px; border-radius: 8px; margin-top: 10px;"></div>
-<input type="hidden" id="latitude" name="latitude">
-<input type="hidden" id="longitude" name="longitude">
-<div id="map" style="height: 300px; border-radius: 8px; margin-top: 10px;"></div>
-<input type="hidden" id="latitude" name="latitude">
-<input type="hidden" id="longitude" name="longitude">
-var map = L.map('map').setView([14.5995, 120.9842], 13); // Manila default
-L.tileLayer('<https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png>').addTo(map);
-var marker;
-map.on('click', function(e) {
-    if (marker) map.removeLayer(marker);
-    marker = L.marker(e.latlng).addTo(map);
-    document.getElementById('latitude').value = e.latlng.lat;
-    document.getElementById('longitude').value = e.latlng.lng;
-});
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css' rel='stylesheet' />
@@ -1621,9 +1606,7 @@ function confirmBooking() {
     })
     .catch(error => {
         console.error('Booking save error:', error);
-        showToast('Unable to save booking. Please try again.', 'error')<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-        ;
+        showToast('Unable to save booking. Please try again.', 'error');
         // Re-enable button on error so user can retry
         isBookingInProgress = false;
         confirmBtn.disabled = false;
@@ -1644,7 +1627,6 @@ document.querySelector('.checkout-btn')?.addEventListener('click', function(e) {
 </script>
 
 <!-- Booking Agreement Modal Component -->
-<?php include __DIR__ . '/../../public/booking-agreement-modal.php'; ?>
 <?php include ROOT_PATH . '/public/booking-agreement-modal.php'; ?>
 
 <!-- Payment Modal Component -->
