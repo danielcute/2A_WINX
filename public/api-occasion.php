@@ -97,12 +97,23 @@ try {
     } 
     
     elseif ($method === 'POST') {
-        // Check admin session
-        if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
+    // Check admin session (match WardrobeController::requireAdmin)
+        if (!isset($_SESSION['user_id'])) {
             http_response_code(401);
             echo json_encode(['success' => false, 'message' => 'Unauthorized']);
             exit;
         }
+
+        require_once ROOT_PATH . '/app/models/User.php';
+        $userModel = new User();
+        $admin = $userModel->findById((int)$_SESSION['user_id']);
+
+        if (!$admin || (($admin['role'] ?? null) !== 'admin')) {
+            http_response_code(401);
+            echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+            exit;
+        }
+
         
         $content_type = $_SERVER['CONTENT_TYPE'] ?? '';
         $action = $_GET['action'] ?? 'create';
@@ -211,12 +222,23 @@ try {
     } 
     
     elseif ($method === 'DELETE') {
-        // Check admin session
-        if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
+        // Check admin session (match WardrobeController::requireAdmin)
+        if (!isset($_SESSION['user_id'])) {
             http_response_code(401);
             echo json_encode(['success' => false, 'message' => 'Unauthorized']);
             exit;
         }
+
+        require_once ROOT_PATH . '/app/models/User.php';
+        $userModel = new User();
+        $admin = $userModel->findById((int)$_SESSION['user_id']);
+
+        if (!$admin || (($admin['role'] ?? null) !== 'admin')) {
+            http_response_code(401);
+            echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+            exit;
+        }
+
         
         $data = json_decode(file_get_contents('php://input'), true);
         $occasion_id = intval($data['occasion_id'] ?? 0);
