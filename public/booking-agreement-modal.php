@@ -150,7 +150,7 @@
 </div>
 
 <!-- Hidden form to submit booking data after agreement acceptance -->
-<form id="bookingForm" method="POST" style="display: none;">
+<form id="bookingForm" method="POST" action="index.php?route=checkout-submit" style="display: none;">
     <input type="hidden" name="eventName" id="bookingEventName">
     <input type="hidden" name="eventDate" id="bookingEventDate">
     <input type="hidden" name="eventTime" id="bookingEventTime">
@@ -648,9 +648,8 @@
         // For now, we'll log the data
         console.log('Booking confirmed and ready for payment');
         console.log('Deposit amount:', depositAmount);
-
-        // TODO: Uncomment and modify based on your actual payment flow
-        // document.getElementById('bookingForm').submit();
+        
+        document.getElementById('bookingForm').submit();
     }
 
     // Toast notification helper

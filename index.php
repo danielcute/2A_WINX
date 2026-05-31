@@ -160,7 +160,7 @@ switch ($route) {
     
     // ── USER PROTECTED ROUTES ──
     case 'homepage':
-        if (!isset($_SESSION['user_id']) || $_SESSION['role'] === 'admin') {
+        if (!isset($_SESSION['user_id']) || (isset($_SESSION['role']) && $_SESSION['role'] === 'admin')) {
             header('Location: ' . BASE_URL . '/index.php?route=signin');
             exit;
         }
@@ -168,7 +168,7 @@ switch ($route) {
         break;
 
     case 'plans':
-        if (!isset($_SESSION['user_id']) || $_SESSION['role'] === 'admin') {
+        if (!isset($_SESSION['user_id']) || (isset($_SESSION['role']) && $_SESSION['role'] === 'admin')) {
             header('Location: ' . BASE_URL . '/index.php?route=signin');
             exit;
         }
@@ -177,7 +177,7 @@ switch ($route) {
         break;
     
     case 'packages':
-        if (!isset($_SESSION['user_id']) || $_SESSION['role'] === 'admin') {
+        if (!isset($_SESSION['user_id']) || (isset($_SESSION['role']) && $_SESSION['role'] === 'admin')) {
             header('Location: ' . BASE_URL . '/index.php?route=signin');
             exit;
         }
@@ -185,7 +185,7 @@ switch ($route) {
         break;
     
     case 'plan-detail':
-        if (!isset($_SESSION['user_id']) || $_SESSION['role'] === 'admin') {
+        if (!isset($_SESSION['user_id']) || (isset($_SESSION['role']) && $_SESSION['role'] === 'admin')) {
             header('Location: ' . BASE_URL . '/index.php?route=signin');
             exit;
         }
@@ -193,7 +193,7 @@ switch ($route) {
         break;
     
     case 'customize':
-        if (!isset($_SESSION['user_id']) || $_SESSION['role'] === 'admin') {
+        if (!isset($_SESSION['user_id']) || (isset($_SESSION['role']) && $_SESSION['role'] === 'admin')) {
             header('Location: ' . BASE_URL . '/index.php?route=signin');
             exit;
         }
@@ -201,15 +201,24 @@ switch ($route) {
         break;
     
     case 'checkout':
-        if (!isset($_SESSION['user_id']) || $_SESSION['role'] === 'admin') {
+        if (!isset($_SESSION['user_id']) || (isset($_SESSION['role']) && $_SESSION['role'] === 'admin')) {
             header('Location: ' . BASE_URL . '/index.php?route=signin');
             exit;
         }
         require ROOT_PATH . '/app/views/user/checkout.php';
         break;
     
+    case 'checkout-submit':
+        if (!isset($_SESSION['user_id']) || (isset($_SESSION['role']) && $_SESSION['role'] === 'admin')) {
+            header('Location: ' . BASE_URL . '/index.php?route=signin');
+            exit;
+        }
+        require_once ROOT_PATH . '/app/controllers/CheckoutController.php';
+        (new CheckoutController())->submit();
+        break;
+
     case 'wardrobe':
-        if (!isset($_SESSION['user_id']) || $_SESSION['role'] === 'admin') {
+        if (!isset($_SESSION['user_id']) || (isset($_SESSION['role']) && $_SESSION['role'] === 'admin')) {
             header('Location: ' . BASE_URL . '/index.php?route=signin');
             exit;
         }
@@ -233,7 +242,7 @@ switch ($route) {
         break;
     
     case 'messages':
-        if (!isset($_SESSION['user_id'])) {
+        if (!isset($_SESSION['user_id']) || (isset($_SESSION['role']) && $_SESSION['role'] === 'admin')) {
             header('Location: ' . BASE_URL . '/index.php?route=signin');
             exit;
         }

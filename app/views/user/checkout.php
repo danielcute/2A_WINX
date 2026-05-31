@@ -75,7 +75,7 @@ $depositRequired = round($cartTotal * 0.5);
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
     <title>Checkout — Sinta</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -518,6 +518,49 @@ $depositRequired = round($cartTotal * 0.5);
             .form-row { grid-template-columns: 1fr; }
             .full-width { grid-column: span 1; }
             .payment-methods { flex-direction: column; }
+        }
+
+        /* Enhanced Mobile Navigation UX */
+        @media (max-width: 768px) {
+            .app-nav {
+                background: rgba(255, 255, 255, 0.8) !important;
+                backdrop-filter: blur(15px) saturate(180%);
+                -webkit-backdrop-filter: blur(15px) saturate(180%);
+                padding-top: env(safe-area-inset-top);
+            }
+
+            #mobileMenu {
+                position: fixed;
+                top: 0;
+                right: 0;
+                width: 280px;
+                max-width: 85%;
+                height: 100vh;
+                background: white;
+                box-shadow: -10px 0 30px rgba(0,0,0,0.08);
+                transform: translateX(100%);
+                transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+                display: flex !important;
+                flex-direction: column;
+                padding: calc(80px + env(safe-area-inset-top)) 1.5rem 2rem;
+                z-index: 2001;
+                visibility: hidden;
+                will-change: transform;
+            }
+
+            #mobileMenu.active {
+                transform: translateX(0);
+                visibility: visible;
+            }
+
+            body.mobile-menu-open::after {
+                content: '';
+                position: fixed;
+                inset: 0;
+                background: rgba(0,0,0,0.3);
+                backdrop-filter: blur(4px);
+                z-index: 2000;
+            }
         }
 
         /* Toast Notifications */
