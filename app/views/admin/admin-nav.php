@@ -269,15 +269,15 @@ body {
   .admin-sidebar {
     transform: translateX(-100%);
     width: 280px;
-    max-width: 80%;
+    max-width: 85%;
     height: 100vh;
     position: fixed;
-    z-index: 5000;
+    z-index: 9000; /* Highest priority */
     top: 0;
     left: 0;
     box-shadow: var(--shadow-lg);
     border-right: none;
-    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.3s;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), visibility 0s linear 0s;
     will-change: transform;
     visibility: hidden;
   }
@@ -293,7 +293,7 @@ body {
     inset: 0;
     background: rgba(0,0,0,0.4);
     backdrop-filter: blur(4px);
-    z-index: 4500;
+    z-index: 8500;
     opacity: 0;
     visibility: hidden;
     transition: all 0.3s ease;
@@ -306,7 +306,7 @@ body {
 
   .admin-main {
     margin-left: 0;
-    padding: calc(70px + 1.5rem) 1rem 2rem;
+    padding: calc(70px + 2rem) 1.25rem 5rem;
     min-height: calc(100vh - 60px);
     width: 100%;
     box-sizing: border-box;
@@ -318,7 +318,7 @@ body {
     top: 0;
     left: 0;
     right: 0;
-    z-index: 4000;
+    z-index: 8000;
     border-radius: 0;
     margin-bottom: 0;
     background: rgba(255, 255, 255, 0.8);
@@ -731,7 +731,8 @@ body {
   </div>
 </div>
 </div>
-<div class="admin-content" style="position: relative; z-index: 1;">
+<div class="admin-content" style="position: relative; z-index: 10; width: 100%;">
+
 <script>
 // Base URL for API calls - Use var and check to prevent "already declared" errors
 if (typeof window.baseUrl === 'undefined') { window.baseUrl = '<?php echo BASE_URL; ?>'; }

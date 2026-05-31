@@ -116,8 +116,8 @@ if (!empty($_GET['id'])) {
     <style>
         /* Your existing styles (same as previous improved version) */
         body { background: #F5F0E8; }
-        .admin-container { width: 100%; margin: 0; padding: 1.5rem; }
-        .page-header { margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between; background: white; padding: 1.5rem 2rem; border-radius: 24px; border: 1px solid var(--border); }
+        .admin-container { width: 100%; margin: 0; padding: 0; }
+        .page-header { margin-bottom: 2rem; }
         .page-header h1 { font-family: var(--serif); font-size: 2.2rem; color: var(--dark); margin: 0; font-weight: 700; }
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
         .stat-card { background: white; padding: 1.5rem; border-radius: 24px; border: 2px solid var(--border); text-align: center; transition: all 0.3s; }
@@ -195,11 +195,12 @@ if (!empty($_GET['id'])) {
         .reply-form textarea { width: 100%; padding: 0.8rem; border: 2px solid #E2D9C8; border-radius: 16px; font-family: inherit; resize: vertical; min-height: 100px; }
         
         @media (max-width: 968px) { 
-            .content-wrapper { grid-template-columns: 1fr; border-radius: 0; margin: -1rem; width: calc(100% + 2rem); } 
+            .content-wrapper { grid-template-columns: 1fr; border-radius: 24px; margin: 0; width: 100%; } 
             .feedback-list { display: <?= !empty($_GET['id']) ? 'none' : 'block' ?>; border-right: none; }
             .detail-panel { display: <?= !empty($_GET['id']) ? 'flex' : 'none' ?>; }
             .back-to-list { display: inline-flex; }
             .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .admin-container { padding: 0.5rem; }
         }
     </style>
 </head>
@@ -207,7 +208,7 @@ if (!empty($_GET['id'])) {
 <?php include 'admin-nav.php'; ?>
 
 <div class="admin-container">
-    <div class="page-header">
+    <div class="admin-page-header">
         <h1><i class="fas fa-comments"></i> Feedback Management</h1>
     </div>
     

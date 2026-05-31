@@ -50,12 +50,12 @@ if ($recent_bookings && $recent_bookings->num_rows > 0) {
     <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css' rel='stylesheet' />
     <style>
         /* Your existing dashboard specific styles (stats-grid, etc.) */
-        .dashboard-container { width: 100%; padding: 0; box-sizing: border-box; }
-        .dashboard-header { margin-bottom: 2rem; }
+        .dashboard-container { width: 100%; padding: 0; }
+        .dashboard-header { margin-bottom: 2.5rem; }
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
-        .stat-card { background: white; border: 2px solid var(--border); border-radius: 24px; padding: 1.8rem; transition: all 0.3s; box-shadow: var(--shadow-sm); }
-        .stat-card:hover { border-color: var(--primary); transform: translateY(-5px); box-shadow: var(--shadow-md); }
-        .stat-card h3 { font-size: 2.2rem; margin: 0; color: var(--primary); font-weight: 800; font-family: var(--sans); }
+        .stat-card { background: white; border: 2px solid var(--border); border-radius: 24px; padding: 1.5rem; transition: all 0.3s; box-shadow: var(--shadow-sm); text-align: center; }
+        .stat-card:hover { border-color: var(--primary); transform: translateY(-3px); box-shadow: var(--shadow-md); }
+        .stat-card h3 { font-size: 2rem; margin: 0; color: var(--primary); font-weight: 800; font-family: var(--sans); }
         .stat-card p { color: var(--text-secondary); font-weight: 600; margin-top: 0.4rem; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; }
         
         .quick-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.75rem; margin: 1.5rem 0; }
@@ -189,6 +189,12 @@ if ($recent_bookings && $recent_bookings->num_rows > 0) {
         @media (max-width: 1024px) {
             .dashboard-grid-2col { grid-template-columns: 1fr; }
             .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            
+            .dashboard-header h1 { font-size: 1.8rem; }
+            
+            .recent-bookings { border-radius: 20px; border: none; background: transparent; box-shadow: none; }
+            .recent-bookings table { display: block; }
+            .recent-bookings tbody { display: block; }
         }
         
         .recent-bookings { background: white; border-radius: 24px; overflow: hidden; border: 2px solid var(--border); box-shadow: var(--shadow-sm); margin-bottom: 2rem; }
@@ -230,8 +236,15 @@ if ($recent_bookings && $recent_bookings->num_rows > 0) {
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
 </head>
 <body>
-<?php include 'admin-nav.php'; ?>
+<?php 
+$page_title = 'Dashboard';
+include 'admin-nav.php'; 
+?>
 <div class="dashboard-container">
+    <div class="admin-page-header">
+        <h1><i class="fas fa-chart-line animated-icon"></i> Admin <em>Overview</em></h1>
+    </div>
+
     <!-- Stats Grid -->
     <div class="stats-grid">
         <div class="stat-card"><h3><?= $total_packages ?></h3><p>Total Packages</p></div>
@@ -280,7 +293,7 @@ if ($recent_bookings && $recent_bookings->num_rows > 0) {
     </div>
 
     <!-- Recent Bookings -->
-    <h2 style="margin: 2rem 0 1rem;">Recent Bookings</h2>
+    <h3 style="font-family: var(--serif); font-size: 1.6rem; margin: 2rem 0 1rem; color: var(--dark);">Recent Bookings</h3>
     <div class="recent-bookings">
         <table>
             <thead><tr><th>ID</th><th>Customer</th><th>Event</th><th>Date</th><th>Amount</th><th>Status</th></tr></thead>
