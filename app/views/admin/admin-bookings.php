@@ -116,7 +116,7 @@ $stats = $bookingModel->getStats();
     <link rel="stylesheet" href="/assets/css/global.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .admin-container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+        .admin-container { width: 100%; margin: 0; padding: 0; }
         .bookings-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
         .bookings-header h1 { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; color: #2C2820; margin: 0; display: flex; align-items: center; gap: 1rem; letter-spacing: -0.03em; font-weight: 200; }
         .bookings-header h1 em { color: #8A7650; font-style: italic; font-weight: 400; }

@@ -272,12 +272,12 @@ body {
     max-width: 80%;
     height: 100vh;
     position: fixed;
-    z-index: 5000; /* Increased to ensure it's above topbar and overlay */
+    z-index: 5000;
     top: 0;
     left: 0;
     box-shadow: var(--shadow-lg);
     border-right: none;
-    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), visibility 0s linear 0.3s;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.3s;
     will-change: transform;
     visibility: hidden;
   }
@@ -293,7 +293,7 @@ body {
     inset: 0;
     background: rgba(0,0,0,0.4);
     backdrop-filter: blur(4px);
-    z-index: 4500; /* Sits just below the sidebar */
+    z-index: 4500;
     opacity: 0;
     visibility: hidden;
     transition: all 0.3s ease;
@@ -306,10 +306,11 @@ body {
 
   .admin-main {
     margin-left: 0;
-    padding: calc(70px + 2rem) 1rem 2rem;
+    padding: calc(70px + 1.5rem) 1rem 2rem;
     min-height: calc(100vh - 60px);
     width: 100%;
     box-sizing: border-box;
+    position: relative;
   }
   
   .admin-topbar {
@@ -317,7 +318,7 @@ body {
     top: 0;
     left: 0;
     right: 0;
-    z-index: 1000;
+    z-index: 4000;
     border-radius: 0;
     margin-bottom: 0;
     background: rgba(255, 255, 255, 0.8);
@@ -730,8 +731,7 @@ body {
   </div>
 </div>
 </div>
-<div class="admin-content">
-
+<div class="admin-content" style="position: relative; z-index: 1;">
 <script>
 // Base URL for API calls - Use var and check to prevent "already declared" errors
 if (typeof window.baseUrl === 'undefined') { window.baseUrl = '<?php echo BASE_URL; ?>'; }

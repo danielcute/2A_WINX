@@ -50,7 +50,8 @@ if ($recent_bookings && $recent_bookings->num_rows > 0) {
     <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css' rel='stylesheet' />
     <style>
         /* Your existing dashboard specific styles (stats-grid, etc.) */
-        .dashboard-container { width: 100%; padding: 1rem; box-sizing: border-box; }
+        .dashboard-container { width: 100%; padding: 0; box-sizing: border-box; }
+        .dashboard-header { margin-bottom: 2rem; }
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
         .stat-card { background: white; border: 2px solid var(--border); border-radius: 24px; padding: 1.8rem; transition: all 0.3s; box-shadow: var(--shadow-sm); }
         .stat-card:hover { border-color: var(--primary); transform: translateY(-5px); box-shadow: var(--shadow-md); }
