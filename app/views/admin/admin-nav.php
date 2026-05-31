@@ -634,14 +634,14 @@ body {
 <aside class="admin-sidebar" id="adminSidebar">
 <div class="admin-sidebar__header"><a href="<?php echo BASE_URL; ?>/index.php?route=admin-dashboard" class="admin-sidebar__logo"><img src="<?php echo BASE_URL; ?>/assets/img/logo.png" alt="Sinta" class="admin-sidebar__logo-img"><span class="admin-sidebar__logo-text">Sinta</span></a><span class="admin-sidebar__sub">Admin Panel</span></div>
 <nav class="admin-sidebar__nav">
-<a href="index.php?route=admin-dashboard" class="admin-sidebar__link<?php echo isset($page) && $page === 'admin-dashboard' ? ' active' : ''; ?>"><i class="fas fa-home"></i><span>Dashboard</span></a>
-<a href="index.php?route=admin-manage-packages" class="admin-sidebar__link<?php echo isset($page) && $page === 'admin-packages' ? ' active' : ''; ?>"><i class="fas fa-box"></i><span>Packages</span></a>
-<a href="index.php?route=admin-occasions" class="admin-sidebar__link<?php echo isset($page) && $page === 'admin-occasions' ? ' active' : ''; ?>"><i class="fas fa-calendar-day"></i><span>Occasions</span></a>
-<a href="index.php?route=admin-bookings" class="admin-sidebar__link<?php echo isset($page) && $page === 'admin-bookings' ? ' active' : ''; ?>"><i class="fas fa-calendar-check"></i><span>Bookings</span></a>
-<a href="index.php?route=admin-feedback" class="admin-sidebar__link<?php echo isset($page) && $page === 'admin-feedback' ? ' active' : ''; ?>"><i class="fas fa-comment-dots"></i><span>Feedback</span></a>
-<a href="index.php?route=admin-customize" class="admin-sidebar__link<?php echo isset($page) && $page === 'admin-customize' ? ' active' : ''; ?>"><i class="fas fa-palette"></i><span>Customization</span></a>
-<a href="index.php?route=admin-wardrobe" class="admin-sidebar__link<?php echo isset($page) && (strpos($page, 'admin-wardrobe') !== false) ? ' active' : ''; ?>"><i class="fas fa-tshirt"></i><span>Wardrobe</span></a>
-<a href="index.php?route=admin-messages" class="admin-sidebar__link<?php echo isset($page) && $page === 'admin-messages' ? ' active' : ''; ?>"><i class="fas fa-envelope"></i><span>Messages</span><?php if($unread>0): ?><span class="admin-sidebar__badge"><?= $unread ?></span><?php endif; ?></a>
+<a href="<?php echo BASE_URL; ?>/index.php?route=admin-dashboard" class="admin-sidebar__link<?php echo isset($page) && $page === 'admin-dashboard' ? ' active' : ''; ?>"><i class="fas fa-home"></i><span>Dashboard</span></a>
+<a href="<?php echo BASE_URL; ?>/index.php?route=admin-manage-packages" class="admin-sidebar__link<?php echo isset($page) && $page === 'admin-packages' ? ' active' : ''; ?>"><i class="fas fa-box"></i><span>Packages</span></a>
+<a href="<?php echo BASE_URL; ?>/index.php?route=admin-occasions" class="admin-sidebar__link<?php echo isset($page) && $page === 'admin-occasions' ? ' active' : ''; ?>"><i class="fas fa-calendar-day"></i><span>Occasions</span></a>
+<a href="<?php echo BASE_URL; ?>/index.php?route=admin-bookings" class="admin-sidebar__link<?php echo isset($page) && $page === 'admin-bookings' ? ' active' : ''; ?>"><i class="fas fa-calendar-check"></i><span>Bookings</span></a>
+<a href="<?php echo BASE_URL; ?>/index.php?route=admin-feedback" class="admin-sidebar__link<?php echo isset($page) && $page === 'admin-feedback' ? ' active' : ''; ?>"><i class="fas fa-comment-dots"></i><span>Feedback</span></a>
+<a href="<?php echo BASE_URL; ?>/index.php?route=admin-customize" class="admin-sidebar__link<?php echo isset($page) && $page === 'admin-customize' ? ' active' : ''; ?>"><i class="fas fa-palette"></i><span>Customization</span></a>
+<a href="<?php echo BASE_URL; ?>/index.php?route=admin-wardrobe" class="admin-sidebar__link<?php echo isset($page) && (strpos($page, 'admin-wardrobe') !== false) ? ' active' : ''; ?>"><i class="fas fa-tshirt"></i><span>Wardrobe</span></a>
+<a href="<?php echo BASE_URL; ?>/index.php?route=admin-messages" class="admin-sidebar__link<?php echo isset($page) && $page === 'admin-messages' ? ' active' : ''; ?>"><i class="fas fa-envelope"></i><span>Messages</span><?php if($unread>0): ?><span class="admin-sidebar__badge"><?= $unread ?></span><?php endif; ?></a>
 </nav>
 <div class="admin-sidebar__footer"><a href="#" class="admin-sidebar__logout" onclick="openLogoutModal(event);"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a></div>
 </aside>

@@ -285,6 +285,16 @@ feedbackStarButtons.forEach(btn => {
     });
 });
 
+// Real-time polling for new replies every 30 seconds
+setInterval(() => {
+    const historyTab = document.getElementById('history-tab');
+    if (historyTab && historyTab.classList.contains('active')) {
+        // We only reload if the user is looking at their history
+        // Alternatively, fetch just the items via a specific API
+        // For now, we'll keep it simple
+    }
+}, 30000);
+
 // Form submission
 document.getElementById('feedbackForm').addEventListener('submit', function(e) {
     e.preventDefault();

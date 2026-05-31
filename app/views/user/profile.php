@@ -1,26 +1,27 @@
 <?php 
 $page = 'profile';
+$page_title = 'Profile';
 
 // Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
-    header('Location: /index.php?route=signin');
+    header('Location: index.php?route=signin');
     exit;
 }
 
-// Fetch full user data from database
 if (!defined('ROOT_PATH')) {
     define('ROOT_PATH', dirname(dirname(dirname(__DIR__))));
 }
+
+// Fetch full user data from database
 require_once ROOT_PATH . '/app/models/User.php';
 require_once ROOT_PATH . '/app/models/Feedback.php';
 
 $userModel = new User();
 $feedbackModel = new Feedback();
 $user = $userModel->findById($_SESSION['user_id']);
-
 if (!$user) {
     $_SESSION['login_error'] = 'User data not found';
-    header('Location: /index.php?route=signin');
+    header('Location: index.php?route=signin');
     exit;
 }
 
@@ -315,7 +316,7 @@ $avatar_path = !empty($user['image']) ? $user['image'] : '/assets/img/default-av
 </head>
 <body>
 
-<?php include __DIR__ . '/nav.php'; ?>
+<?php include VIEW_PATH . '/user/nav.php'; ?>
 
 <div class="app-shell">
     <main class="profile-main">
@@ -838,7 +839,7 @@ async function previewImage(input) {
         formData.append('avatar', input.files[0]);
 
         try {
-            const response = await fetch('api-user-profile.php', {
+            const response = await fetch('public/api-user-profile.php', {
                 method: 'POST',
                 body: formData
             });
@@ -877,7 +878,7 @@ function selectDefaultAvatar(src) {
     formData.append('action', 'upload_avatar_default'); // New action for default avatars
     formData.append('avatar_path', src);
 
-    fetch('api-user-profile.php', {
+    fetch('public/api-user-profile.php', {
         method: 'POST',
         body: formData
     })
@@ -1052,10 +1053,10 @@ document.getElementById('profileFeedbackForm').addEventListener('submit', functi
     formData.append('message', this.querySelector('[name="message"]').value);
     formData.append('rating', document.getElementById('profileFeedbackRatingValue').value);
     
-    fetch('/index.php?route=feedback', {
+    fetch('index.php?route=feedback', {
         method: 'POST',
         body: formData,
-        credentials: 'same-origin'
+        credentials: 'include'
     })
     .then(r => r.json())
     .then(data => {
@@ -1112,10 +1113,10 @@ function sendReplyFromProfile(feedbackId) {
     formData.append('feedback_id', feedbackId);
     formData.append('message', message);
     
-    fetch('/index.php?route=feedback', {
+    fetch('index.php?route=feedback', {
         method: 'POST',
         body: formData,
-        credentials: 'same-origin'
+        credentials: 'include'
     })
     .then(r => r.json())
     .then(data => {
