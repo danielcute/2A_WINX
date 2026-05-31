@@ -119,9 +119,7 @@ class CheckoutController {
                 'venue' => $venue,
                 'theme' => $theme,
                 'total_price' => $totalPrice,
-                'statu<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-                <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-                s' => $status,
+                'status' => $status,
                 'events' => $events,
                 'payment_method' => $paymentMethod,
                 'payment_details' => $paymentDetails,
