@@ -116,31 +116,60 @@ if (!empty($_GET['id'])) {
     <style>
         /* Your existing styles (same as previous improved version) */
         body { background: #F5F0E8; }
-        .admin-container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
-        .page-header { margin-bottom: 2rem; }
-        .page-header h1 { font-family: 'Cormorant Garamond', serif; font-size: 2rem; color: #2C2820; margin: 0; }
+        .admin-container { width: 100%; margin: 0; padding: 1rem; }
+        .page-header { margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; }
+        .page-header h1 { font-family: 'Cormorant Garamond', serif; font-size: 2rem; color: #2C2820; margin: 0; font-weight: 700; }
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
-        .stat-card { background: white; padding: 1.5rem; border-radius: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); text-align: center; }
-        .stat-card h3 { font-size: 2rem; color: #8A7650; margin: 0; }
+        .stat-card { background: white; padding: 1.25rem; border-radius: 18px; border: 1.5px solid var(--border); text-align: center; }
+        .stat-card h3 { font-size: 1.8rem; color: #8A7650; margin: 0; font-weight: 800; }
         .stat-card p { color: #8B7355; margin: 0.5rem 0 0; }
-        .content-wrapper { display: grid; grid-template-columns: 350px 1fr; gap: 2rem; }
-        .feedback-list { background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .filter-tabs { display: flex; flex-wrap: wrap; gap: 0.5rem; padding: 1rem; border-bottom: 1px solid #E2D9C8; background: #FAF8F5; }
-        .filter-btn { padding: 0.5rem 1rem; background: #F0EBE3; border: none; border-radius: 30px; cursor: pointer; color: #2C2820; font-weight: 600; font-size: 0.85rem; transition: all 0.2s; text-decoration: none; display: inline-block; }
+
+        /* Unified Content Container */
+        .content-wrapper { 
+            display: grid; 
+            grid-template-columns: 380px 1fr; 
+            gap: 0; 
+            background: white; 
+            border-radius: 24px; 
+            overflow: hidden; 
+            border: 1px solid var(--border); 
+            min-height: 70vh;
+            box-shadow: var(--shadow-md);
+        }
+
+        .feedback-list { border-right: 1px solid var(--border); background: #FCFAF7; }
+        .filter-tabs { display: flex; gap: 0.5rem; padding: 1rem; border-bottom: 1px solid #E2D9C8; overflow-x: auto; scrollbar-width: none; }
+        .filter-btn { padding: 0.4rem 1rem; background: white; border: 1px solid var(--border); border-radius: 20px; cursor: pointer; color: var(--text-secondary); font-weight: 600; font-size: 0.8rem; transition: all 0.2s; text-decoration: none; white-space: nowrap; }
         .filter-btn.active { background: #8A7650; color: white; }
-        .filter-btn:hover { background: #D4C7B1; }
-        .feedback-items { max-height: 70vh; overflow-y: auto; }
-        .feedback-item { padding: 1rem; border-bottom: 1px solid #E2D9C8; cursor: pointer; transition: background 0.2s; text-decoration: none; display: block; color: inherit; }
-        .feedback-item:hover { background: #F5F0E8; }
-        .feedback-item.active { background: #8A7650; color: white; }
-        .feedback-item.active .feedback-subject, .feedback-item.active .feedback-meta { color: white; }
-        .feedback-subject { font-weight: 700; margin-bottom: 0.25rem; }
-        .feedback-meta { font-size: 0.8rem; color: #8B7355; }
-        .detail-panel { background: white; border-radius: 20px; padding: 1.5rem; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+
+        .feedback-items { max-height: calc(70vh - 60px); overflow-y: auto; }
+        .feedback-item { 
+            padding: 1.25rem 1rem; 
+            border-bottom: 1px solid #F0EBE3; 
+            cursor: pointer; 
+            transition: all 0.2s; 
+            text-decoration: none; 
+            display: flex; 
+            gap: 0.8rem; 
+            color: inherit; 
+        }
+        .feedback-item:hover { background: white; box-shadow: inset 4px 0 0 var(--primary); }
+        .feedback-item.active { background: #F5F0E8; box-shadow: inset 4px 0 0 var(--primary); }
+        
+        .item-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--primary-pale); color: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; }
+        .item-content { flex: 1; min-width: 0; }
+        .feedback-subject { font-weight: 700; font-size: 0.95rem; margin-bottom: 0.15rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .feedback-meta { font-size: 0.8rem; color: #8B7355; display: flex; justify-content: space-between; }
+
+        .detail-panel { background: white; padding: 2rem; display: flex; flex-direction: column; }
         .detail-header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid #E2D9C8; }
         .detail-title { flex: 1; }
-        .detail-subject { font-size: 1.4rem; font-weight: 700; color: #2C2820; margin-bottom: 0.5rem; }
+        .detail-subject { font-size: 1.6rem; font-weight: 700; color: #2C2820; margin-bottom: 0.75rem; font-family: var(--serif); }
         .detail-meta { font-size: 0.85rem; color: #8B7355; margin: 0.25rem 0; }
+        
+        /* Mobile 'Back' Navigation */
+        .back-to-list { display: none; margin-bottom: 1.5rem; text-decoration: none; color: var(--primary); font-weight: 600; align-items: center; gap: 0.5rem; }
+
         .status-badge { display: inline-block; padding: 0.3rem 0.8rem; border-radius: 30px; font-size: 0.75rem; font-weight: 600; }
         .status-open { background: #FFF3CD; color: #856404; }
         .status-in_progress { background: #D1ECF1; color: #0c5460; }
@@ -163,12 +192,14 @@ if (!empty($_GET['id'])) {
         .btn-danger:hover { background: #d32f2f; transform: translateY(-2px); }
         .status-select { padding: 0.6rem 1rem; border-radius: 40px; border: 2px solid #E2D9C8; background: white; font-weight: 600; cursor: pointer; }
         .reply-form textarea { width: 100%; padding: 0.8rem; border: 2px solid #E2D9C8; border-radius: 16px; font-family: inherit; resize: vertical; min-height: 100px; }
-        .empty-state { text-align: center; padding: 3rem; color: #8B7355; background: white; border-radius: 20px; }
-        .toast { position: fixed; bottom: 2rem; right: 2rem; padding: 1rem 1.5rem; border-radius: 12px; color: white; font-weight: 600; z-index: 1000; animation: slideIn 0.3s ease; }
-        .toast.success { background: #2e7d32; }
-        .toast.error { background: #c62828; }
-        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        @media (max-width: 900px) { .content-wrapper { grid-template-columns: 1fr; } .action-buttons { flex-direction: column; } .btn-action { justify-content: center; } }
+        
+        @media (max-width: 900px) { 
+            .content-wrapper { grid-template-columns: 1fr; } 
+            .feedback-list { display: <?= !empty($_GET['id']) ? 'none' : 'block' ?>; border-right: none; }
+            .detail-panel { display: <?= !empty($_GET['id']) ? 'flex' : 'none' ?>; }
+            .back-to-list { display: inline-flex; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
     </style>
 </head>
 <body>
@@ -204,11 +235,14 @@ if (!empty($_GET['id'])) {
                     <?php else: ?>
                         <?php foreach ($feedbacks as $fb): ?>
                             <a href="?route=admin-feedback&id=<?php echo $fb['feedback_id']; ?>" class="feedback-item <?php echo (!empty($_GET['id']) && (int)$_GET['id'] === $fb['feedback_id']) ? 'active' : ''; ?>">
-                                <div class="feedback-subject"><?php echo htmlspecialchars(substr($fb['subject'], 0, 40)); ?></div>
-                                <div class="feedback-meta">
-                                    <div><?php echo htmlspecialchars($fb['first_name'] . ' ' . ($fb['last_name'] ?? '')); ?></div>
-                                    <div><?php echo date('M d, Y', strtotime($fb['created_at'])); ?></div>
-                                    <div><span class="status-badge status-<?php echo $fb['status']; ?>"><?php echo ucfirst(str_replace('_', ' ', $fb['status'])); ?></span></div>
+                                <div class="item-avatar"><?= substr($fb['first_name'], 0, 1) ?></div>
+                                <div class="item-content">
+                                    <div class="feedback-subject"><?php echo htmlspecialchars($fb['subject']); ?></div>
+                                    <div class="feedback-meta">
+                                        <span><?php echo htmlspecialchars($fb['first_name']); ?></span>
+                                        <span><?php echo date('M d', strtotime($fb['created_at'])); ?></span>
+                                    </div>
+                                    <div style="margin-top: 0.25rem;"><span class="status-badge status-<?php echo $fb['status']; ?>" style="padding: 0.1rem 0.5rem; font-size: 0.65rem;"><?php echo ucfirst(str_replace('_', ' ', $fb['status'])); ?></span></div>
                                 </div>
                             </a>
                         <?php endforeach; ?>
@@ -221,6 +255,7 @@ if (!empty($_GET['id'])) {
         <div>
             <?php if ($currentFeedback): ?>
                 <div class="detail-panel">
+                    <a href="?route=admin-feedback" class="back-to-list"><i class="fas fa-arrow-left"></i> Back to Inbox</a>
                     <div class="detail-header">
                         <div class="detail-title">
                             <div class="detail-subject"><?php echo htmlspecialchars($currentFeedback['subject']); ?></div>
