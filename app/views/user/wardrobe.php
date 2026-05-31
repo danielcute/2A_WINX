@@ -1435,7 +1435,7 @@ $wardrobesByCategory = $wardrobeModel->getAllByCategory();
     }
 
     function calculateTotal() {
-      return selectedWardrobe ? parseFloat(selectedWardrobe.price) : 0;
+      return selectedWardrobes.reduce((sum, w) => sum + parseFloat(w.rental_price || w.price || 0), 0);
     }
 
     function escapeHtml(text) {

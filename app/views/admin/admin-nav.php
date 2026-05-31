@@ -267,12 +267,12 @@ body {
   }
 
   .admin-sidebar {
-    transform: translateX(-100%);
+    transform: translate3d(-100%, 0, 0);
     width: 280px;
-    max-width: 80%;
+    max-width: 85%;
     height: 100vh;
     position: fixed;
-    z-index: 5000; /* Increased to ensure it's above topbar and overlay */
+    z-index: 11000; /* Above overlay and topbar */
     top: 0;
     left: 0;
     box-shadow: var(--shadow-lg);
@@ -283,9 +283,9 @@ body {
   }
   
   .admin-sidebar.open {
-    transform: translateX(0);
+    transform: translate3d(0, 0, 0);
     visibility: visible;
-    transition-delay: 0s;
+    transition-delay: 0.05s; /* Slight delay to let overlay start first as requested */
   }
   
   .admin-overlay {
@@ -293,15 +293,16 @@ body {
     inset: 0;
     background: rgba(0,0,0,0.4);
     backdrop-filter: blur(4px);
-    z-index: 8500;
+    z-index: 10500;
     opacity: 0;
     visibility: hidden;
-    transition: all 0.3s ease;
+    transition: opacity 0.3s ease, visibility 0s linear 0.3s;
   }
 
   .admin-overlay.active {
     opacity: 1;
     visibility: visible;
+    transition-delay: 0s; /* Overlay appears instantly */
   }
 
   .admin-main {
@@ -337,16 +338,18 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 42px;
-    height: 42px;
+    width: 44px;
+    height: 44px;
     background: white;
     color: var(--gold);
     border: 1px solid var(--gray-light);
-    border-radius: 10px;
-    font-size: 1.1rem;
+    border-radius: 12px;
+    font-size: 1.2rem;
     cursor: pointer;
     margin-right: 0.5rem;
     flex-shrink: 0;
+    position: relative;
+    z-index: 10600; /* Ensure toggle is above overlay for double-tap toggle */
   }
 
   .admin-topbar__title {
