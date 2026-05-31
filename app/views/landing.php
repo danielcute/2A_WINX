@@ -576,7 +576,7 @@
   // Load client feedback
   async function loadClientFeedback() {
     try {
-      const response = await fetch('/api-feedback.php');
+      const response = await fetch('<?php echo BASE_URL; ?>/api-feedback.php');
       const data = await response.json();
       
       const container = document.getElementById('feedbackContainer');
