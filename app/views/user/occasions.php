@@ -198,7 +198,7 @@ $occasions = $occasionModel->getAll();
                 const imgContainer = document.getElementById('img_' + occId);
                 
                 // Load image via API
-                fetch('/api-occasion.php?image=' + occId)
+                fetch('public/api-occasion.php?image=' + occId)
                   .then(res => {
                     if (!res.ok) throw new Error('Image not found');
                     return res.json();

@@ -776,7 +776,7 @@ const notificationTypes = {
   function loadNotifications() {
     if (!notifContainer) return;
 
-    fetch('api-notification.php?action=get_unread&limit=10')
+    fetch('public/api-notification.php?action=get_unread&limit=10')
       .then(response => {
         if (!response.ok) throw new Error('Failed to fetch notifications');
         const contentType = response.headers.get('content-type');
@@ -901,9 +901,9 @@ const notificationTypes = {
       if (notifDropdown.classList.contains('active')) {
         loadNotifications();
         
-        // Auto-refresh every 30 seconds while dropdown is open
+        // Auto-refresh every 10 seconds while dropdown is open for "real-time" feel
         if (!notificationRefreshInterval) {
-          notificationRefreshInterval = setInterval(loadNotifications, 30000);
+          notificationRefreshInterval = setInterval(loadNotifications, 10000);
         }
       } else {
         // Clear interval when dropdown closes

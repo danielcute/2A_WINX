@@ -178,14 +178,14 @@ class Customization {
     
     public function getAllOptions() {
         $stmt = $this->db->prepare("
-            SELECT * FROM customization_options_tbl 
-            WHERE is_active = 1 
+            SELECT * FROM customization_options_tbl
             ORDER BY category, name
         ");
         
         if (!$stmt) {
             // Check if it's a "table doesn't exist" error
-            if (strpos($this->db->error, "doesn't exist") !== false) {
+            $error = $this->db->error;
+            if (strpos($error, "doesn't exist") !== false) {
                 error_log("customization_options_tbl doesn't exist, attempting to create...");
                 $this->ensureTableExists();
                 
@@ -197,7 +197,7 @@ class Customization {
                 ");
                 
                 if (!$stmt) {
-                    error_log("getAllOptions prepare failed after table creation: " . $this->db->error);
+                    error_log("getAllOptions prepare failed after table creation: " . $error);
                     return [];
                 }
             } else {

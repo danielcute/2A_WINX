@@ -102,6 +102,7 @@ class CheckoutController {
 
             require_once ROOT_PATH . '/app/models/Plan.php';
             require_once ROOT_PATH . '/app/models/Customization.php';
+            require_once ROOT_PATH . '/app/models/Notification.php';
             
             $planModel = new Plan();
             $planId = $planModel->create([
@@ -136,6 +137,23 @@ class CheckoutController {
                 }
 
                 // Plan is the main booking record - no separate booking entry needed
+                
+                // Notify Admin of new booking
+                try {
+                    $notif = new Notification();
+                    $adminResult = Database::getInstance()->getConnection()->query("SELECT user_id FROM users_tbl WHERE role = 'admin' LIMIT 1");
+                    if ($adminResult && $adminRow = $adminResult->fetch_assoc()) {
+                        $notif->create([
+                            'user_id' => $adminRow['user_id'],
+                            'type' => 'book_confirmation',
+                            'title' => 'New Booking Received',
+                            'message' => 'New booking "' . $eventName . '" from ' . ($_SESSION['user_name'] ?? 'User'),
+                            'related_type' => 'plan',
+                            'related_id' => $planId
+                        ]);
+                    }
+                } catch (Exception $e) { error_log("Admin notification failed: " . $e->getMessage()); }
+
                 unset($_SESSION['checkout_cart']);
                 echo json_encode(['success' => true, 'plan_id' => $planId, 'message' => 'Booking saved successfully']);
             } else {

@@ -217,6 +217,21 @@ function handleProcessPayment($db) {
         } else {
             $paymentId = $db->insert_id;
             
+            // Automate Event Flow Message if Deposit is paid
+            if ($paymentType === 'deposit') {
+                try {
+                    require_once ROOT_PATH . '/app/controllers/MessagingController.php';
+                    $msgCtrl = new MessagingController();
+                    $adminIdResult = $db->query("SELECT user_id FROM users_tbl WHERE role = 'admin' LIMIT 1");
+                    if ($adminIdResult && $adminRow = $adminIdResult->fetch_assoc()) {
+                        $botMessage = "Thank you for your deposit! Your booking is now confirmed. \n\nPlease provide your preferred Event Flow (Schedule). \n\nFormat example:\n10:00 AM - Church Ceremony\n12:00 PM - Reception\n\nPlease reply directly to this message.";
+                        $msgCtrl->sendAdminMessage($adminRow['user_id'], $userId, $plan['events'] . " - Event Flow Setup", $botMessage, 'system');
+                    }
+                } catch (Exception $e) {
+                    error_log("Auto-bot message failed: " . $e->getMessage());
+                }
+            }
+            
             // Try to create receipt
             try {
                 // Determine receipt type based on payment status
