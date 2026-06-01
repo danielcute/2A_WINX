@@ -845,6 +845,188 @@ $wardrobesByCategory = $wardrobeModel->getAllByCategory();
         width: 100%;
       }
     }
+
+    /* ========== MOBILE-FIRST RESPONSIVE DESIGN ========== */
+    
+    /* Small Mobile Phones (320px - 480px) */
+    @media (max-width: 480px) {
+      .wardrobe-container {
+        padding: 1rem 0.75rem;
+      }
+
+      .wardrobe-header {
+        margin-bottom: 1.5rem;
+      }
+
+      .wardrobe-title {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .wardrobe-subtitle {
+        font-size: 0.9rem;
+      }
+
+      .wardrobe-search-section {
+        padding: 1rem;
+        gap: 0.75rem;
+      }
+
+      #wardrobeSearch {
+        font-size: 0.9rem;
+        padding: 0.6rem 0.75rem;
+      }
+
+      .category-tabs {
+        gap: 0.5rem;
+        padding-bottom: 0.25rem;
+      }
+
+      .category-tab {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8rem;
+      }
+
+      /* Single column grid on small mobile */
+      .wardrobes-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .wardrobe-card {
+        display: flex;
+        flex-direction: row;
+        height: auto;
+        border: 1px solid var(--border);
+      }
+
+      .wardrobe-card__image {
+        width: 100px;
+        height: 100px;
+        min-width: 100px;
+        flex-shrink: 0;
+        font-size: 2rem;
+      }
+
+      .wardrobe-card__content {
+        padding: 0.6rem;
+        font-size: 0.75rem;
+      }
+
+      .wardrobe-card__name {
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-bottom: 0.2rem;
+      }
+
+      .wardrobe-card__desc {
+        font-size: 0.65rem;
+        margin-bottom: 0.3rem;
+        -webkit-line-clamp: 1;
+      }
+
+      .wardrobe-card__price {
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-bottom: 0.3rem;
+        color: var(--primary);
+      }
+
+      .wardrobe-card__button {
+        font-size: 0.7rem;
+        padding: 0.4rem 0.6rem;
+      }
+
+      .wardrobe-footer {
+        flex-direction: column;
+        padding: 1rem 0.75rem;
+        gap: 1rem;
+      }
+
+      .wardrobe-footer__summary {
+        width: 100%;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .wardrobe-footer__item {
+        font-size: 0.8rem;
+      }
+
+      .wardrobe-footer__label {
+        font-size: 0.7rem;
+      }
+
+      .wardrobe-footer__actions {
+        width: 100%;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .wardrobe-footer__actions .btn {
+        width: 100%;
+        font-size: 0.85rem;
+        padding: 0.7rem;
+      }
+    }
+
+    /* Tablets (481px - 768px) */
+    @media (min-width: 481px) and (max-width: 768px) {
+      .wardrobes-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.25rem;
+      }
+
+      .wardrobe-card__image {
+        height: 200px;
+      }
+
+      .wardrobe-card__name {
+        font-size: 0.9rem;
+      }
+
+      .wardrobe-card__desc {
+        font-size: 0.75rem;
+      }
+
+      .wardrobe-card__price {
+        font-size: 0.85rem;
+      }
+
+      .wardrobe-card__button {
+        font-size: 0.8rem;
+        padding: 0.5rem 0.8rem;
+      }
+
+      .wardrobe-footer {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .wardrobe-footer__actions {
+        flex-direction: row;
+        gap: 0.75rem;
+      }
+
+      .wardrobe-footer__actions .btn {
+        width: auto;
+        min-width: 140px;
+      }
+    }
+
+    /* Large Screens (769px and above) */
+    @media (min-width: 769px) {
+      .wardrobes-grid {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 1.5rem;
+      }
+
+      .wardrobe-card__image {
+        height: 320px;
+      }
+    }
   </style>
 </head>
 <body>
