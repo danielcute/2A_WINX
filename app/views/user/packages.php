@@ -1,5 +1,4 @@
 <?php 
-session_start(); 
 $page = 'packages';
 $occasion = $_GET['occasion'] ?? 'wedding';
 
