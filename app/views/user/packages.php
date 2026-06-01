@@ -344,7 +344,5 @@ if (!$packages) {
       </div>
     <?php endif; ?>
   </main>
-
-  <?php require ROOT_PATH . '/app/views/user/footer.php'; ?>
 </body>
 </html>
