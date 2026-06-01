@@ -361,7 +361,6 @@ $page_title = 'Manage Wardrobes';
             .category-header h2 {
                 font-size: 1.1rem;
             }
-        }
 
             .wardrobe-table .wardrobe-image-cell {
                 display: block;
@@ -793,7 +792,14 @@ $page_title = 'Manage Wardrobes';
                                     </td>
                                     <td class="wardrobe-name" data-label="Name"><?php echo htmlspecialchars($wardrobe['name']); ?></td>
                                     <td class="wardrobe-desc" data-label="Description" title="<?php echo htmlspecialchars($wardrobe['description'] ?? ''); ?>">
-                                        <?php echo htmlspecialchars(substr($wardrobe['description'] ?? '', 0, 50)); ?>...
+                                        <?php 
+                                            $desc = trim($wardrobe['description'] ?? '');
+                                            if (empty($desc) || $desc === '0') {
+                                                echo '<span style="color:#aaa;">—</span>';
+                                            } else {
+                                                echo htmlspecialchars(mb_strlen($desc) > 50 ? mb_substr($desc, 0, 50) . '…' : $desc);
+                                            }
+                                        ?>
                                     </td>
                                     <td data-label="Price">
                                         <span class="price-badge">₱<?php echo number_format($wardrobe['rental_price'], 2); ?></span>
@@ -807,9 +813,16 @@ $page_title = 'Manage Wardrobes';
                                     <td data-label="Sizes" style="font-size: 0.85rem;">
                                         <div style="display: flex; flex-wrap: wrap; gap: 4px;">
                                             <?php 
-                                                $sizes = array_map('trim', explode(',', $wardrobe['sizes_available'] ?? ''));
-                                                foreach ($sizes as $size) {
-                                                    echo '<span style="background: #f0f0f0; padding: 3px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: 500;">' . htmlspecialchars($size) . '</span>';
+                                                $sizesRaw = trim($wardrobe['sizes_available'] ?? '');
+                                                if (empty($sizesRaw) || $sizesRaw === '0') {
+                                                    echo '<span style="color:#aaa;">—</span>';
+                                                } else {
+                                                    $sizes = array_filter(array_map('trim', explode(',', $sizesRaw)));
+                                                    foreach ($sizes as $size) {
+                                                        if ($size !== '') {
+                                                            echo '<span style="background: #f0f0f0; padding: 3px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: 500;">' . htmlspecialchars($size) . '</span>';
+                                                        }
+                                                    }
                                                 }
                                             ?>
                                         </div>

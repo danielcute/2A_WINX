@@ -620,22 +620,11 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
                     <div class="occasion-card">
                         <div class="occasion-image-container">
                             <?php if (!empty($occasion['image'])): ?>
-                                <img id="occImg_<?= $occasion['occasion_id'] ?>" alt="<?= htmlspecialchars($occasion['events']) ?>" style="display: none;">
-                                <script>
-                                    fetch(baseUrl + '/public/api-occasion.php?image=<?= (int)$occasion['occasion_id'] ?>', {
-                                        credentials: 'same-origin'
-                                    })
-                                        .then(res => res.json())
-                                        .then(data => {
-                                            if (data.success && data.image) {
-                                                const img = document.getElementById('occImg_<?= (int)$occasion['occasion_id'] ?>');
-                                                img.src = data.image;
-                                                img.style.display = 'block';
-                                            }
-                                        })
-                                        .catch(err => console.error('Error loading image:', err));
-                                </script>
-                                <i class="fas fa-image" style="display:block;"></i>
+                                <img src="<?= BASE_URL ?>/api-occasion-image.php?id=<?= (int)$occasion['occasion_id'] ?>"
+                                     alt="<?= htmlspecialchars($occasion['events']) ?>"
+                                     style="width:100%;height:100%;object-fit:cover;"
+                                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                                <i class="fas fa-calendar-alt" style="display:none;"></i>
                             <?php else: ?>
                                 <i class="fas fa-calendar-alt"></i>
                             <?php endif; ?>

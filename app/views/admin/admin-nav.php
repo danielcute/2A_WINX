@@ -1,5 +1,17 @@
 ﻿﻿<?php
-$unread = $_SESSION['admin_unread_count'] ?? 0;
+$unread = 0;
+if (isset($_SESSION['user_id'])) {
+    if (!defined('ROOT_PATH')) {
+        define('ROOT_PATH', dirname(dirname(dirname(__DIR__))));
+    }
+    require_once ROOT_PATH . '/config/database.php';
+    $db = Database::getInstance()->getConnection();
+    $adminId = (int)$_SESSION['user_id'];
+    $unreadResult = $db->query("SELECT COUNT(*) as cnt FROM messages_tbl WHERE recipient_id = $adminId AND status = 'unread'");
+    if ($unreadResult) {
+        $unread = (int)($unreadResult->fetch_assoc()['cnt'] ?? 0);
+    }
+}
 ?>
 <style>
 /* ----- ADMIN DESIGN SYSTEM v2 ----- */
@@ -331,12 +343,10 @@ body {
     transform: translate3d(0, 0, 0);
   }
   
-  /* Removed glassmorphism overlay - sidebar now shows directly */
   .admin-overlay {
     position: fixed;
     inset: 0;
-    top: 70px;
-    background: rgba(0,0,0,0.3);
+    background: rgba(0,0,0,0.45);
     z-index: 9999;
     opacity: 0;
     visibility: hidden;
@@ -359,6 +369,7 @@ body {
     position: relative;
     display: flex;
     flex-direction: column;
+    pointer-events: auto;
   }
 
   .admin-content {
@@ -367,16 +378,11 @@ body {
     width: 100%;
     box-sizing: border-box;
     overflow-x: hidden;
-    pointer-events: none;
+    pointer-events: auto;
   }
   
-  /* Allow clicks on interactive elements within admin-content */
-  .admin-content button,
-  .admin-content a,
-  .admin-content input,
-  .admin-content select,
-  .admin-content textarea,
-  .admin-content [onclick] {
+  /* Allow clicks on all elements within admin-content */
+  .admin-content * {
     pointer-events: auto;
   }
   
@@ -508,6 +514,7 @@ body {
   
   .admin-content {
     padding: 90px 0.75rem 2rem;
+    pointer-events: auto;
   }
   
   .fab-add {

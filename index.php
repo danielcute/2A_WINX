@@ -394,7 +394,8 @@ switch ($route) {
             header('Location: ' . BASE_URL . '/index.php?route=signin');
             exit;
         }
-        require ROOT_PATH . '/app/views/admin/admin-customize.php';
+        require_once ROOT_PATH . '/app/controllers/CustomizeController.php';
+        (new CustomizeController())->listAll();
         break;
     
     case 'admin-customize-add':
@@ -402,7 +403,17 @@ switch ($route) {
             header('Location: ' . BASE_URL . '/index.php?route=signin');
             exit;
         }
-        require ROOT_PATH . '/app/views/admin/admin-customize-add.php';
+        require_once ROOT_PATH . '/app/controllers/CustomizeController.php';
+        (new CustomizeController())->addForm();
+        break;
+
+    case 'admin-customize-create':
+        if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+            header('Location: ' . BASE_URL . '/index.php?route=signin');
+            exit;
+        }
+        require_once ROOT_PATH . '/app/controllers/CustomizeController.php';
+        (new CustomizeController())->create();
         break;
     
     case 'admin-customize-edit':
@@ -410,7 +421,26 @@ switch ($route) {
             header('Location: ' . BASE_URL . '/index.php?route=signin');
             exit;
         }
-        require ROOT_PATH . '/app/views/admin/admin-customize-edit.php';
+        require_once ROOT_PATH . '/app/controllers/CustomizeController.php';
+        (new CustomizeController())->editForm();
+        break;
+
+    case 'admin-customize-update':
+        if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+            header('Location: ' . BASE_URL . '/index.php?route=signin');
+            exit;
+        }
+        require_once ROOT_PATH . '/app/controllers/CustomizeController.php';
+        (new CustomizeController())->update();
+        break;
+
+    case 'admin-customize-delete':
+        if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+            header('Location: ' . BASE_URL . '/index.php?route=signin');
+            exit;
+        }
+        require_once ROOT_PATH . '/app/controllers/CustomizeController.php';
+        (new CustomizeController())->delete();
         break;
     
     case 'admin-occasions':

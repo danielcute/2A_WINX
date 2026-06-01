@@ -337,5 +337,6 @@ sort($allCategories);
             }
         });
     </script>
+<?php include ROOT_PATH . '/app/views/admin/admin-footer.php'; ?>
 </body>
 </html>

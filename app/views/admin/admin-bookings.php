@@ -311,10 +311,6 @@ $stats = $bookingModel->getStats();
             .stat-card {
                 padding: 1rem;
                 border-radius: 18px;
-                background: white;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
             }
             .stat-card h3 {
                 font-size: 1.4rem;
@@ -322,13 +318,15 @@ $stats = $bookingModel->getStats();
             .stat-card p {
                 font-size: 0.8rem;
             }
+            /* Scrollable table wrapper */
             .table-wrapper {
                 border-radius: 18px;
                 overflow-x: auto;
                 -webkit-overflow-scrolling: touch;
             }
+            /* Keep table at minimum readable width */
             .admin-table {
-                min-width: 900px;
+                min-width: 750px;
             }
             .admin-table th, .admin-table td {
                 padding: 0.75rem 0.6rem;
@@ -359,33 +357,38 @@ $stats = $bookingModel->getStats();
                 font-size: 1.3rem;
             }
             .stats-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(2, 1fr);
                 gap: 0.6rem;
                 margin-bottom: 1.5rem;
             }
             .stat-card {
-                padding: 1rem;
+                padding: 0.85rem;
                 border-radius: 16px;
-                background: white;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
             }
             .stat-card h3 {
-                font-size: 1.3rem;
+                font-size: 1.2rem;
                 margin-bottom: 0.25rem;
             }
             .stat-card p {
-                font-size: 0.75rem;
+                font-size: 0.72rem;
                 margin: 0;
             }
             .admin-table {
-                min-width: 100%;
+                min-width: 700px;
             }
             .admin-table th, .admin-table td {
                 padding: 0.6rem 0.4rem;
-                font-size: 0.7rem;
+                font-size: 0.72rem;
+            }
+            .booking-actions {
+                flex-direction: column;
+                gap: 0.25rem;
+            }
+            .booking-actions .btn {
+                font-size: 0.68rem;
+                padding: 0.3rem 0.4rem;
+                width: 100%;
+                justify-content: center;
             }
         }
     </style>

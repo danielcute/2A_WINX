@@ -580,5 +580,6 @@ if (!empty($option['colors_json'])) {
             });
         }
     </script>
+<?php include ROOT_PATH . '/app/views/admin/admin-footer.php'; ?>
 </body>
 </html>
