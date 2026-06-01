@@ -1042,9 +1042,11 @@ const adminNotificationTypes = {
 
     if (!btn || !sidebar || !overlay) return;
     
-    // Fix pointer-events on topbar to allow hamburger clicks
+    // Fix pointer-events on topbar to allow hamburger clicks (multiple safeguards)
     if (topbar) {
       topbar.style.setProperty('pointer-events', 'auto', 'important');
+      // Also fix the button explicitly
+      btn.style.setProperty('pointer-events', 'auto', 'important');
     }
 
     const toggleMenu = () => {
@@ -1053,7 +1055,7 @@ const adminNotificationTypes = {
       document.body.style.overflow = isOpen ? 'hidden' : '';
     };
 
-    // Set both inline and event listener
+    // Set inline onclick handler as primary
     btn.onclick = function(e) {
       if (e) {
         e.preventDefault();
@@ -1063,10 +1065,19 @@ const adminNotificationTypes = {
       return false;
     };
 
+    // Add click event listener as backup
     btn.addEventListener('click', (e) => {
+      e.preventDefault();
       e.stopPropagation();
       toggleMenu();
-    });
+    }, true);  // Use capture phase
+    
+    // Add additional event listeners for mobile compatibility
+    btn.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      toggleMenu();
+    }, true);
 
     // Overlay click - closes the menu
     overlay.addEventListener('click', (e) => {
