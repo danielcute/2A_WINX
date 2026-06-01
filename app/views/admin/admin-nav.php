@@ -307,6 +307,7 @@ body {
   .admin-overlay {
     position: fixed;
     inset: 0;
+    top: 70px;
     background: rgba(0,0,0,0.15);
     z-index: 10500;
     opacity: 0;
@@ -345,7 +346,7 @@ body {
     top: 0;
     left: 0;
     right: 0;
-    z-index: 8000;
+    z-index: 11500;
     border-radius: 0;
     margin-bottom: 0;
     background: rgba(255, 255, 255, 0.95);
@@ -358,6 +359,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    pointer-events: auto;
   }
 
   .admin-mobile-toggle {
@@ -375,9 +377,11 @@ body {
     margin-right: 0.5rem;
     flex-shrink: 0;
     position: relative;
-    z-index: 10600; /* Ensure toggle is above overlay for double-tap toggle */
+    z-index: 11600;
     padding: 0;
     transition: all 0.2s ease;
+    pointer-events: auto;
+    touch-action: manipulation;
   }
 
   .admin-mobile-toggle:active,
