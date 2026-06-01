@@ -307,8 +307,7 @@ body {
   .admin-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.4);
-    backdrop-filter: blur(4px);
+    background: rgba(0,0,0,0.15);
     z-index: 10500;
     opacity: 0;
     visibility: hidden;
@@ -319,7 +318,7 @@ body {
   .admin-overlay.active {
     opacity: 1;
     visibility: visible;
-    transition-delay: 0s; /* Overlay appears instantly */
+    transition-delay: 0s;
     pointer-events: auto;
   }
 
