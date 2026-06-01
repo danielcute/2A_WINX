@@ -53,6 +53,7 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
             padding: 1.5rem;
             box-sizing: border-box;
             width: 100%;
+            padding-top: 2rem;
         }
 
         .occasions-header {

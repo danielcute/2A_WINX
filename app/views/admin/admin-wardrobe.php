@@ -22,6 +22,7 @@ $page_title = 'Manage Wardrobes';
             padding: 1.5rem;
             box-sizing: border-box;
             width: 100%;
+            padding-top: 2rem;
         }
 
         .header-section {

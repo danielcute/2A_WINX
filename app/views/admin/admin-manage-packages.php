@@ -219,7 +219,13 @@ $sectionOrder = ['Wedding', 'Birthday', 'Big Events / Gala', 'Other Events'];
     <style>
         body { background: #f5f5f5; font-family: 'DM Sans', sans-serif; }
         body.modal-open { overflow: hidden; }
-        .admin-container { width: 100%; margin: 0; padding: 1.5rem; box-sizing: border-box; }
+        .admin-container { 
+            width: 100%; 
+            margin: 0; 
+            padding: 1.5rem; 
+            box-sizing: border-box;
+            padding-top: 2rem;
+        }
         .page-header { margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between; background: white; padding: 1.5rem 2rem; border-radius: 24px; border: 1px solid var(--border); }
         .page-header h1 { font-family: var(--serif); font-size: 2.2rem; color: var(--dark); margin: 0; font-weight: 700; display: inline-flex; align-items: center; gap: 1rem; }
         .page-header h1 em { color: #8A7650; font-style: italic; font-weight: 400; }
@@ -258,7 +264,14 @@ $sectionOrder = ['Wedding', 'Birthday', 'Big Events / Gala', 'Other Events'];
         .packages-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
         .package-card { background: white; border: 2.5px solid var(--border); border-radius: 24px; overflow: hidden; box-shadow: var(--shadow-sm); transition: all 0.3s ease; display: flex; flex-direction: column; }
         .package-card:hover { border-color: var(--primary); box-shadow: var(--shadow-lg); transform: translateY(-8px); }
-        .package-image { width: 100%; height: 200px; object-fit: cover; background: linear-gradient(135deg, #E2D9C8 0%, #D4C7B1 100%); }
+        .package-image { 
+            width: 100%; 
+            height: 200px; 
+            object-fit: cover; 
+            background: linear-gradient(135deg, #E2D9C8 0%, #D4C7B1 100%); 
+            display: block;
+            image-rendering: crisp-edges;
+        }
         .package-info { padding: 1.5rem; display: flex; flex-direction: column; flex: 1; }
         .package-name { font-family: var(--serif); font-size: 1.5rem; font-weight: 700; color: #2C2820; margin-bottom: 0.25rem; }
         .package-price { color: var(--primary); font-size: 1.6rem; font-weight: 800; margin: 0.5rem 0; font-family: var(--sans); }
@@ -282,20 +295,23 @@ $sectionOrder = ['Wedding', 'Birthday', 'Big Events / Gala', 'Other Events'];
                 gap: 1rem; 
                 align-items: stretch;
                 padding: 1.5rem; 
+                border-radius: 20px;
             }
             .page-header h1 { font-size: 1.6rem; }
             .page-header .btn { 
                 width: 100%; 
-                padding: 1rem; 
+                padding: 1.2rem; 
                 border-radius: 18px; 
                 font-size: 1rem;
                 background: linear-gradient(135deg, #8A7650 0%, #6B5A3E 100%);
                 color: white;
                 border: none;
+                justify-content: center;
             }
             .page-header .btn:hover {
                 background: linear-gradient(135deg, #6B5A3E 0%, #5A4A30 100%);
                 box-shadow: 0 8px 24px rgba(138, 118, 80, 0.3);
+                transform: translateY(-2px);
             }
             .packages-grid { grid-template-columns: 1fr; }
             .filter-pill { 

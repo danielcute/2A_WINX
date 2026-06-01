@@ -117,7 +117,13 @@ if (!empty($_GET['id'])) {
     <style>
         /* Your existing styles (same as previous improved version) */
         body { background: #F5F0E8; }
-        .admin-container { width: 100%; margin: 0; padding: 0; }
+        .admin-container { 
+            width: 100%; 
+            margin: 0; 
+            padding: 1.5rem; 
+            box-sizing: border-box;
+            padding-top: 2rem;
+        }
         .page-header { margin-bottom: 2rem; }
         .page-header h1 { font-family: var(--serif); font-size: 2.2rem; color: var(--dark); margin: 0; font-weight: 700; }
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 2rem; }

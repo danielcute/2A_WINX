@@ -115,7 +115,13 @@ $users = $messagingController->getAllUsers();
     <style>
         /* (same CSS as before - keep unchanged) */
         body { background: #f5f5f5; font-family: 'DM Sans', sans-serif; }
-        .admin-container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        .admin-container { 
+            max-width: 1400px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            box-sizing: border-box;
+            padding-top: 2rem;
+        }
         .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .page-header h1 { font-family: 'Cormorant Garamond', serif; font-size: 1.9rem; color: #2C2820; margin: 0; font-weight: 700; letter-spacing: -0.03em; display: inline-flex; align-items: center; gap: 0.75rem; }
         .badge { display: inline-block; background: #f44336; color: white; padding: 5px 10px; border-radius: 20px; font-size: 0.85rem; margin-left: 10px; }

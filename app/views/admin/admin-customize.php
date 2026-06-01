@@ -38,6 +38,8 @@ $page_title = 'Manage Customizations';
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
+            padding-top: 2rem;
+            box-sizing: border-box;
         }
 
         .header-section {

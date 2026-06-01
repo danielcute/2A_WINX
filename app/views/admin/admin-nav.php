@@ -160,22 +160,24 @@ body {
   position: relative;
   display: flex;
   flex-direction: column;
+  gap: 1rem;
 }
 
 .admin-sidebar__logout {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.8rem;
-  color: rgba(255,255,255,0.6);
+  color: rgba(255,255,255,0.7);
   text-decoration: none;
-  font-size: 0.85rem;
-  transition: var(--transition);
+  font-size: 0.9rem;
+  transition: all 0.25s ease;
   font-weight: 500;
   cursor: pointer;
-  padding: 0.8rem 1.2rem;
+  padding: 0.9rem 1.2rem;
   border-radius: 12px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.08);
+  border: 1.5px solid rgba(255,255,255,0.15);
   margin: 0;
   width: 100%;
   box-sizing: border-box;
@@ -183,13 +185,21 @@ body {
   z-index: 1200;
   pointer-events: auto;
   touch-action: auto;
+  -webkit-user-select: none;
+  user-select: none;
+  min-height: 44px;
 }
 
 .admin-sidebar__logout:hover {
   color: #ff8a7a;
   transform: translateX(3px);
-  background: rgba(255,255,255,0.1);
-  border-color: rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.12);
+  border-color: rgba(255,255,255,0.25);
+}
+
+.admin-sidebar__logout:active {
+  transform: translateX(1px);
+  background: rgba(255,255,255,0.15);
 }
 
 /* --- Main area --- */
@@ -293,33 +303,30 @@ body {
     left: 0;
     box-shadow: var(--shadow-lg);
     border-right: none;
-    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), visibility 0s linear 0.3s;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     will-change: transform;
-    visibility: hidden;
   }
   
   .admin-sidebar.open {
     transform: translate3d(0, 0, 0);
-    visibility: visible;
-    transition-delay: 0.05s; /* Slight delay to let overlay start first as requested */
   }
   
+  /* Removed glassmorphism overlay - sidebar now shows directly */
   .admin-overlay {
     position: fixed;
     inset: 0;
     top: 70px;
-    background: rgba(0,0,0,0.15);
-    z-index: 10500;
+    background: rgba(0,0,0,0.3);
+    z-index: 9999;
     opacity: 0;
     visibility: hidden;
-    transition: opacity 0.3s ease, visibility 0s linear 0.3s;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
     pointer-events: none;
   }
 
   .admin-overlay.active {
     opacity: 1;
     visibility: visible;
-    transition-delay: 0s;
     pointer-events: auto;
   }
 
@@ -336,9 +343,11 @@ body {
 
   .admin-content {
     flex: 1;
-    padding: 80px 1rem 2rem;
+    padding: 90px 1rem 2rem;
     width: 100%;
     box-sizing: border-box;
+    overflow-x: hidden;
+    pointer-events: auto;
   }
   
   .admin-topbar {
@@ -359,11 +368,11 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    pointer-events: auto;
+    pointer-events: none;
   }
 
   .admin-mobile-toggle {
-    display: flex;
+    display: flex !important;
     align-items: center;
     justify-content: center;
     width: 44px;
@@ -380,8 +389,13 @@ body {
     z-index: 11600;
     padding: 0;
     transition: all 0.2s ease;
-    pointer-events: auto;
+    pointer-events: auto !important;
     touch-action: manipulation;
+  }
+
+  .admin-icon-btn,
+  .admin-avatar {
+    pointer-events: auto;
   }
 
   .admin-mobile-toggle:active,
@@ -478,9 +492,19 @@ body {
     font-size: 0.9rem;
   }
   
+  .admin-sidebar__footer {
+    padding: 1.5rem 1rem;
+    gap: 0.75rem;
+  }
+  
   .admin-sidebar__logout {
-    font-size: 0.75rem;
-    padding: 1rem;
+    font-size: 0.85rem;
+    padding: 0.85rem 1rem;
+    min-height: 40px;
+  }
+  
+  .admin-content {
+    padding: 90px 0.75rem 2rem;
   }
   
   .fab-add {

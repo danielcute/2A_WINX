@@ -121,6 +121,7 @@ $stats = $bookingModel->getStats();
             margin: 0; 
             padding: 1.5rem; 
             box-sizing: border-box;
+            padding-top: 2rem;
         }
         .bookings-header { margin-bottom: 2.5rem; }
         .bookings-header h1 { 
@@ -297,7 +298,7 @@ $stats = $bookingModel->getStats();
 
         @media (max-width: 768px) {
             .admin-container { 
-                padding: 1rem;
+                padding: 1rem 0.75rem;
             }
             .bookings-header h1 { 
                 font-size: 1.3rem;
@@ -310,6 +311,10 @@ $stats = $bookingModel->getStats();
             .stat-card {
                 padding: 1rem;
                 border-radius: 18px;
+                background: white;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
             }
             .stat-card h3 {
                 font-size: 1.4rem;
@@ -341,7 +346,7 @@ $stats = $bookingModel->getStats();
 
         @media (max-width: 480px) {
             .admin-container { 
-                padding: 0.75rem;
+                padding: 0.75rem 0.5rem;
             }
             .bookings-header {
                 margin-bottom: 1.5rem;
@@ -359,21 +364,28 @@ $stats = $bookingModel->getStats();
                 margin-bottom: 1.5rem;
             }
             .stat-card {
-                padding: 0.9rem;
+                padding: 1rem;
                 border-radius: 16px;
+                background: white;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
             }
             .stat-card h3 {
-                font-size: 1.2rem;
+                font-size: 1.3rem;
+                margin-bottom: 0.25rem;
             }
             .stat-card p {
-                font-size: 0.7rem;
+                font-size: 0.75rem;
+                margin: 0;
             }
             .admin-table {
                 min-width: 100%;
             }
             .admin-table th, .admin-table td {
-                padding: 0.6rem 0.5rem;
-                font-size: 0.75rem;
+                padding: 0.6rem 0.4rem;
+                font-size: 0.7rem;
             }
         }
     </style>
