@@ -406,16 +406,112 @@ if ($occasion === 'other') {
       }
     }
     
+    @media (max-width: 768px) {
+      .pkg-card__img {
+        height: 150px;
+      }
+      .pkg-card__body {
+        padding: 1rem;
+      }
+      .pkg-card h3 {
+        font-size: 1.1rem;
+      }
+      .pkg-card__desc {
+        font-size: 0.75rem;
+      }
+      .pkg-features li {
+        font-size: 0.75rem;
+        padding: 0.25rem 0;
+      }
+      .pkg-card__footer {
+        padding-top: 0.75rem;
+        margin-top: 0.75rem;
+      }
+      .pkg-price {
+        font-size: 1.2rem;
+      }
+    }
+    
     @media (max-width: 600px) {
       .pkg-grid {
         grid-template-columns: 1fr;
+        gap: 1rem;
       }
       .pkg-main {
         padding: 1.5rem 1rem 4rem;
         padding-top: calc(76px + 1rem);
       }
+      .pkg-card__img {
+        height: 120px;
+      }
+      .pkg-card__body {
+        padding: 0.75rem;
+      }
+      .pkg-card h3 {
+        font-size: 1rem;
+        margin-bottom: 0.3rem;
+      }
+      .pkg-card__desc {
+        font-size: 0.7rem;
+        margin-bottom: 0.5rem;
+      }
+      .pkg-features {
+        margin: 0.5rem 0;
+      }
+      .pkg-features li {
+        font-size: 0.7rem;
+        padding: 0.2rem 0;
+        gap: 0.3rem;
+      }
+      .pkg-card__footer {
+        padding-top: 0.5rem;
+        margin-top: 0.5rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+      }
+      .pkg-price {
+        font-size: 1rem;
+      }
+      .btn {
+        width: 100%;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8rem;
+      }
       .custom-dropdown {
-        min-width: 180px;
+        min-width: 140px;
+        font-size: 0.85rem;
+      }
+      .dropdown-selected {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.8rem;
+      }
+      .pkg-header {
+        margin-bottom: 1.5rem;
+      }
+      .pkg-header h1 {
+        margin: 0.3rem 0 0.2rem;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .pkg-grid {
+        gap: 0.75rem;
+      }
+      .pkg-main {
+        padding: 1rem 0.75rem 3rem;
+      }
+      .pkg-card__img {
+        height: 100px;
+      }
+      .pkg-card__body {
+        padding: 0.5rem;
+      }
+      .pkg-card h3 {
+        font-size: 0.9rem;
+      }
+      .pkg-price {
+        font-size: 0.9rem;
       }
     }
 

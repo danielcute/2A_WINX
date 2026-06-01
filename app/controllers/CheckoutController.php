@@ -179,13 +179,15 @@ class CheckoutController {
                 echo json_encode(['success' => false, 'message' => 'Failed to save your plan.']);
             }
         } catch (Exception $e) {
-            error_log('Checkout submit error: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
+            $errorMsg = 'Checkout submit error: ' . $e->getMessage() . "\nFile: " . $e->getFile() . " Line: " . $e->getLine() . "\n" . $e->getTraceAsString();
+            error_log($errorMsg);
             ob_clean();
-            echo json_encode(['success' => false, 'message' => 'An error occurred while processing your booking: ' . $e->getMessage()]);
+            echo json_encode(['success' => false, 'message' => 'An error occurred while processing your booking: ' . $e->getMessage(), 'debug' => $errorMsg]);
         } catch (Throwable $t) {
-            error_log('Checkout submit fatal error: ' . $t->getMessage() . "\n" . $t->getTraceAsString());
+            $errorMsg = 'Checkout submit fatal error: ' . $t->getMessage() . "\nFile: " . $t->getFile() . " Line: " . $t->getLine() . "\n" . $t->getTraceAsString();
+            error_log($errorMsg);
             ob_clean();
-            echo json_encode(['success' => false, 'message' => 'A fatal error occurred.']);
+            echo json_encode(['success' => false, 'message' => 'A fatal error occurred: ' . $t->getMessage(), 'debug' => $errorMsg]);
         }
         exit;
     }
