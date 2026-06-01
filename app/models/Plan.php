@@ -121,10 +121,10 @@ class Plan {
     }
     
     public function getAll($limit = null, $offset = 0) {
-        $sql = "SELECT p.*, o.name as occasion_name, u.first_name, u.last_name, u.email
-                FROM tbl_plans p
-                LEFT JOIN tbl_occasions o ON p.occasion_id = o.occasion_id
-                LEFT JOIN tbl_users u ON p.user_id = u.user_id
+        $sql = "SELECT p.*, o.events as occasion_name, u.first_name, u.last_name, u.email
+                FROM plans_tbl p
+                LEFT JOIN occasions_tbl o ON p.occasion_id = o.occasion_id
+                LEFT JOIN users_tbl u ON p.user_id = u.user_id
                 ORDER BY p.created_at DESC";
         
         if ($limit) {
@@ -132,6 +132,10 @@ class Plan {
         }
         
         $result = $this->db->query($sql);
+        if (!$result) {
+            error_log("Plan::getAll() error: " . $this->db->error);
+            return [];
+        }
         $plans = [];
         while ($row = $result->fetch_assoc()) {
             $plans[] = $row;
@@ -140,9 +144,10 @@ class Plan {
     }
     
     public function getCount() {
-        $result = $this->db->query("SELECT COUNT(*) as total FROM tbl_plans");
+        $result = $this->db->query("SELECT COUNT(*) as total FROM plans_tbl");
+        if (!$result) return 0;
         $row = $result->fetch_assoc();
-        return $row['total'];
+        return $row['total'] ?? 0;
     }
     
     public function getStats() {
@@ -153,8 +158,9 @@ class Plan {
                 SUM(CASE WHEN status = 'confirmed' THEN 1 ELSE 0 END) as confirmed,
                 SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed,
                 SUM(total_price) as total_revenue
-            FROM tbl_plans
+            FROM plans_tbl
         ");
+        if (!$result) return ['total'=>0,'pending'=>0,'confirmed'=>0,'completed'=>0,'total_revenue'=>0];
         return $result->fetch_assoc();
     }
     

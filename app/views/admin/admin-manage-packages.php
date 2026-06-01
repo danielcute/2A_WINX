@@ -211,7 +211,7 @@ $sectionOrder = ['Wedding', 'Birthday', 'Big Events / Gala', 'Other Events'];
 ?>
 <!DOCTYPE html>
 <html lang="en">
-    <meta charset="UTF-8">
+<head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Manage Packages | Sinta</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -436,7 +436,10 @@ $sectionOrder = ['Wedding', 'Birthday', 'Big Events / Gala', 'Other Events'];
                 <div class="packages-grid">
                     <?php foreach ($packageSections[$sectionName] as $pkg): ?>
                         <div class="package-card">
-                            <img src="<?= htmlspecialchars($pkg['image'] ?? '/assets/img/placeholder.jpg') ?>" alt="<?= htmlspecialchars($pkg['name'] ?? 'Package') ?>" class="package-image">
+                            <img src="<?= !empty($pkg['image']) ? htmlspecialchars($pkg['image']) : '/assets/img/placeholder.jpg' ?>" 
+                                 alt="<?= htmlspecialchars($pkg['name'] ?? 'Package') ?>" 
+                                 class="package-image"
+                                 onerror="this.src='/assets/img/placeholder.jpg'">
                             <div class="package-info">
                                 <div class="package-name"><?= htmlspecialchars($pkg['package_name'] ?? $pkg['name'] ?? 'Unnamed') ?></div>
                                 <div class="package-price">₱<?= number_format($pkg['price'], 2) ?></div>
@@ -545,7 +548,7 @@ function openAddModal() {
 function editPackage(packageId) {
     // Fetch package data via AJAX
     // FIX: target the public/ folder where API files reside
-    fetch('<?= BASE_URL ?>/public/api-package.php?action=get_package&id=' + packageId, {
+    fetch('/public/api-package.php?action=get_package&id=' + packageId, {
       credentials: 'same-origin'
     })
         .then(response => response.json())
@@ -617,5 +620,6 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 
+<?php include __DIR__ . '/admin-footer.php'; ?>
 </body>
 </html>

@@ -26,6 +26,22 @@ $unread = $_SESSION['admin_unread_count'] ?? 0;
 
 .admin-mobile-toggle {
   display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  color: var(--charcoal);
+  font-size: 1.2rem;
+  border-radius: 8px;
+  transition: background 0.2s ease;
+  min-width: 44px;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  z-index: 12000;
+  position: relative;
+  pointer-events: auto !important;
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* Base & Typography */
@@ -292,6 +308,10 @@ body {
     flex-direction: column;
   }
 
+  .admin-mobile-toggle {
+    display: flex !important;
+  }
+
   .admin-sidebar {
     transform: translate3d(-100%, 0, 0);
     width: 280px;
@@ -347,6 +367,16 @@ body {
     width: 100%;
     box-sizing: border-box;
     overflow-x: hidden;
+    pointer-events: none;
+  }
+  
+  /* Allow clicks on interactive elements within admin-content */
+  .admin-content button,
+  .admin-content a,
+  .admin-content input,
+  .admin-content select,
+  .admin-content textarea,
+  .admin-content [onclick] {
     pointer-events: auto;
   }
   
@@ -363,50 +393,23 @@ body {
     -webkit-backdrop-filter: blur(15px) saturate(180%);
     border-bottom: 1px solid var(--gray-light);
     padding: 0 1rem;
+    pointer-events: auto !important;
     height: 70px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.08);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    pointer-events: none;
   }
-
-  .admin-mobile-toggle {
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-    width: 44px;
-    height: 44px;
-    background: white;
-    color: var(--gold);
-    border: 1px solid var(--gray-light);
-    border-radius: 12px;
-    font-size: 1.2rem;
-    cursor: pointer;
-    margin-right: 0.5rem;
-    flex-shrink: 0;
-    position: relative;
-    z-index: 11600;
-    padding: 0;
-    transition: all 0.2s ease;
+  
+  /* Ensure topbar and all interactive elements are clickable */
+  .admin-topbar,
+  .admin-topbar * {
     pointer-events: auto !important;
-    touch-action: manipulation;
   }
-
-  .admin-icon-btn,
-  .admin-avatar {
-    pointer-events: auto;
-  }
-
-  .admin-mobile-toggle:active,
-  .admin-mobile-toggle:focus {
-    outline: none;
-  }
-
+  
+  /* Reset pointer-events for non-interactive text elements */
   .admin-topbar__title {
-    flex: 1;
-    min-width: 0;
-    padding-right: 0.5rem;
+    pointer-events: none;
   }
 
   .admin-topbar__title h2 {
@@ -763,10 +766,11 @@ body {
 <a href="<?php echo BASE_URL; ?>/index.php?route=admin-messages" class="admin-sidebar__link<?php echo isset($page) && $page === 'admin-messages' ? ' active' : ''; ?>"><i class="fas fa-envelope"></i><span>Messages</span><?php if($unread>0): ?><span class="admin-sidebar__badge"><?= $unread ?></span><?php endif; ?></a>
 </nav>
 <div class="admin-sidebar__footer"><a href="#" class="admin-sidebar__logout" onclick="openLogoutModal(event);"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a></div>
+<!-- Force cache refresh: v2 -->
 </aside>
 <main class="admin-main">
 <div class="admin-topbar">
-<button class="admin-mobile-toggle" id="mobileToggle"><i class="fas fa-bars"></i></button>
+<button class="admin-mobile-toggle" id="mobileToggle" onclick="document.getElementById('adminSidebar').classList.toggle('open'); document.getElementById('adminOverlay').classList.toggle('active'); document.body.style.overflow = document.getElementById('adminSidebar').classList.contains('open') ? 'hidden' : '';"><i class="fas fa-bars"></i></button>
 <div class="admin-topbar__title"><h2 id="pageTitle"><?php echo $page_title ?? 'Dashboard'; ?></h2><p>Welcome back, <?php echo htmlspecialchars($_SESSION['user_name'] ?? 'Admin'); ?></p></div>
 <div class="admin-topbar__user">
   <div class="admin-notif-wrapper" style="position: relative;">
@@ -1000,48 +1004,106 @@ const adminNotificationTypes = {
   loadAdminNotifications();
 })();
 
-// Mobile sidebar toggle
-const mobileToggle = document.getElementById('mobileToggle');
-const adminSidebar = document.getElementById('adminSidebar');
-const adminOverlay = document.getElementById('adminOverlay');
+// Mobile sidebar toggle - executed immediately
+(function setupMobileToggle() {
+  // Try immediately first
+  const mobileToggle = document.getElementById('mobileToggle');
+  const adminSidebar = document.getElementById('adminSidebar');
+  const adminOverlay = document.getElementById('adminOverlay');
 
-if (mobileToggle && adminSidebar && adminOverlay) {
-  const toggleMenu = () => {
-    const isOpen = adminSidebar.classList.toggle('open');
-    adminOverlay.classList.toggle('active', isOpen);
-    document.body.style.overflow = isOpen ? 'hidden' : '';
-  };
-
-  // Burger button click - opens the menu
-  mobileToggle.addEventListener('click', (e) => {
-    e.stopPropagation();
-    toggleMenu();
-  });
-
-  // Overlay click - closes the menu
-  adminOverlay.addEventListener('click', (e) => {
-    if (e.target === adminOverlay && adminSidebar.classList.contains('open')) {
-      toggleMenu();
-    }
-  });
-  
-  // Close on sidebar link click
-  adminSidebar.querySelectorAll('.admin-sidebar__link').forEach(link => {
-    link.addEventListener('click', () => {
-      if (adminSidebar.classList.contains('open')) {
-        toggleMenu();
-      }
-    });
-  });
-
-  // Close on logout click
-  const logoutBtn = adminSidebar.querySelector('.admin-sidebar__logout');
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', () => {
-      if (adminSidebar.classList.contains('open')) {
-        toggleMenu();
-      }
-    });
+  if (mobileToggle && adminSidebar && adminOverlay) {
+    initToggle();
+    return;
   }
-}
+
+  // If not ready, wait for DOM
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initToggle);
+  } else {
+    // DOM already loaded, use small delay
+    setTimeout(initToggle, 50);
+  }
+
+  function initToggle() {
+    const btn = document.getElementById('mobileToggle');
+    const sidebar = document.getElementById('adminSidebar');
+    const overlay = document.getElementById('adminOverlay');
+    const topbar = document.querySelector('.admin-topbar');
+
+    if (!btn || !sidebar || !overlay) return;
+    
+    // Fix pointer-events on topbar to allow hamburger clicks
+    if (topbar) {
+      topbar.style.setProperty('pointer-events', 'auto', 'important');
+    }
+
+    const toggleMenu = () => {
+      const isOpen = sidebar.classList.toggle('open');
+      overlay.classList.toggle('active', isOpen);
+      document.body.style.overflow = isOpen ? 'hidden' : '';
+    };
+
+    // Set both inline and event listener
+    btn.onclick = function(e) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      toggleMenu();
+      return false;
+    };
+
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleMenu();
+    });
+
+    // Overlay click - closes the menu
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay && sidebar.classList.contains('open')) {
+        toggleMenu();
+      }
+    });
+    
+    // Close on sidebar link click
+    sidebar.querySelectorAll('.admin-sidebar__link').forEach(link => {
+      link.addEventListener('click', () => {
+        if (sidebar.classList.contains('open')) {
+          toggleMenu();
+        }
+      });
+    });
+
+    // Close on logout click
+    const logoutBtn = sidebar.querySelector('.admin-sidebar__logout');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', () => {
+        if (sidebar.classList.contains('open')) {
+          toggleMenu();
+        }
+      });
+    }
+  }
+})();
+
+// Window-level click capture for hamburger button (handles pointer-events blocking)
+window.addEventListener('click', function(e) {
+  const mobileToggle = document.getElementById('mobileToggle');
+  const hamburgerIcon = document.querySelector('.admin-mobile-toggle .fa-bars');
+  
+  if (mobileToggle && (e.target === mobileToggle || e.target === hamburgerIcon || mobileToggle.contains(e.target))) {
+    e.stopPropagation();
+    e.preventDefault();
+    
+    const sidebar = document.getElementById('adminSidebar');
+    const overlay = document.getElementById('adminOverlay');
+    
+    if (sidebar && overlay) {
+      const isOpen = sidebar.classList.toggle('open');
+      overlay.classList.toggle('active', isOpen);
+      document.body.style.overflow = isOpen ? 'hidden' : '';
+    }
+  }
+}, true);
+
 </script>

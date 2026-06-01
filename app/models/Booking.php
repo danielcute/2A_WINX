@@ -1,4 +1,4 @@
-in the<?php
+<?php
 /**
  * Booking Model
  * Handles booking/checkout operations

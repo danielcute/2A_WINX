@@ -515,7 +515,7 @@ function cancelPlan(event, planId, eventName) {
   event.stopPropagation();
   
   // First check if cancellation is still available (within 30 minutes)
-  fetch('/api-plan.php?action=check_cancellation&plan_id=' + planId)
+  fetch('/public/api-plan.php?action=check_cancellation&plan_id=' + planId)
     .then(response => {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -537,7 +537,7 @@ function cancelPlan(event, planId, eventName) {
           formData.append('action', 'cancel_plan');
           formData.append('plan_id', planId);
           
-          fetch('/api-plan.php', {
+          fetch('/public/api-plan.php', {
             method: 'POST',
             body: formData
           })

@@ -82,7 +82,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             $_SESSION['user_id'] = $user['user_id'];
             $_SESSION['user_name'] = $user['first_name'];
             $_SESSION['user_last_name'] = $user['last_name'];
+            $_SESSION['user_email'] = $user['email'];
             $_SESSION['email'] = $user['email'];
+            $_SESSION['user_phone'] = $user['phone'] ?? '';
+            $_SESSION['user_birthday'] = $user['birthday'] ?? '';
+            $_SESSION['user_address'] = $user['address'] ?? '';
+            $_SESSION['user_avatar'] = $user['image'] ?? null;
+            $_SESSION['user_role'] = $user['role'];
             $_SESSION['role'] = $user['role'];
             if ($user['role'] === 'admin') {
                 $_SESSION['admin_logged_in'] = true;
@@ -110,14 +116,23 @@ if ($route === 'verify-2fa' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $userModel = new User();
     
     // Verify the 2FA code
-    if ($userModel->verify2FA($_SESSION['temp_user_id'], $code)) {
+    if ($userModel->verifyTwoFactorCode($_SESSION['temp_user_id'], $code)) {
 
         // Code verified - complete the login
         $_SESSION['user_id'] = $_SESSION['temp_user_id'];
         $_SESSION['user_name'] = $_SESSION['temp_user_name'];
         $_SESSION['user_last_name'] = $_SESSION['temp_user_last_name'];
+        $_SESSION['user_email'] = $_SESSION['temp_email'];
         $_SESSION['email'] = $_SESSION['temp_email'];
+        $_SESSION['user_role'] = $_SESSION['temp_role'];
         $_SESSION['role'] = $_SESSION['temp_role'];
+        
+        // Set role-specific flags
+        if ($_SESSION['role'] === 'admin') {
+            $_SESSION['admin_logged_in'] = true;
+        } else {
+            $_SESSION['user_logged_in'] = true;
+        }
         
         // Clear temp session vars
         unset($_SESSION['temp_user_id'], $_SESSION['temp_user_name'], $_SESSION['temp_user_last_name'], $_SESSION['temp_email'], $_SESSION['temp_role']);
@@ -127,7 +142,7 @@ if ($route === 'verify-2fa' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         header('Location: ' . BASE_URL . $redirectUrl);
         exit;
     } else {
-        $_SESSION['2fa_error'] = 'Invalid verification code';
+        $_SESSION['two_fa_error'] = 'Invalid verification code';
     }
 }
 
@@ -189,7 +204,10 @@ switch ($route) {
             header('Location: ' . BASE_URL . '/index.php?route=signin');
             exit;
         }
-        require ROOT_PATH . '/app/views/user/plan-detail.php';
+        // Redirect to event-detail with the same id parameter
+        $planId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+        header('Location: ' . BASE_URL . '/index.php?route=event-detail&id=' . $planId);
+        exit;
         break;
     
     case 'customize':
@@ -208,6 +226,73 @@ switch ($route) {
         require ROOT_PATH . '/app/views/user/checkout.php';
         break;
     
+    case 'setup-2fa':
+        if (!isset($_SESSION['user_id'])) {
+            header('Location: ' . BASE_URL . '/index.php?route=signin');
+            exit;
+        }
+        // Handle POST (enable 2FA)
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'enable_2fa') {
+            require_once ROOT_PATH . '/app/models/User.php';
+            $code = $_POST['code'] ?? '';
+            $userModel = new User();
+            $tempSecret = $_SESSION['temp_2fa_secret'] ?? null;
+            if (empty($code)) {
+                $_SESSION['two_fa_error'] = 'Please enter your verification code';
+            } elseif (!$tempSecret) {
+                $_SESSION['two_fa_error'] = 'No 2FA secret found. Please refresh and try again.';
+            } elseif ($userModel->verifyTwoFactorCode($_SESSION['user_id'], $code, $tempSecret)) {
+                $userModel->enableTwoFactor($_SESSION['user_id'], $tempSecret);
+                unset($_SESSION['temp_2fa_secret']);
+                $_SESSION['two_fa_success'] = 'Two-factor authentication has been enabled successfully!';
+                header('Location: ' . BASE_URL . '/index.php?route=profile&tab=security');
+                exit;
+            } else {
+                $_SESSION['two_fa_error'] = 'Invalid authentication code. Please try again.';
+            }
+            header('Location: ' . BASE_URL . '/index.php?route=setup-2fa');
+            exit;
+        }
+        // GET: generate secret and show setup page
+        require_once ROOT_PATH . '/app/models/User.php';
+        $userModel = new User();
+        if ($userModel->isTwoFactorEnabled($_SESSION['user_id'])) {
+            $_SESSION['two_fa_error'] = 'Two-factor authentication is already enabled.';
+            header('Location: ' . BASE_URL . '/index.php?route=profile&tab=security');
+            exit;
+        }
+        if (empty($_SESSION['temp_2fa_secret'])) {
+            $_SESSION['temp_2fa_secret'] = $userModel->generateTwoFactorSecret();
+        }
+        require ROOT_PATH . '/app/views/user/setup-2fa.php';
+        break;
+
+    case 'disable-2fa':
+        if (!isset($_SESSION['user_id'])) {
+            header('Location: ' . BASE_URL . '/index.php?route=signin');
+            exit;
+        }
+        require_once ROOT_PATH . '/app/models/User.php';
+        $userModel = new User();
+        if ($userModel->disableTwoFactor($_SESSION['user_id'])) {
+            $_SESSION['two_fa_success'] = 'Two-factor authentication has been disabled.';
+        } else {
+            $_SESSION['two_fa_error'] = 'Failed to disable two-factor authentication.';
+        }
+        header('Location: ' . BASE_URL . '/index.php?route=profile&tab=security');
+        exit;
+        break;
+
+    case 'delete-plan':
+        if (!isset($_SESSION['user_id']) || (isset($_SESSION['role']) && $_SESSION['role'] === 'admin')) {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+            exit;
+        }
+        require_once ROOT_PATH . '/app/controllers/PlanController.php';
+        (new PlanController())->delete();
+        break;
+
     case 'checkout-submit':
         if (!isset($_SESSION['user_id']) || (isset($_SESSION['role']) && $_SESSION['role'] === 'admin')) {
             header('Location: ' . BASE_URL . '/index.php?route=signin');

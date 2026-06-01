@@ -1,8 +1,12 @@
 <?php 
 $page = 'messages';
-if (!isset($_SESSION['user_logged_in']) && !isset($_SESSION['admin_logged_in'])) {
+if (session_status() === PHP_SESSION_NONE) { session_start(); }
+if (!isset($_SESSION['user_id'])) {
     header('Location: /index.php?route=signin');
     exit;
+}
+if (!defined('ROOT_PATH')) {
+    define('ROOT_PATH', dirname(dirname(dirname(__DIR__))));
 }
 $user_id = $_SESSION['user_id'];
 require_once ROOT_PATH . '/app/models/Plan.php';
@@ -142,11 +146,10 @@ if ($selected_plan_id) {
     .empty-state i { font-size: 3rem; margin-bottom: 1rem; color: #ddd; }
     
     @media (max-width: 768px) { 
-      .msg-sidebar { width: 100px; } 
-      .msg-event__title, .msg-event__date { display: none; } 
-      .msg-sidebar__header h3 { display: none; } 
-      .msg-search { display: none; }
-      .msg-chat__header, .msg-chat__body, .msg-chat__footer { display: none; }
+      .msg-container { flex-direction: column; height: auto; }
+      .msg-sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border); max-height: 200px; }
+      .msg-chat { min-height: 60vh; }
+      .msg-chat__header, .msg-chat__body, .msg-chat__footer { display: flex; }
     }
   </style>
 </head>
@@ -158,6 +161,7 @@ if ($selected_plan_id) {
     <aside class="msg-sidebar">
       <div class="msg-sidebar__header">
         <h3>Messages</h3>
+        <button onclick="document.getElementById('newMsgModal').style.display='flex'" style="background:var(--primary);color:white;border:none;border-radius:8px;padding:0.4rem 0.8rem;font-size:0.8rem;cursor:pointer;margin-top:0.5rem;width:100%;"><i class="fas fa-plus"></i> New Message</button>
       </div>
       <div class="msg-search">
         <input type="text" id="searchEvents" placeholder="Search events...">
@@ -297,5 +301,31 @@ if ($selected_plan_id) {
     }
   });
 </script>
+
+<!-- New Message Modal -->
+<div id="newMsgModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:2000;align-items:center;justify-content:center;">
+  <div style="background:white;border-radius:20px;padding:2rem;max-width:480px;width:90%;box-shadow:0 20px 40px rgba(0,0,0,0.15);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+      <h3 style="margin:0;font-family:'Cormorant Garamond',serif;font-size:1.4rem;">New Message</h3>
+      <button onclick="document.getElementById('newMsgModal').style.display='none'" style="background:none;border:none;font-size:1.5rem;cursor:pointer;color:#999;">&times;</button>
+    </div>
+    <form method="POST" action="/index.php?route=messages">
+      <input type="hidden" name="action" value="send">
+      <input type="hidden" name="plan_id" value="0">
+      <div style="margin-bottom:1rem;">
+        <label style="display:block;font-size:0.75rem;font-weight:600;color:#6B6463;margin-bottom:0.4rem;text-transform:uppercase;">Subject</label>
+        <input type="text" name="subject" placeholder="e.g., General Inquiry" required style="width:100%;padding:0.75rem 1rem;border:1.5px solid #E2D9C8;border-radius:10px;font-family:inherit;font-size:0.9rem;">
+      </div>
+      <div style="margin-bottom:1.25rem;">
+        <label style="display:block;font-size:0.75rem;font-weight:600;color:#6B6463;margin-bottom:0.4rem;text-transform:uppercase;">Message</label>
+        <textarea name="message_text" placeholder="Type your message here..." required rows="4" style="width:100%;padding:0.75rem 1rem;border:1.5px solid #E2D9C8;border-radius:10px;font-family:inherit;font-size:0.9rem;resize:vertical;"></textarea>
+      </div>
+      <div style="display:flex;gap:0.75rem;">
+        <button type="submit" style="flex:1;padding:0.85rem;background:var(--primary);color:white;border:none;border-radius:999px;font-weight:600;cursor:pointer;font-size:0.85rem;"><i class="fas fa-paper-plane"></i> Send</button>
+        <button type="button" onclick="document.getElementById('newMsgModal').style.display='none'" style="flex:1;padding:0.85rem;background:transparent;color:#6B6463;border:1.5px solid #E2D9C8;border-radius:999px;font-weight:600;cursor:pointer;font-size:0.85rem;">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
 </body>
 </html>

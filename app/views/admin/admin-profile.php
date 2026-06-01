@@ -45,7 +45,7 @@ $avatar_upload_error = '';
 $avatar_upload_success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['avatar'])) {
-    $upload_dir = ROOT_PATH . '/public/assets/img/';
+    $upload_dir = ROOT_PATH . '/public/assets/img/avatars/';
     
     // Create directory if it doesn't exist
     if (!file_exists($upload_dir)) {
@@ -55,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['avatar'])) {
     $file = $_FILES['avatar'];
     $file_name = 'admin_' . $admin_data['id'] . '_' . time() . '.' . pathinfo($file['name'], PATHINFO_EXTENSION);
     $target_file = $upload_dir . $file_name;
-    $relative_path = '/assets/img/' . $file_name;
+    $relative_path = '/assets/img/avatars/' . $file_name;
     
     // Allowed file types
     $allowed_types = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'image/webp'];
@@ -69,8 +69,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['avatar'])) {
         } else {
             if (move_uploaded_file($file['tmp_name'], $target_file)) {
                 // Delete old avatar if it exists
-                if (!empty($admin_data['image']) && file_exists(ROOT_PATH . $admin_data['image'])) {
-                    unlink(ROOT_PATH . $admin_data['image']);
+                if (!empty($admin_data['image']) && file_exists(ROOT_PATH . '/public' . $admin_data['image'])) {
+                    unlink(ROOT_PATH . '/public' . $admin_data['image']);
                 }
                 // Update database with new image
                 $userModel->update($admin_data['id'], ['image' => $relative_path]);
@@ -628,7 +628,7 @@ async function previewImage(input) {
         formData.append('avatar', input.files[0]);
 
         try {
-            const response = await fetch('api-admin-profile.php', {
+            const response = await fetch('/public/api-admin-profile.php', {
                 method: 'POST',
                 body: formData
             });
@@ -710,7 +710,6 @@ function copyAdminSecret() {
 
 // Switch between QR code and manual key entry for admin 2FA
 function switchAdminMethod(event, method) {
-    // Update button states
     document.querySelectorAll('.admin-setup-tab-btn').forEach(btn => {
         btn.style.color = '';
         btn.style.borderBottomColor = 'transparent';
@@ -718,16 +717,35 @@ function switchAdminMethod(event, method) {
     event.target.closest('.admin-setup-tab-btn').style.color = '#8A7650';
     event.target.closest('.admin-setup-tab-btn').style.borderBottomColor = '#8A7650';
     
-    // Toggle section visibility
     const qrSection = document.getElementById('adminQrMethod');
     const manualSection = document.getElementById('adminManualMethod');
     
     if (method === 'qr') {
-        qrSection.style.display = 'block';
-        manualSection.style.display = 'none';
+        if (qrSection) qrSection.style.display = 'block';
+        if (manualSection) manualSection.style.display = 'none';
     } else {
-        qrSection.style.display = 'none';
-        manualSection.style.display = 'block';
+        if (qrSection) qrSection.style.display = 'none';
+        if (manualSection) manualSection.style.display = 'block';
+    }
+}
+
+// Switch between 6-digit code and setup key verification
+function switchAdminVerify(event, method) {
+    document.querySelectorAll('.admin-verify-tab-btn').forEach(btn => {
+        btn.style.color = '#999';
+        btn.style.borderBottomColor = 'transparent';
+    });
+    event.target.closest('.admin-verify-tab-btn').style.color = '#8A7650';
+    event.target.closest('.admin-verify-tab-btn').style.borderBottomColor = '#8A7650';
+    
+    document.querySelectorAll('.admin-verify-method').forEach(el => el.style.display = 'none');
+    
+    if (method === 'code') {
+        const el = document.getElementById('adminCodeInput');
+        if (el) el.style.display = 'block';
+    } else {
+        const el = document.getElementById('adminKeyInput');
+        if (el) el.style.display = 'block';
     }
 }
 </script>

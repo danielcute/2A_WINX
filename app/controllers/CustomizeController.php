@@ -1,20 +1,9 @@
-var map = L.map('map').setView([14.5995, 120.9842], 13); // Manila default
-L.tileLayer('<https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png>').addTo(map);
-var marker;
-map.on('click', function(e) {
-    if (marker) map.removeLayer(marker);
-    marker = L.marker(e.latlng).addTo(map);
-    document.getElementById('latitude').value = e.latlng.lat;
-    document.getElementById('longitude').value = e.latlng.lng;
-});
 <?php
 if (!defined('ROOT_PATH')) {
-    // Check if app folder exists at current level (production) or parent level (local)
     $appDir = dirname(dirname(__DIR__));
     if (is_dir($appDir . '/app')) {
         define('ROOT_PATH', $appDir);
     } else {
-        // Go up 3 levels from controllers folder
         define('ROOT_PATH', $appDir);
     }
 }
@@ -33,12 +22,11 @@ class CustomizeController {
         $allOptions = $customization->getAllOptions();
         
         if (empty($allOptions)) {
-            $allOptions = $customization->getAllOptions(); // Model will attempt seeding
+            $allOptions = $customization->getAllOptions();
         }
 
-        // Filter to only main categories
         $mainCategories = ['Theme', 'Color Combinations', 'Venue', 'Food', 'Sweets', 'Catering', 'Pastries', 'Beverages', 'Add-ons'];
-        $options = $allOptions; // Show all for admin to manage
+        $options = $allOptions;
         include ROOT_PATH . '/app/views/admin/admin-customize.php';
     }
 
@@ -46,7 +34,6 @@ class CustomizeController {
         require_once ROOT_PATH . '/app/models/Customization.php';
         $customization = new Customization();
         $allOptions = $customization->getAllOptions();
-        // Filter to only main categories
         $mainCategories = ['Theme', 'Color Combinations', 'Venue', 'Food', 'Sweets', 'Catering', 'Pastries', 'Beverages', 'Add-ons'];
         $options = array_filter($allOptions, function($opt) use ($mainCategories) {
             return in_array($opt['category'], $mainCategories);
@@ -65,7 +52,6 @@ class CustomizeController {
         $imageData = null;
         $imageType = null;
 
-        // Handle image upload
         if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
             $imageData = file_get_contents($_FILES['image']['tmp_name']);
             $imageType = $_FILES['image']['type'];
@@ -120,7 +106,6 @@ class CustomizeController {
         }
 
         $allOptions = $customization->getAllOptions();
-        // Filter to only main categories
         $mainCategories = ['Theme', 'Venue Deco', 'Color Combinations', 'Venue', 'Food', 'Catering', 'Pastries', 'Beverages', 'Add-ons'];
         $options = array_filter($allOptions, function($opt) use ($mainCategories) {
             return in_array($opt['category'], $mainCategories);
@@ -144,7 +129,6 @@ class CustomizeController {
         $imageData = null;
         $imageType = null;
 
-        // Handle image upload (only if a new image is provided)
         if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
             $imageData = file_get_contents($_FILES['image']['tmp_name']);
             $imageType = $_FILES['image']['type'];
@@ -158,16 +142,13 @@ class CustomizeController {
             'is_active' => isset($_POST['is_active']) ? 1 : 0,
         ];
 
-        // Only add image data if a new image was provided
         if ($imageData !== null) {
             $data['image'] = $imageData;
             $data['image_type'] = $imageType;
         }
 
-        // Handle colors_json for Color Combinations
         if (!empty($_POST['colors_json'])) {
             $colors_json = trim($_POST['colors_json']);
-            // Validate that it's valid JSON
             if (json_decode($colors_json, true) !== null) {
                 $data['colors_json'] = $colors_json;
             }
@@ -182,24 +163,21 @@ class CustomizeController {
         $result = $customization->update($optionId, $data);
 
         if ($result) {
-            // Handle color palette images if this is a Color Combinations option
             if ($data['category'] === 'Color Combinations' && !empty($_POST['colors']) && isset($_FILES['color_images'])) {
                 $colors = $_POST['colors'];
                 $files = $_FILES['color_images'];
                 
-                // Process each color image
                 foreach ($colors as $index => $hex) {
                     if (isset($files['error'][$index]) && $files['error'][$index] === UPLOAD_ERR_OK) {
-                        $imageData = file_get_contents($files['tmp_name'][$index]);
-                        $imageType = $files['type'][$index];
+                        $imgData = file_get_contents($files['tmp_name'][$index]);
+                        $imgType = $files['type'][$index];
                         
-                        // Save color palette image
                         $customization->saveColorPaletteImage(
                             $optionId,
                             $hex,
-                            '',  // color name (optional)
-                            $imageData,
-                            $imageType
+                            '',
+                            $imgData,
+                            $imgType
                         );
                     }
                 }
@@ -234,280 +212,266 @@ class CustomizeController {
     }
 
     /**
-     * Get all customization options by category
+     * Get all customization options by category (MySQLi version)
      */
     public function getCustomizationOptions() {
-        try {
-            $query = "SELECT option_id, category, name, price, is_active 
-                      FROM customization_options_tbl 
-                      WHERE is_active = 1 
-                      ORDER BY category, name";
-            
-            $stmt = $this->conn->prepare($query);
-            $stmt->execute();
-            
-            $options = [];
-            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                $options[$row['category']][] = $row;
-            }
-            
-            return ['success' => true, 'data' => $options];
-        } catch (PDOException $e) {
-            return ['success' => false, 'message' => 'Database error: ' . $e->getMessage()];
+        $sql = "SELECT option_id, category, name, price, is_active 
+                FROM customization_options_tbl 
+                WHERE is_active = 1 
+                ORDER BY category, name";
+        
+        $result = $this->conn->query($sql);
+        if (!$result) {
+            return ['success' => false, 'message' => 'Database error: ' . $this->conn->error];
         }
+        
+        $options = [];
+        while ($row = $result->fetch_assoc()) {
+            $options[$row['category']][] = $row;
+        }
+        
+        return ['success' => true, 'data' => $options];
     }
     
     /**
-     * Get package details with its customization options
+     * Get package details with its customization options (MySQLi version)
      */
     public function getPackageWithOptions($packageId) {
-        try {
-            // Get package details
-            $query = "SELECT p.*, o.events as occasion_name 
-                      FROM packages_tbl p
-                      LEFT JOIN occasions_tbl o ON p.occasion_id = o.occasion_id
-                      WHERE p.package_id = :package_id AND p.status = 'active'";
-            
-            $stmt = $this->conn->prepare($query);
-            $stmt->bindParam(':package_id', $packageId);
-            $stmt->execute();
-            $package = $stmt->fetch(PDO::FETCH_ASSOC);
-            
-            if (!$package) {
-                return ['success' => false, 'message' => 'Package not found'];
-            }
-            
-            // Get package-specific customization options
-            $query = "SELECT co.*, pco.is_required 
-                      FROM customization_options_tbl co
-                      INNER JOIN package_customization_options pco ON co.option_id = pco.option_id
-                      WHERE pco.package_id = :package_id AND co.is_active = 1
-                      ORDER BY co.category, co.name";
-            
-            $stmt = $this->conn->prepare($query);
-            $stmt->bindParam(':package_id', $packageId);
-            $stmt->execute();
-            
-            $options = [];
-            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                $options[$row['category']][] = $row;
-            }
-            
-            $package['customization_options'] = $options;
-            
-            return ['success' => true, 'data' => $package];
-        } catch (PDOException $e) {
-            return ['success' => false, 'message' => 'Database error: ' . $e->getMessage()];
+        $packageId = (int)$packageId;
+        
+        $stmt = $this->conn->prepare(
+            "SELECT p.*, o.events as occasion_name 
+             FROM packages_tbl p
+             LEFT JOIN occasions_tbl o ON p.occasion_id = o.occasion_id
+             WHERE p.package_id = ? AND p.status = 'active'"
+        );
+        if (!$stmt) {
+            return ['success' => false, 'message' => 'Database error: ' . $this->conn->error];
         }
+        $stmt->bind_param('i', $packageId);
+        $stmt->execute();
+        $package = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+        
+        if (!$package) {
+            return ['success' => false, 'message' => 'Package not found'];
+        }
+        
+        $stmt2 = $this->conn->prepare(
+            "SELECT co.* 
+             FROM customization_options_tbl co
+             WHERE co.is_active = 1
+             ORDER BY co.category, co.name"
+        );
+        if (!$stmt2) {
+            return ['success' => false, 'message' => 'Database error: ' . $this->conn->error];
+        }
+        $stmt2->execute();
+        $result = $stmt2->get_result();
+        
+        $options = [];
+        while ($row = $result->fetch_assoc()) {
+            $options[$row['category']][] = $row;
+        }
+        $stmt2->close();
+        
+        $package['customization_options'] = $options;
+        
+        return ['success' => true, 'data' => $package];
     }
     
     /**
-     * Save user customization
+     * Save user customization (MySQLi version)
      */
     public function saveCustomization($userId, $data) {
-        try {
-            $this->conn->beginTransaction();
-            
-            // Validate required fields
-            if (empty($data['package_id']) || empty($data['occasion_id'])) {
-                return ['success' => false, 'message' => 'Package and occasion are required'];
-            }
-            
-            // Calculate total price
-            $totalPrice = $this->calculateTotalPrice($data['package_id'], $data['selections'] ?? []);
-            
-            // Insert or update customization record
-            if (isset($data['customization_id']) && $data['customization_id'] > 0) {
-                // Update existing
-                $query = "UPDATE user_customizations 
-                          SET package_id = :package_id, 
-                              occasion_id = :occasion_id, 
-                              event_date = :event_date,
-                              total_price = :total_price,
-                              status = :status,
-                              updated_at = CURRENT_TIMESTAMP
-                          WHERE customization_id = :customization_id AND user_id = :user_id";
-                
-                $stmt = $this->conn->prepare($query);
-                $stmt->bindParam(':customization_id', $data['customization_id']);
-            } else {
-                // Insert new
-                $query = "INSERT INTO user_customizations 
-                          (user_id, package_id, occasion_id, event_date, total_price, status) 
-                          VALUES (:user_id, :package_id, :occasion_id, :event_date, :total_price, :status)";
-                
-                $stmt = $this->conn->prepare($query);
-            }
-            
-            $stmt->bindParam(':user_id', $userId);
-            $stmt->bindParam(':package_id', $data['package_id']);
-            $stmt->bindParam(':occasion_id', $data['occasion_id']);
-            $stmt->bindParam(':event_date', $data['event_date']);
-            $stmt->bindParam(':total_price', $totalPrice);
-            $status = isset($data['status']) ? $data['status'] : 'draft';
-            $stmt->bindParam(':status', $status);
-            
-            $stmt->execute();
-            
-            // Get the customization ID
-            if (isset($data['customization_id']) && $data['customization_id'] > 0) {
-                $customizationId = $data['customization_id'];
-            } else {
-                $customizationId = $this->conn->lastInsertId();
-            }
-            
-            // Delete existing selections if updating
-            if (isset($data['customization_id']) && $data['customization_id'] > 0) {
-                $deleteQuery = "DELETE FROM customization_selections WHERE customization_id = :customization_id";
-                $deleteStmt = $this->conn->prepare($deleteQuery);
-                $deleteStmt->bindParam(':customization_id', $customizationId);
-                $deleteStmt->execute();
-            }
-            
-            // Insert selections
-            if (!empty($data['selections'])) {
-                $insertQuery = "INSERT INTO customization_selections 
-                                (customization_id, category, option_id, quantity, unit_price) 
-                                VALUES (:customization_id, :category, :option_id, :quantity, :unit_price)";
-                $insertStmt = $this->conn->prepare($insertQuery);
-                
-                foreach ($data['selections'] as $selection) {
-                    $insertStmt->bindParam(':customization_id', $customizationId);
-                    $insertStmt->bindParam(':category', $selection['category']);
-                    $insertStmt->bindParam(':option_id', $selection['option_id']);
-                    $insertStmt->bindParam(':quantity', $selection['quantity']);
-                    $insertStmt->bindParam(':unit_price', $selection['price']);
-                    $insertStmt->execute();
-                }
-            }
-            
-            $this->conn->commit();
-            
-            return [
-                'success' => true, 
-                'message' => 'Customization saved successfully',
-                'customization_id' => $customizationId,
-                'total_price' => $totalPrice
-            ];
-            
-        } catch (PDOException $e) {
-            $this->conn->rollBack();
-            return ['success' => false, 'message' => 'Database error: ' . $e->getMessage()];
+        if (empty($data['package_id']) || empty($data['occasion_id'])) {
+            return ['success' => false, 'message' => 'Package and occasion are required'];
         }
+        
+        $userId = (int)$userId;
+        $packageId = (int)$data['package_id'];
+        $occasionId = (int)$data['occasion_id'];
+        $eventDate = $this->conn->real_escape_string($data['event_date'] ?? '');
+        $status = $this->conn->real_escape_string($data['status'] ?? 'draft');
+        
+        // Calculate total price
+        $totalPrice = $this->calculateTotalPrice($packageId, $data['selections'] ?? []);
+        
+        if (isset($data['customization_id']) && $data['customization_id'] > 0) {
+            $customizationId = (int)$data['customization_id'];
+            $stmt = $this->conn->prepare(
+                "UPDATE user_customizations 
+                 SET package_id = ?, occasion_id = ?, event_date = ?, total_price = ?, status = ?, updated_at = NOW()
+                 WHERE customization_id = ? AND user_id = ?"
+            );
+            if (!$stmt) return ['success' => false, 'message' => 'DB error: ' . $this->conn->error];
+            $stmt->bind_param('iisdsii', $packageId, $occasionId, $eventDate, $totalPrice, $status, $customizationId, $userId);
+        } else {
+            $stmt = $this->conn->prepare(
+                "INSERT INTO user_customizations (user_id, package_id, occasion_id, event_date, total_price, status) 
+                 VALUES (?, ?, ?, ?, ?, ?)"
+            );
+            if (!$stmt) return ['success' => false, 'message' => 'DB error: ' . $this->conn->error];
+            $stmt->bind_param('iiidss', $userId, $packageId, $occasionId, $totalPrice, $eventDate, $status);
+        }
+        
+        if (!$stmt->execute()) {
+            $error = $stmt->error;
+            $stmt->close();
+            return ['success' => false, 'message' => 'DB error: ' . $error];
+        }
+        
+        if (!isset($data['customization_id']) || $data['customization_id'] <= 0) {
+            $customizationId = (int)$this->conn->insert_id;
+        }
+        $stmt->close();
+        
+        // Delete existing selections if updating
+        if (isset($data['customization_id']) && $data['customization_id'] > 0) {
+            $delStmt = $this->conn->prepare("DELETE FROM customization_selections WHERE customization_id = ?");
+            if ($delStmt) {
+                $delStmt->bind_param('i', $customizationId);
+                $delStmt->execute();
+                $delStmt->close();
+            }
+        }
+        
+        // Insert selections
+        if (!empty($data['selections'])) {
+            $insStmt = $this->conn->prepare(
+                "INSERT INTO customization_selections (customization_id, category, option_id, quantity, unit_price) 
+                 VALUES (?, ?, ?, ?, ?)"
+            );
+            if ($insStmt) {
+                foreach ($data['selections'] as $selection) {
+                    $cat = $selection['category'];
+                    $optId = (int)$selection['option_id'];
+                    $qty = (int)($selection['quantity'] ?? 1);
+                    $unitPrice = (float)($selection['price'] ?? 0);
+                    $insStmt->bind_param('isiid', $customizationId, $cat, $optId, $qty, $unitPrice);
+                    $insStmt->execute();
+                }
+                $insStmt->close();
+            }
+        }
+        
+        return [
+            'success' => true, 
+            'message' => 'Customization saved successfully',
+            'customization_id' => $customizationId,
+            'total_price' => $totalPrice
+        ];
     }
     
     /**
-     * Calculate total price for a customization
+     * Calculate total price for a customization (MySQLi version)
      */
     private function calculateTotalPrice($packageId, $selections) {
-        // Get package base price
-        $query = "SELECT price FROM packages_tbl WHERE package_id = :package_id";
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':package_id', $packageId);
+        $packageId = (int)$packageId;
+        $stmt = $this->conn->prepare("SELECT price FROM packages_tbl WHERE package_id = ?");
+        if (!$stmt) return 0;
+        $stmt->bind_param('i', $packageId);
         $stmt->execute();
-        $package = $stmt->fetch(PDO::FETCH_ASSOC);
+        $row = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
         
-        $total = $package ? floatval($package['price']) : 0;
+        $total = $row ? (float)$row['price'] : 0;
         
-        // Add selected options prices
         foreach ($selections as $selection) {
-            $total += floatval($selection['price']) * intval($selection['quantity']);
+            $total += (float)($selection['price'] ?? 0) * (int)($selection['quantity'] ?? 1);
         }
         
         return $total;
     }
     
     /**
-     * Get user's saved customizations
+     * Get user's saved customizations (MySQLi version)
      */
     public function getUserCustomizations($userId) {
-        try {
-            $query = "SELECT uc.*, p.name as package_name, o.events as occasion_name
-                      FROM user_customizations uc
-                      LEFT JOIN packages_tbl p ON uc.package_id = p.package_id
-                      LEFT JOIN occasions_tbl o ON uc.occasion_id = o.occasion_id
-                      WHERE uc.user_id = :user_id
-                      ORDER BY uc.created_at DESC";
-            
-            $stmt = $this->conn->prepare($query);
-            $stmt->bindParam(':user_id', $userId);
-            $stmt->execute();
-            
-            $customizations = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            
-            // Get selections for each customization
-            foreach ($customizations as &$customization) {
-                $selQuery = "SELECT * FROM customization_selections 
-                             WHERE customization_id = :customization_id";
-                $selStmt = $this->conn->prepare($selQuery);
-                $selStmt->bindParam(':customization_id', $customization['customization_id']);
+        $userId = (int)$userId;
+        $stmt = $this->conn->prepare(
+            "SELECT uc.*, p.name as package_name, o.events as occasion_name
+             FROM user_customizations uc
+             LEFT JOIN packages_tbl p ON uc.package_id = p.package_id
+             LEFT JOIN occasions_tbl o ON uc.occasion_id = o.occasion_id
+             WHERE uc.user_id = ?
+             ORDER BY uc.created_at DESC"
+        );
+        if (!$stmt) return ['success' => false, 'message' => 'DB error: ' . $this->conn->error];
+        $stmt->bind_param('i', $userId);
+        $stmt->execute();
+        $customizations = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $stmt->close();
+        
+        foreach ($customizations as &$customization) {
+            $selStmt = $this->conn->prepare("SELECT * FROM customization_selections WHERE customization_id = ?");
+            if ($selStmt) {
+                $selStmt->bind_param('i', $customization['customization_id']);
                 $selStmt->execute();
-                $customization['selections'] = $selStmt->fetchAll(PDO::FETCH_ASSOC);
+                $customization['selections'] = $selStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+                $selStmt->close();
             }
-            
-            return ['success' => true, 'data' => $customizations];
-        } catch (PDOException $e) {
-            return ['success' => false, 'message' => 'Database error: ' . $e->getMessage()];
         }
+        
+        return ['success' => true, 'data' => $customizations];
     }
     
     /**
-     * Get single customization by ID
+     * Get single customization by ID (MySQLi version)
      */
     public function getCustomization($customizationId, $userId) {
-        try {
-            $query = "SELECT uc.*, p.name as package_name, p.description as package_description,
-                             p.price as base_price, o.events as occasion_name
-                      FROM user_customizations uc
-                      LEFT JOIN packages_tbl p ON uc.package_id = p.package_id
-                      LEFT JOIN occasions_tbl o ON uc.occasion_id = o.occasion_id
-                      WHERE uc.customization_id = :customization_id AND uc.user_id = :user_id";
-            
-            $stmt = $this->conn->prepare($query);
-            $stmt->bindParam(':customization_id', $customizationId);
-            $stmt->bindParam(':user_id', $userId);
-            $stmt->execute();
-            
-            $customization = $stmt->fetch(PDO::FETCH_ASSOC);
-            
-            if (!$customization) {
-                return ['success' => false, 'message' => 'Customization not found'];
-            }
-            
-            // Get selections
-            $selQuery = "SELECT * FROM customization_selections 
-                         WHERE customization_id = :customization_id";
-            $selStmt = $this->conn->prepare($selQuery);
-            $selStmt->bindParam(':customization_id', $customizationId);
-            $selStmt->execute();
-            $customization['selections'] = $selStmt->fetchAll(PDO::FETCH_ASSOC);
-            
-            return ['success' => true, 'data' => $customization];
-        } catch (PDOException $e) {
-            return ['success' => false, 'message' => 'Database error: ' . $e->getMessage()];
+        $customizationId = (int)$customizationId;
+        $userId = (int)$userId;
+        
+        $stmt = $this->conn->prepare(
+            "SELECT uc.*, p.name as package_name, p.description as package_description,
+                    p.price as base_price, o.events as occasion_name
+             FROM user_customizations uc
+             LEFT JOIN packages_tbl p ON uc.package_id = p.package_id
+             LEFT JOIN occasions_tbl o ON uc.occasion_id = o.occasion_id
+             WHERE uc.customization_id = ? AND uc.user_id = ?"
+        );
+        if (!$stmt) return ['success' => false, 'message' => 'DB error: ' . $this->conn->error];
+        $stmt->bind_param('ii', $customizationId, $userId);
+        $stmt->execute();
+        $customization = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+        
+        if (!$customization) {
+            return ['success' => false, 'message' => 'Customization not found'];
         }
+        
+        $selStmt = $this->conn->prepare("SELECT * FROM customization_selections WHERE customization_id = ?");
+        if ($selStmt) {
+            $selStmt->bind_param('i', $customizationId);
+            $selStmt->execute();
+            $customization['selections'] = $selStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+            $selStmt->close();
+        }
+        
+        return ['success' => true, 'data' => $customization];
     }
     
     /**
-     * Delete customization
+     * Delete customization (MySQLi version)
      */
     public function deleteCustomization($customizationId, $userId) {
-        try {
-            $query = "DELETE FROM user_customizations 
-                      WHERE customization_id = :customization_id AND user_id = :user_id";
-            $stmt = $this->conn->prepare($query);
-            $stmt->bindParam(':customization_id', $customizationId);
-            $stmt->bindParam(':user_id', $userId);
-            $stmt->execute();
-            
-            if ($stmt->rowCount() > 0) {
-                return ['success' => true, 'message' => 'Customization deleted successfully'];
-            } else {
-                return ['success' => false, 'message' => 'Customization not found'];
-            }
-        } catch (PDOException $e) {
-            return ['success' => false, 'message' => 'Database error: ' . $e->getMessage()];
+        $customizationId = (int)$customizationId;
+        $userId = (int)$userId;
+        
+        $stmt = $this->conn->prepare(
+            "DELETE FROM user_customizations WHERE customization_id = ? AND user_id = ?"
+        );
+        if (!$stmt) return ['success' => false, 'message' => 'DB error: ' . $this->conn->error];
+        $stmt->bind_param('ii', $customizationId, $userId);
+        $stmt->execute();
+        $affected = $stmt->affected_rows;
+        $stmt->close();
+        
+        if ($affected > 0) {
+            return ['success' => true, 'message' => 'Customization deleted successfully'];
         }
+        return ['success' => false, 'message' => 'Customization not found'];
     }
     
     /**
@@ -524,56 +488,54 @@ class CustomizeController {
     }
     
     /**
-     * Add new customization option (Admin only)
+     * Add new customization option (Admin only, MySQLi version)
      */
     public function addCustomizationOption($data) {
-        try {
-            $query = "INSERT INTO customization_options_tbl 
-                      (category, name, price, is_active) 
-                      VALUES (:category, :name, :price, :is_active)";
-            
-            $stmt = $this->conn->prepare($query);
-            $stmt->bindParam(':category', $data['category']);
-            $stmt->bindParam(':name', $data['name']);
-            $stmt->bindParam(':price', $data['price']);
-            $stmt->bindParam(':is_active', $data['is_active']);
-            
-            $stmt->execute();
-            
-            return [
-                'success' => true, 
-                'message' => 'Option added successfully',
-                'option_id' => $this->conn->lastInsertId()
-            ];
-        } catch (PDOException $e) {
-            return ['success' => false, 'message' => 'Database error: ' . $e->getMessage()];
+        $stmt = $this->conn->prepare(
+            "INSERT INTO customization_options_tbl (category, name, price, is_active) VALUES (?, ?, ?, ?)"
+        );
+        if (!$stmt) return ['success' => false, 'message' => 'DB error: ' . $this->conn->error];
+        
+        $category = $data['category'];
+        $name = $data['name'];
+        $price = (float)$data['price'];
+        $isActive = (int)$data['is_active'];
+        $stmt->bind_param('ssdi', $category, $name, $price, $isActive);
+        
+        if ($stmt->execute()) {
+            $id = (int)$this->conn->insert_id;
+            $stmt->close();
+            return ['success' => true, 'message' => 'Option added successfully', 'option_id' => $id];
         }
+        $error = $stmt->error;
+        $stmt->close();
+        return ['success' => false, 'message' => 'DB error: ' . $error];
     }
     
     /**
-     * Update customization option (Admin only)
+     * Update customization option (Admin only, MySQLi version)
      */
     public function updateCustomizationOption($optionId, $data) {
-        try {
-            $query = "UPDATE customization_options_tbl 
-                      SET category = :category, 
-                          name = :name, 
-                          price = :price, 
-                          is_active = :is_active
-                      WHERE option_id = :option_id";
-            
-            $stmt = $this->conn->prepare($query);
-            $stmt->bindParam(':category', $data['category']);
-            $stmt->bindParam(':name', $data['name']);
-            $stmt->bindParam(':price', $data['price']);
-            $stmt->bindParam(':is_active', $data['is_active']);
-            $stmt->bindParam(':option_id', $optionId);
-            
-            $stmt->execute();
-            
+        $optionId = (int)$optionId;
+        $stmt = $this->conn->prepare(
+            "UPDATE customization_options_tbl 
+             SET category = ?, name = ?, price = ?, is_active = ?
+             WHERE option_id = ?"
+        );
+        if (!$stmt) return ['success' => false, 'message' => 'DB error: ' . $this->conn->error];
+        
+        $category = $data['category'];
+        $name = $data['name'];
+        $price = (float)$data['price'];
+        $isActive = (int)$data['is_active'];
+        $stmt->bind_param('ssdii', $category, $name, $price, $isActive, $optionId);
+        
+        if ($stmt->execute()) {
+            $stmt->close();
             return ['success' => true, 'message' => 'Option updated successfully'];
-        } catch (PDOException $e) {
-            return ['success' => false, 'message' => 'Database error: ' . $e->getMessage()];
         }
+        $error = $stmt->error;
+        $stmt->close();
+        return ['success' => false, 'message' => 'DB error: ' . $error];
     }
 }
