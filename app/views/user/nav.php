@@ -55,9 +55,15 @@ if (session_status() === PHP_SESSION_NONE) {
             <?php if (!empty($_SESSION['user_avatar'])): ?>
                 <?php 
                   $avatar_url = $_SESSION['user_avatar'];
-                  if (strpos($avatar_url, 'http') !== 0 && strpos($avatar_url, '/') !== 0) { $avatar_url = '/' . $avatar_url; }
+                  if (strpos($avatar_url, 'http') !== 0 && strpos($avatar_url, '/') !== 0) { 
+                    $avatar_url = '/' . $avatar_url; 
+                  }
+                  // Add cache-busting and error handler
                 ?>
-                <img src="<?php echo htmlspecialchars($avatar_url); ?>" alt="Profile">
+                <img src="<?php echo htmlspecialchars($avatar_url . '?t=' . time()); ?>" 
+                     alt="Profile"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="app-nav__avatar-placeholder" style="display:none; width:100%; height:100%; background:var(--primary); color:white; align-items:center; justify-content:center; font-weight:bold;"><?= substr($_SESSION['user_name'] ?? 'U', 0, 1) ?></div>
             <?php else: ?>
                 <div class="app-nav__avatar-placeholder" style="width:100%; height:100%; background:var(--primary); color:white; display:flex; align-items:center; justify-content:center; font-weight:bold;"><?= substr($_SESSION['user_name'] ?? 'U', 0, 1) ?></div>
             <?php endif; ?>
@@ -97,9 +103,15 @@ if (session_status() === PHP_SESSION_NONE) {
       <?php if (!empty($_SESSION['user_avatar'])): ?>
         <?php 
           $avatar_url = $_SESSION['user_avatar'];
-          if (strpos($avatar_url, 'http') !== 0 && strpos($avatar_url, '/') !== 0) { $avatar_url = '/' . $avatar_url; }
+          if (strpos($avatar_url, 'http') !== 0 && strpos($avatar_url, '/') !== 0) { 
+            $avatar_url = '/' . $avatar_url; 
+          }
         ?>
-        <img src="<?php echo htmlspecialchars($avatar_url); ?>" alt="Profile">
+        <img src="<?php echo htmlspecialchars($avatar_url . '?t=' . time()); ?>" 
+             alt="Profile"
+             style="width:48px; height:48px; border-radius:50%; object-fit:cover;"
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <div class="app-nav__avatar-placeholder" style="display:none; width:48px; height:48px; border-radius:50%; background:var(--primary); color:white; align-items:center; justify-content:center; font-weight:bold; font-size: 1.2rem; flex-shrink: 0;"><?= substr($_SESSION['user_name'] ?? 'U', 0, 1) ?></div>
       <?php else: ?>
         <div class="app-nav__avatar-placeholder" style="width:48px; height:48px; border-radius:50%; background:var(--primary); color:white; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size: 1.2rem; flex-shrink: 0;"><?= substr($_SESSION['user_name'] ?? 'U', 0, 1) ?></div>
       <?php endif; ?>

@@ -146,6 +146,15 @@ if ($route === 'verify-2fa' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+// Handle API endpoint routing - if route starts with 'api-', forward to the API file
+if (strpos($route, 'api-') === 0) {
+    $apiFile = ROOT_PATH . '/public/' . $route . '.php';
+    if (file_exists($apiFile)) {
+        require_once $apiFile;
+        exit;
+    }
+}
+
 // Route handling - determine which view to load
 switch ($route) {
     // ── PUBLIC ROUTES (no auth required) ──

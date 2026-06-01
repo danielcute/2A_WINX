@@ -129,6 +129,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Check if avatar exists, otherwise use default
 $avatar_path = !empty($user['image']) ? $user['image'] : '/assets/img/default-avatar.jpg';
+if (strpos($avatar_path, '/') !== 0 && strpos($avatar_path, 'http') !== 0) {
+    $avatar_path = '/' . $avatar_path;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -352,7 +355,10 @@ $avatar_path = !empty($user['image']) ? $user['image'] : '/assets/img/default-av
         <div class="profile-hero animate-fade-up">
             <div class="profile-avatar-wrap">
                 <div class="profile-avatar">
-                    <img src="<?php echo htmlspecialchars($avatar_path); ?>" alt="<?php echo htmlspecialchars($user['first_name']); ?>" id="profileAvatar">
+                    <img src="<?php echo htmlspecialchars($avatar_path . '?t=' . time()); ?>" 
+                         alt="<?php echo htmlspecialchars($user['first_name']); ?>" 
+                         id="profileAvatar"
+                         onerror="this.src='/assets/img/default-avatar.jpg';">
                 </div>
                 <button class="profile-avatar-edit" aria-label="Change avatar" onclick="openAvatarModal()">
                     <i class="fas fa-camera"></i>
@@ -796,7 +802,10 @@ $avatar_path = !empty($user['image']) ? $user['image'] : '/assets/img/default-av
         <h3 style="margin: 0.5rem 0; font-family: var(--serif);">Change Profile Picture</h3>
         
         <div class="avatar-preview">
-            <img src="<?php echo htmlspecialchars($avatar_path); ?>" alt="Preview" id="avatarPreview">
+            <img src="<?php echo htmlspecialchars($avatar_path . '?t=' . time()); ?>" 
+                 alt="Preview" 
+                 id="avatarPreview"
+                 onerror="this.src='/assets/img/default-avatar.jpg';">
         </div>
         
         <form method="POST" action="" enctype="multipart/form-data" id="avatarUploadForm">

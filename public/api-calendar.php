@@ -325,3 +325,90 @@ function getDateBookings() {
         'bookings' => $bookings
     ]);
 }
+
+/**
+ * Get user's bookings (user view for calendar)
+ */
+function getUserBookings() {
+    global $db;
+    
+    $userId = (int)($_GET['userId'] ?? ($_SESSION['user_id'] ?? 0));
+    
+    if (!$userId) {
+        header('Content-Type: application/json');
+        http_response_code(401);
+        echo json_encode([
+            'error' => 'User not authenticated',
+            'events' => []
+        ]);
+        exit;
+    }
+    
+    // Get user's bookings for calendar display
+    $sql = "SELECT 
+            p.plan_id as id,
+            p.event_name as title,
+            DATE(p.event_date) as start,
+            p.event_time,
+            p.venue,
+            p.status,
+            p.total_price,
+            p.occasion_id,
+            o.occasion_name
+            FROM plans_tbl p
+            LEFT JOIN occasions_tbl o ON p.occasion_id = o.occasion_id
+            WHERE p.user_id = ? 
+            AND p.event_date IS NOT NULL
+            ORDER BY p.event_date ASC";
+    
+    $stmt = $db->prepare($sql);
+    
+    if (!$stmt) {
+        header('Content-Type: application/json');
+        http_response_code(500);
+        echo json_encode([
+            'error' => 'Database error',
+            'events' => []
+        ]);
+        exit;
+    }
+    
+    $stmt->bind_param("i", $userId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    $events = [];
+    while ($row = $result->fetch_assoc()) {
+        // Determine status color
+        $backgroundColor = 'rgba(138, 118, 80, 0.7)'; // Primary/default
+        if ($row['status'] === 'pending') {
+            $backgroundColor = 'rgba(255, 193, 7, 0.7)'; // Yellow for pending
+        } elseif ($row['status'] === 'confirmed') {
+            $backgroundColor = 'rgba(76, 175, 80, 0.7)'; // Green for confirmed
+        } elseif ($row['status'] === 'completed') {
+            $backgroundColor = 'rgba(33, 150, 243, 0.7)'; // Blue for completed
+        } elseif ($row['status'] === 'canceled') {
+            $backgroundColor = 'rgba(244, 67, 54, 0.7)'; // Red for canceled
+        }
+        
+        $events[] = [
+            'id' => (int)$row['id'],
+            'title' => htmlspecialchars($row['title']),
+            'start' => $row['start'],
+            'backgroundColor' => $backgroundColor,
+            'borderColor' => '#8A7650',
+            'extendedProps' => [
+                'time' => $row['event_time'],
+                'venue' => $row['venue'],
+                'status' => $row['status'],
+                'occasion' => $row['occasion_name'],
+                'price' => number_format($row['total_price'], 2)
+            ]
+        ];
+    }
+    
+    $stmt->close();
+    
+    header('Content-Type: application/json');
+    echo json_encode($events);
+}
