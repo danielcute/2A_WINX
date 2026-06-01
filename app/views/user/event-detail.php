@@ -32,7 +32,7 @@ $planSummaryItems = [
     'Flowers & Centrepieces',
     'Full Event Coordination'
 ];
-$heroImageUrl = '/assets/img/event-placeholder.jpg';
+$heroImageUrl = '/assets/img/wedding.jpg';
 $programLines = [];
 $orderRows = [];
 $serviceFee = 0;
@@ -151,7 +151,7 @@ if ($plan) {
         'beach' => '/assets/img/beach.jpg',
         'garden' => '/assets/img/garden.jpg',
     ];
-    $heroImageUrl = '/assets/img/event-placeholder.jpg';
+    $heroImageUrl = '/assets/img/wedding.jpg';
     foreach ($eventImageMap as $keyword => $url) {
         if ($keyword && strpos($eventText, $keyword) !== false) {
             $heroImageUrl = $url;

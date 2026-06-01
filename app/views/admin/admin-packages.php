@@ -176,7 +176,7 @@ $packages = $packageModel->getAll();
         <?php else: ?>
             <?php foreach ($packages as $pkg): ?>
                 <div class="package-card">
-                    <img src="<?= htmlspecialchars($pkg['image'] ?? '/assets/img/placeholder.jpg') ?>" class="package-image" alt="<?= htmlspecialchars($pkg['name']) ?>">
+                    <img src="<?= htmlspecialchars($pkg['image'] ?? '/assets/img/wedding.jpg') ?>" class="package-image" alt="<?= htmlspecialchars($pkg['name']) ?>">
                     <div class="package-info">
                         <div class="package-name"><?= htmlspecialchars($pkg['name']) ?></div>
                         <div class="package-price">₱<?= number_format($pkg['price'], 0) ?></div>

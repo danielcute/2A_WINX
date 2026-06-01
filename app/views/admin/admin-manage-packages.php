@@ -436,10 +436,10 @@ $sectionOrder = ['Wedding', 'Birthday', 'Big Events / Gala', 'Other Events'];
                 <div class="packages-grid">
                     <?php foreach ($packageSections[$sectionName] as $pkg): ?>
                         <div class="package-card">
-                            <img src="<?= !empty($pkg['image']) ? htmlspecialchars($pkg['image']) : '/assets/img/placeholder.jpg' ?>" 
+                            <img src="<?= !empty($pkg['image']) ? htmlspecialchars($pkg['image']) : '/assets/img/wedding.jpg' ?>" 
                                  alt="<?= htmlspecialchars($pkg['name'] ?? 'Package') ?>" 
                                  class="package-image"
-                                 onerror="this.src='/assets/img/placeholder.jpg'">
+                                 onerror="this.src='/assets/img/wedding.jpg'">
                             <div class="package-info">
                                 <div class="package-name"><?= htmlspecialchars($pkg['package_name'] ?? $pkg['name'] ?? 'Unnamed') ?></div>
                                 <div class="package-price">₱<?= number_format($pkg['price'], 2) ?></div>

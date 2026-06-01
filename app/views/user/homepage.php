@@ -636,7 +636,7 @@ if (!empty($_SESSION['user_id'])) {
                   'beach' => '/assets/img/beach.jpg',
                   'garden' => '/assets/img/garden.jpg',
               ];
-              $imageUrl = '/assets/img/event-placeholder.jpg';
+              $imageUrl = '/assets/img/wedding.jpg';
               foreach ($eventImageMap as $keyword => $url) {
                   if ($keyword && strpos($eventText, $keyword) !== false) {
                       $imageUrl = $url;
