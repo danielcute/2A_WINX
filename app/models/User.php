@@ -253,12 +253,18 @@ class User {
      * Generate a new 2FA secret for user
      */
     public function generateTwoFactorSecret() {
-        if (!class_exists('PragmaRX\Google2FA\Google2FA')) {
-            error_log("SINTA Warning: 2FA library missing. Secret generation skipped.");
-            return null;
+        if (class_exists('PragmaRX\Google2FA\Google2FA')) {
+            $google2fa = new Google2FA();
+            return $google2fa->generateSecretKey(32);
         }
-        $google2fa = new Google2FA();
-        return $google2fa->generateSecretKey(32);
+        
+        // Fallback: Generate a random 32-character base32 string
+        $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+        $secret = '';
+        for ($i = 0; $i < 32; $i++) {
+            $secret .= $chars[random_int(0, strlen($chars) - 1)];
+        }
+        return $secret;
     }
     
     /**

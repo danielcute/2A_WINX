@@ -367,14 +367,26 @@ function getUserBookings() {
         header('Content-Type: application/json');
         http_response_code(500);
         echo json_encode([
-            'error' => 'Database error',
+            'success' => false,
+            'error' => 'Database error: ' . $db->error,
             'events' => []
         ]);
         exit;
     }
     
     $stmt->bind_param("i", $userId);
-    $stmt->execute();
+    if (!$stmt->execute()) {
+        http_response_code(500);
+        header('Content-Type: application/json');
+        echo json_encode([
+            'success' => false,
+            'error' => 'Query execution failed: ' . $stmt->error,
+            'events' => []
+        ]);
+        $stmt->close();
+        exit;
+    }
+    
     $result = $stmt->get_result();
     
     $events = [];
@@ -393,16 +405,16 @@ function getUserBookings() {
         
         $events[] = [
             'id' => (int)$row['id'],
-            'title' => htmlspecialchars($row['title']),
+            'title' => htmlspecialchars($row['title'] ?? 'Event'),
             'start' => $row['start'],
             'backgroundColor' => $backgroundColor,
             'borderColor' => '#8A7650',
             'extendedProps' => [
-                'time' => $row['event_time'],
-                'venue' => $row['venue'],
-                'status' => $row['status'],
-                'occasion' => $row['occasion_name'],
-                'price' => number_format($row['total_price'], 2)
+                'time' => $row['event_time'] ?? '',
+                'venue' => $row['venue'] ?? '',
+                'status' => $row['status'] ?? 'pending',
+                'occasion' => $row['occasion_name'] ?? 'Event',
+                'price' => number_format((float)($row['total_price'] ?? 0), 2)
             ]
         ];
     }
