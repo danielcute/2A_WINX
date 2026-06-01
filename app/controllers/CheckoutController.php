@@ -47,20 +47,29 @@ class CheckoutController {
     }
 
     public function submit() {
+        // Suppress all output buffering and errors
+        ob_start();
+        
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
 
+        // Send JSON header immediately
         header('Content-Type: application/json; charset=utf-8');
         
         try {
-            $data = json_decode(file_get_contents('php://input'), true);
+            // Read input
+            $input = file_get_contents('php://input');
+            $data = json_decode($input, true);
+            
             if (!$data) {
+                ob_clean();
                 echo json_encode(['success' => false, 'message' => 'Invalid request data']);
                 exit;
             }
 
             if (empty($_SESSION['user_id'])) {
+                ob_clean();
                 echo json_encode(['success' => false, 'message' => 'User must be logged in to book.']);
                 exit;
             }
@@ -156,16 +165,27 @@ class CheckoutController {
                             'related_id' => $planId
                         ]);
                     }
-                } catch (Exception $e) { error_log("Admin notification failed: " . $e->getMessage()); }
+                } catch (Exception $e) { 
+                    error_log("Admin notification failed: " . $e->getMessage()); 
+                }
 
                 unset($_SESSION['checkout_cart']);
+                
+                // Clean output buffer and return JSON success
+                ob_clean();
                 echo json_encode(['success' => true, 'plan_id' => $planId, 'message' => 'Booking saved successfully']);
             } else {
+                ob_clean();
                 echo json_encode(['success' => false, 'message' => 'Failed to save your plan.']);
             }
         } catch (Exception $e) {
-            error_log('Checkout submit error: ' . $e->getMessage());
-            echo json_encode(['success' => false, 'message' => 'An error occurred while processing your booking.']);
+            error_log('Checkout submit error: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
+            ob_clean();
+            echo json_encode(['success' => false, 'message' => 'An error occurred while processing your booking: ' . $e->getMessage()]);
+        } catch (Throwable $t) {
+            error_log('Checkout submit fatal error: ' . $t->getMessage() . "\n" . $t->getTraceAsString());
+            ob_clean();
+            echo json_encode(['success' => false, 'message' => 'A fatal error occurred.']);
         }
         exit;
     }
