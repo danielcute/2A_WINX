@@ -801,19 +801,33 @@ $depositRequired = round($cartTotal * 0.5);
                     <?php foreach ($cartItems as $item): ?>
                         <div class="cart-item">
                             <div class="cart-item__icon">
-                                <i class="<?= $item['type'] === 'custom' ? 'fas fa-magic' : 'fas fa-gift' ?>"></i>
+                                <?php
+                                $icon = 'fas fa-gift';
+                                $cat = strtolower($item['category'] ?? $item['type'] ?? '');
+                                if ($cat === 'wardrobe') $icon = 'fas fa-tshirt';
+                                elseif ($cat === 'theme') $icon = 'fas fa-palette';
+                                elseif ($cat === 'venue') $icon = 'fas fa-map-marker-alt';
+                                elseif (in_array($cat, ['food','catering'])) $icon = 'fas fa-utensils';
+                                elseif (in_array($cat, ['add-ons','extras'])) $icon = 'fas fa-plus-circle';
+                                elseif ($cat === 'beverages') $icon = 'fas fa-wine-glass';
+                                elseif (in_array($cat, ['pastries','sweets'])) $icon = 'fas fa-birthday-cake';
+                                elseif ($cat === 'custom') $icon = 'fas fa-magic';
+                                ?>
+                                <i class="<?= $icon ?>"></i>
                             </div>
                             <div class="cart-item__details">
                                 <div class="cart-item__name"><?= htmlspecialchars($item['name']) ?></div>
-                                <div class="cart-item__type"><?= $item['type'] === 'custom' ? 'Custom Package' : 'Pre-made Package' ?></div>
+                                <div class="cart-item__type"><?= htmlspecialchars(ucfirst($item['category'] ?? ($item['type'] === 'custom' ? 'Custom Package' : 'Package'))) ?></div>
                                 <?php if (!empty($item['features'])): ?>
                                     <div class="cart-item__details-list">
                                         <?php 
                                             $featureList = is_string($item['features']) ? explode("\n", $item['features']) : $item['features'];
                                             $firstThree = array_slice($featureList, 0, 3);
-                                            echo implode(', ', array_map('trim', array_filter($firstThree)));
+                                            echo htmlspecialchars(implode(', ', array_map('trim', array_filter($firstThree))));
                                         ?>
                                     </div>
+                                <?php elseif (!empty($item['description'])): ?>
+                                    <div class="cart-item__details-list"><?= htmlspecialchars(substr($item['description'], 0, 80)) ?></div>
                                 <?php elseif (!empty($item['details'])): ?>
                                     <div class="cart-item__details-list"><?= htmlspecialchars($item['details']) ?></div>
                                 <?php endif; ?>
@@ -1704,11 +1718,16 @@ function confirmBooking() {
     })
     .then(result => {
         if (result.success && result.plan_id) {
-            showToast('Booking created! Redirecting to event details...', 'success');
+            showToast('Booking confirmed! Redirecting to your plans...', 'success');
             
-            // Redirect to event detail page with plan_id after brief delay
+            // Clear sessionStorage cart
+            sessionStorage.removeItem('checkoutCart');
+            sessionStorage.removeItem('selectedWardrobes');
+            sessionStorage.removeItem('customizationItems');
+            
+            // Redirect to plans page after brief delay
             setTimeout(() => {
-                window.location.href = `/index.php?route=event-detail&id=${result.plan_id}`;
+                window.location.href = '/index.php?route=plans';
             }, 1200);
         } else {
             showToast(result.message || 'Failed to save your booking.', 'error');

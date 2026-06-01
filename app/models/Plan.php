@@ -32,20 +32,53 @@ class Plan {
         $paymentMethod = isset($data['payment_method']) ? $this->db->real_escape_string($data['payment_method']) : null;
         $paymentDetails = isset($data['payment_details']) ? $this->db->real_escape_string($data['payment_details']) : null;
         $paymentStatus = isset($data['payment_status']) ? $this->db->real_escape_string($data['payment_status']) : 'pending';
-        $latitude = isset($data['latitude']) ? (float)$data['latitude'] : null;
-        $longitude = isset($data['longitude']) ? (float)$data['longitude'] : null;
-        
-        $stmt = $this->db->prepare("INSERT INTO plans_tbl 
-        (user_id, occasion_id, package_id, customize_id, event_name, event_date, event_time, guest_count, venue, theme, total_price, status, events, payment_method, payment_details, payment_status, latitude, longitude) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        
-        if (!$stmt) {
-            error_log("Plan create prepare failed: " . $this->db->error);
-            return false;
+
+        // Check if latitude/longitude columns exist before inserting
+        $hasLatLng = false;
+        $colCheck = $this->db->query("SHOW COLUMNS FROM plans_tbl LIKE 'latitude'");
+        if ($colCheck && $colCheck->num_rows > 0) {
+            $hasLatLng = true;
         }
-        
-        $stmt->bind_param("iiiisssississsssdd", $userId, $occasionId, $packageId, $customizeId, $eventName, $eventDate, $eventTime, $guestCount, $venue, $theme, $totalPrice, $status, $events, $paymentMethod, $paymentDetails, $paymentStatus, $latitude, $longitude);
-        
+
+        if ($hasLatLng) {
+            $latitude = isset($data['latitude']) && $data['latitude'] !== '' ? (float)$data['latitude'] : null;
+            $longitude = isset($data['longitude']) && $data['longitude'] !== '' ? (float)$data['longitude'] : null;
+
+            $stmt = $this->db->prepare("INSERT INTO plans_tbl 
+            (user_id, occasion_id, package_id, customize_id, event_name, event_date, event_time, guest_count, venue, theme, total_price, status, events, payment_method, payment_details, payment_status, latitude, longitude) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+
+            if (!$stmt) {
+                error_log("Plan create prepare failed: " . $this->db->error);
+                return false;
+            }
+
+            $stmt->bind_param("iiiisssississsssdd",
+                $userId, $occasionId, $packageId, $customizeId,
+                $eventName, $eventDate, $eventTime, $guestCount,
+                $venue, $theme, $totalPrice, $status,
+                $events, $paymentMethod, $paymentDetails, $paymentStatus,
+                $latitude, $longitude
+            );
+        } else {
+            // Fallback: insert without lat/lng columns
+            $stmt = $this->db->prepare("INSERT INTO plans_tbl 
+            (user_id, occasion_id, package_id, customize_id, event_name, event_date, event_time, guest_count, venue, theme, total_price, status, events, payment_method, payment_details, payment_status) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+
+            if (!$stmt) {
+                error_log("Plan create prepare failed: " . $this->db->error);
+                return false;
+            }
+
+            $stmt->bind_param("iiiisssississsss",
+                $userId, $occasionId, $packageId, $customizeId,
+                $eventName, $eventDate, $eventTime, $guestCount,
+                $venue, $theme, $totalPrice, $status,
+                $events, $paymentMethod, $paymentDetails, $paymentStatus
+            );
+        }
+
         if ($stmt->execute()) {
             $result = $this->db->insert_id;
             $stmt->close();
