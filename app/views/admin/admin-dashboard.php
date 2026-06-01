@@ -187,33 +187,151 @@ if ($recent_bookings && $recent_bookings->num_rows > 0) {
             border: none;
             cursor: pointer;
         }
+
         @media (max-width: 1024px) {
-            .dashboard-grid-2col { grid-template-columns: 1fr; }
-            .stats-grid { grid-template-columns: repeat(2, 1fr); }
-            
-            .dashboard-header h1 { font-size: 1.8rem; }
-            
-            .recent-bookings { border-radius: 20px; border: none; background: transparent; box-shadow: none; }
-            .recent-bookings table { display: block; }
-            .recent-bookings tbody { display: block; }
+            .dashboard-container {
+                padding: 1.2rem;
+            }
+
+            .dashboard-grid-2col { 
+                grid-template-columns: 1fr; 
+            }
+
+            .stats-grid { 
+                grid-template-columns: repeat(2, 1fr); 
+                gap: 1.2rem;
+            }
+
+            .dashboard-header h1 { 
+                font-size: 1.8rem; 
+            }
+
+            .recent-bookings { 
+                border-radius: 20px; 
+                border: none; 
+                background: transparent; 
+                box-shadow: none; 
+            }
+
+            .recent-bookings table { 
+                display: block; 
+            }
+
+            .recent-bookings tbody { 
+                display: block; 
+            }
+
+            .quick-actions {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .event-calendar h2 {
+                font-size: 1.3rem;
+            }
+
+            .weather-widget {
+                min-height: 320px;
+            }
         }
-        
-        .recent-bookings { background: white; border-radius: 24px; overflow: hidden; border: 2px solid var(--border); box-shadow: var(--shadow-sm); margin-bottom: 2rem; }
-        .recent-bookings table { width: 100%; border-collapse: collapse; }
-        .recent-bookings th, .recent-bookings td { padding: 1.2rem 1rem; text-align: left; border-bottom: 1px solid var(--border); }
-        .recent-bookings th { background-color: #F9F7F3; font-weight: 700; color: var(--primary); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; }
+
+        .recent-bookings { 
+            background: white; 
+            border-radius: 24px; 
+            overflow: hidden; 
+            border: 2px solid var(--border); 
+            box-shadow: var(--shadow-sm); 
+            margin-bottom: 2rem; 
+        }
+
+        .recent-bookings table { 
+            width: 100%; 
+            border-collapse: collapse; 
+        }
+
+        .recent-bookings th, .recent-bookings td { 
+            padding: 1.2rem 1rem; 
+            text-align: left; 
+            border-bottom: 1px solid var(--border); 
+        }
+
+        .recent-bookings th { 
+            background-color: #F9F7F3; 
+            font-weight: 700; 
+            color: var(--primary); 
+            font-size: 0.85rem; 
+            text-transform: uppercase; 
+            letter-spacing: 0.05em; 
+        }
 
         @media (max-width: 768px) {
+            .dashboard-container {
+                padding: 1rem;
+            }
+
+            .admin-page-header {
+                padding: 1.2rem 1.5rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .admin-page-header h1 {
+                font-size: 1.4rem;
+            }
+
             .stats-grid { 
                 grid-template-columns: repeat(2, 1fr); 
                 gap: 1rem;
             }
-            .stat-card { padding: 1.25rem; }
-            .stat-card h3 { font-size: 1.5rem; }
-            
-            .recent-bookings thead { display: none; }
-            .recent-bookings table, .recent-bookings tbody, .recent-bookings tr, .recent-bookings td { display: block; width: 100%; }
-            .recent-bookings tr { border-bottom: 2px solid var(--border); padding: 1rem; }
+
+            .stat-card { 
+                padding: 1.25rem; 
+                border-radius: 16px;
+            }
+
+            .stat-card h3 { 
+                font-size: 1.5rem; 
+            }
+
+            .quick-actions {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.6rem;
+                margin: 1.2rem 0;
+            }
+
+            .action-btn {
+                padding: 1rem 0.75rem;
+                font-size: 0.8rem;
+                border-radius: 12px;
+            }
+
+            .action-btn i {
+                display: block;
+                margin-bottom: 0.4rem;
+                font-size: 1.3rem;
+            }
+
+            .recent-bookings {
+                border-radius: 16px;
+                margin-bottom: 1.5rem;
+            }
+
+            .recent-bookings thead { 
+                display: none; 
+            }
+
+            .recent-bookings table, .recent-bookings tbody, .recent-bookings tr, .recent-bookings td { 
+                display: block; 
+                width: 100%; 
+                box-sizing: border-box;
+            }
+
+            .recent-bookings tr { 
+                border-bottom: 2px solid var(--border); 
+                padding: 1rem; 
+                margin-bottom: 0.5rem;
+                border-radius: 12px;
+                background: white;
+            }
+
             .recent-bookings td { 
                 text-align: right; 
                 padding: 0.6rem 0; 
@@ -223,10 +341,227 @@ if ($recent_bookings && $recent_bookings->num_rows > 0) {
                 justify-content: space-between;
                 font-size: 0.95rem;
             }
+
             .recent-bookings td::before { 
                 content: attr(data-label); 
                 font-weight: 700; 
                 color: var(--primary);
+            }
+
+            .dashboard-grid-2col {
+                gap: 1.2rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .event-calendar {
+                padding: 1.2rem;
+                border-radius: 16px;
+            }
+
+            .event-calendar h2 {
+                font-size: 1.2rem;
+                margin-bottom: 1rem;
+            }
+
+            .weather-widget {
+                padding: 1.5rem;
+                border-radius: 16px;
+                min-height: 300px;
+            }
+
+            .weather-widget .location-name {
+                font-size: 1.1rem;
+            }
+
+            .weather-widget .weather-icon {
+                font-size: 2.5rem;
+            }
+
+            .weather-widget .temp {
+                font-size: 2rem;
+            }
+
+            .weather-widget .condition {
+                font-size: 0.9rem;
+            }
+
+            .weather-widget .details {
+                gap: 1rem;
+            }
+
+            .weather-widget .detail-item {
+                flex: 1;
+                padding: 0.3rem;
+            }
+
+            .weather-widget .detail-label {
+                font-size: 0.75rem;
+            }
+
+            .weather-widget .detail-value {
+                font-size: 0.85rem;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .dashboard-container {
+                padding: 0.75rem;
+            }
+
+            .admin-page-header {
+                padding: 1rem 1.2rem;
+                margin-bottom: 1.2rem;
+                border-radius: 12px;
+            }
+
+            .admin-page-header h1 {
+                font-size: 1.1rem;
+                gap: 0.5rem;
+            }
+
+            .admin-page-header h1 i {
+                font-size: 1.2rem;
+            }
+
+            .stats-grid { 
+                grid-template-columns: repeat(2, 1fr); 
+                gap: 0.75rem;
+            }
+
+            .stat-card { 
+                padding: 1rem; 
+                border-radius: 12px;
+            }
+
+            .stat-card h3 { 
+                font-size: 1.2rem; 
+            }
+
+            .stat-card p {
+                font-size: 0.75rem;
+            }
+
+            .quick-actions {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+                margin: 1rem 0;
+            }
+
+            .action-btn {
+                padding: 0.9rem 0.75rem;
+                font-size: 0.75rem;
+                border-radius: 10px;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                justify-content: flex-start;
+            }
+
+            .action-btn i {
+                display: inline;
+                margin-bottom: 0;
+                font-size: 1rem;
+                min-width: 20px;
+            }
+
+            .recent-bookings {
+                border-radius: 12px;
+                margin-bottom: 1.2rem;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            }
+
+            .recent-bookings thead { 
+                display: none; 
+            }
+
+            .recent-bookings tr { 
+                border-bottom: 1px solid var(--border); 
+                padding: 0.75rem; 
+                margin-bottom: 0.4rem;
+                border-radius: 8px;
+            }
+
+            .recent-bookings td { 
+                padding: 0.4rem 0; 
+                font-size: 0.8rem;
+            }
+
+            .recent-bookings td::before { 
+                font-size: 0.75rem;
+                min-width: 70px;
+            }
+
+            .dashboard-grid-2col {
+                gap: 1rem;
+                margin-bottom: 1.2rem;
+            }
+
+            .event-calendar {
+                padding: 1rem;
+                border-radius: 12px;
+                margin-bottom: 1.2rem;
+            }
+
+            .event-calendar h2 {
+                font-size: 1rem;
+                margin-bottom: 0.75rem;
+            }
+
+            #adminEventCalendar {
+                height: 300px !important;
+            }
+
+            .weather-widget {
+                padding: 1.2rem;
+                border-radius: 12px;
+                min-height: 280px;
+                gap: 0.25rem;
+            }
+
+            .weather-widget .location-name {
+                font-size: 0.95rem;
+                margin-bottom: 0.75rem;
+            }
+
+            .weather-widget .weather-icon {
+                font-size: 2rem;
+                margin: 0.3rem 0;
+            }
+
+            .weather-widget .temp {
+                font-size: 1.5rem;
+                margin: 0.3rem 0;
+            }
+
+            .weather-widget .condition {
+                font-size: 0.8rem;
+                margin-bottom: 1rem;
+            }
+
+            .weather-widget .details {
+                gap: 0.75rem;
+            }
+
+            .weather-widget .detail-item {
+                padding: 0.2rem;
+            }
+
+            .weather-widget .detail-label {
+                font-size: 0.65rem;
+            }
+
+            .weather-widget .detail-value {
+                font-size: 0.75rem;
+            }
+
+            .status-badge { 
+                padding: 0.2rem 0.6rem; 
+                font-size: 0.7rem; 
+            }
+
+            h3[style*="font-size: 1.6rem"] {
+                font-size: 1.2rem !important;
+                margin: 1.5rem 0 0.75rem !important;
             }
         }
         .status-badge { padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }

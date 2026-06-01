@@ -219,7 +219,7 @@ $sectionOrder = ['Wedding', 'Birthday', 'Big Events / Gala', 'Other Events'];
     <style>
         body { background: #f5f5f5; font-family: 'DM Sans', sans-serif; }
         body.modal-open { overflow: hidden; }
-        .admin-container { width: 100%; margin: 0; padding: 1.5rem; }
+        .admin-container { width: 100%; margin: 0; padding: 1.5rem; box-sizing: border-box; }
         .page-header { margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between; background: white; padding: 1.5rem 2rem; border-radius: 24px; border: 1px solid var(--border); }
         .page-header h1 { font-family: var(--serif); font-size: 2.2rem; color: var(--dark); margin: 0; font-weight: 700; display: inline-flex; align-items: center; gap: 1rem; }
         .page-header h1 em { color: #8A7650; font-style: italic; font-weight: 400; }
@@ -269,12 +269,63 @@ $sectionOrder = ['Wedding', 'Birthday', 'Big Events / Gala', 'Other Events'];
         .btn-delete-custom { color: #f44336; border-color: #f44336; }
         .btn-delete-custom:hover { background: rgba(244, 67, 54, 0.15); color: #d32f2f; border-color: #d32f2f; }
 
+        /* Mobile optimizations */
+        @media (max-width: 1024px) {
+            .page-header { flex-wrap: wrap; }
+            .packages-grid { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
+        }
+
         @media (max-width: 768px) {
             .admin-container { padding: 1rem; }
-            .page-header { flex-direction: column; gap: 1rem; align-items: flex-start; padding: 1.5rem; }
-            .page-header .btn { width: 100%; }
+            .page-header { 
+                flex-direction: column; 
+                gap: 1rem; 
+                align-items: stretch;
+                padding: 1.5rem; 
+            }
+            .page-header h1 { font-size: 1.6rem; }
+            .page-header .btn { 
+                width: 100%; 
+                padding: 1rem; 
+                border-radius: 18px; 
+                font-size: 1rem;
+                background: linear-gradient(135deg, #8A7650 0%, #6B5A3E 100%);
+                color: white;
+                border: none;
+            }
+            .page-header .btn:hover {
+                background: linear-gradient(135deg, #6B5A3E 0%, #5A4A30 100%);
+                box-shadow: 0 8px 24px rgba(138, 118, 80, 0.3);
+            }
             .packages-grid { grid-template-columns: 1fr; }
-            .filter-pill { flex: 1; text-align: center; font-size: 0.8rem; padding: 0.6rem 1rem; }
+            .filter-pill { 
+                flex: 1; 
+                text-align: center; 
+                font-size: 0.8rem; 
+                padding: 0.6rem 1rem;
+                min-width: 80px;
+            }
+            .package-image { height: 180px; }
+        }
+        
+        @media (max-width: 480px) {
+            .admin-container { padding: 0.75rem; }
+            .page-header {
+                padding: 1rem;
+                border-radius: 18px;
+            }
+            .page-header h1 { 
+                font-size: 1.3rem;
+                gap: 0.5rem;
+            }
+            .packages-grid { gap: 1rem; }
+            .package-card { border-radius: 18px; }
+            .package-image { height: 160px; }
+            .package-info { padding: 1rem; }
+            .package-name { font-size: 1.2rem; }
+            .package-price { font-size: 1.4rem; }
+            .package-desc { font-size: 0.85rem; }
+            .filter-pill { font-size: 0.7rem; padding: 0.5rem 0.8rem; }
         }
         
         /* Modal */
@@ -331,7 +382,7 @@ $sectionOrder = ['Wedding', 'Birthday', 'Big Events / Gala', 'Other Events'];
         .close-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; }
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; font-weight: 600; margin-bottom: 5px; color: #333; }
-        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-family: inherit; }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-family: inherit; box-sizing: border-box; }
         .form-group textarea { resize: vertical; min-height: 100px; }
     </style>
 </head>

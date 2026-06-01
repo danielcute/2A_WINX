@@ -1201,6 +1201,301 @@ $page_title = 'Manage Customizations';
             display: inline-block;
             margin-right: 4px;
         }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 1024px) {
+            .admin-container {
+                padding: 1.2rem;
+            }
+
+            .header-section {
+                padding-bottom: 1.2rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .header-section h1 {
+                font-size: 1.6rem;
+            }
+
+            .options-grid {
+                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+                gap: 1.2rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .category-title {
+                font-size: 1.5rem;
+                margin-bottom: 1.2rem;
+            }
+
+            .option-image {
+                height: 180px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .admin-container {
+                padding: 1rem;
+            }
+
+            .header-section {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1rem;
+                padding-bottom: 1.2rem;
+                margin-bottom: 1.5rem;
+                border-bottom: 2px solid #e0e0e0;
+            }
+
+            .header-section h1 {
+                font-size: 1.3rem;
+                gap: 0.75rem;
+            }
+
+            .header-section .btn {
+                width: 100%;
+                justify-content: center;
+                padding: 1rem;
+                font-size: 0.9rem;
+                border-radius: 16px;
+            }
+
+            .options-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 1rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .category-title {
+                font-size: 1.2rem;
+                margin-bottom: 1rem;
+                padding-bottom: 0.75rem;
+            }
+
+            .option-card {
+                border-radius: 14px;
+            }
+
+            .option-image {
+                height: 160px;
+                font-size: 2.5rem;
+            }
+
+            .option-content {
+                padding: 1rem;
+            }
+
+            .option-name {
+                font-size: 1rem;
+            }
+
+            .option-desc {
+                font-size: 0.8rem;
+            }
+
+            .option-price {
+                font-size: 1.1rem;
+            }
+
+            .option-actions {
+                padding: 0.75rem 1rem;
+            }
+
+            .option-actions .btn--primary,
+            .option-actions .btn-delete-custom {
+                min-width: 100px;
+                padding: 0.5rem 1rem;
+                font-size: 0.75rem;
+            }
+
+            .btn--fab {
+                bottom: 1.5rem;
+                right: 1.5rem;
+                width: 50px;
+                height: 50px;
+                font-size: 1.2rem;
+            }
+
+            .modal-content {
+                padding: 1.5rem;
+                width: 90%;
+                max-width: 500px;
+            }
+
+            .modal-header h2 {
+                font-size: 1.3rem;
+            }
+
+            .close-btn {
+                width: 28px;
+                height: 28px;
+                font-size: 1.5rem;
+            }
+
+            .form-group {
+                margin-bottom: 1.2rem;
+            }
+
+            .form-group label {
+                font-size: 0.9rem;
+                margin-bottom: 0.4rem;
+            }
+
+            .form-group input,
+            .form-group textarea,
+            .form-group select {
+                font-size: 0.9rem;
+                padding: 0.6rem 0.8rem;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .admin-container {
+                padding: 0.75rem;
+            }
+
+            .header-section {
+                padding-bottom: 1rem;
+                margin-bottom: 1.2rem;
+                gap: 0.75rem;
+            }
+
+            .header-section h1 {
+                font-size: 1.1rem;
+                gap: 0.5rem;
+                margin: 0;
+            }
+
+            .header-section .btn {
+                padding: 0.9rem 1.2rem;
+                font-size: 0.85rem;
+                border-radius: 14px;
+            }
+
+            .options-grid {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+                margin-bottom: 1.2rem;
+            }
+
+            .category-title {
+                font-size: 1rem;
+                margin-bottom: 0.75rem;
+                padding-bottom: 0.5rem;
+            }
+
+            .category-title i {
+                font-size: 1.3rem;
+            }
+
+            .option-card {
+                border-radius: 12px;
+            }
+
+            .option-image {
+                height: 140px;
+                font-size: 2rem;
+            }
+
+            .option-content {
+                padding: 0.75rem;
+            }
+
+            .option-name {
+                font-size: 0.95rem;
+                margin-bottom: 0.4rem;
+            }
+
+            .option-desc {
+                font-size: 0.75rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .option-price {
+                font-size: 1rem;
+                margin-bottom: 0.4rem;
+            }
+
+            .status-badge {
+                padding: 0.3rem 0.6rem;
+                font-size: 0.7rem;
+            }
+
+            .option-actions {
+                padding: 0.6rem 0.75rem;
+                gap: 0.5rem;
+            }
+
+            .option-actions .btn--primary,
+            .option-actions .btn-delete-custom {
+                min-width: 80px;
+                padding: 0.45rem 0.8rem;
+                font-size: 0.7rem;
+            }
+
+            .btn--fab {
+                bottom: 1rem;
+                right: 1rem;
+                width: 45px;
+                height: 45px;
+                font-size: 1rem;
+            }
+
+            .modal {
+                z-index: 99998;
+            }
+
+            .modal-content {
+                padding: 1.2rem;
+                width: 95%;
+                max-width: 450px;
+                z-index: 99999;
+            }
+
+            .modal-header {
+                margin-bottom: 1rem;
+            }
+
+            .modal-header h2 {
+                font-size: 1.1rem;
+                gap: 0.5rem;
+            }
+
+            .modal-header h2 i {
+                font-size: 1.2rem;
+            }
+
+            .close-btn {
+                width: 26px;
+                height: 26px;
+                font-size: 1.3rem;
+            }
+
+            .form-group {
+                margin-bottom: 1rem;
+            }
+
+            .form-group label {
+                font-size: 0.8rem;
+                margin-bottom: 0.3rem;
+            }
+
+            .form-group input,
+            .form-group textarea,
+            .form-group select {
+                font-size: 0.85rem;
+                padding: 0.5rem 0.7rem;
+                border-radius: 8px;
+            }
+
+            .form-group textarea {
+                min-height: 80px;
+            }
+
+            .category-summary {
+                font-size: 0.8rem;
+            }
+        }
     </style>
 
     <!-- Modal for Add Customization - Moved outside admin-container for proper z-index stacking -->

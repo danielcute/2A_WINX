@@ -44,6 +44,15 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
             max-width: 1300px;
             margin: 0 auto;
             width: 100%;
+            box-sizing: border-box;
+        }
+
+        .admin-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1.5rem;
+            box-sizing: border-box;
+            width: 100%;
         }
 
         .occasions-header {
@@ -51,6 +60,10 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
             justify-content: space-between;
             align-items: center;
             margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid #e0e0e0;
+            flex-wrap: wrap;
+            gap: 1rem;
         }
 
         .occasions-header h1 {
@@ -63,6 +76,24 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
             gap: 1rem;
             font-weight: 700;
             letter-spacing: -0.03em;
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .occasions-header .btn--primary {
+            background: linear-gradient(135deg, #8A7650 0%, #6B5A3E 100%);
+            border-radius: 18px;
+            padding: 0.75rem 1.5rem;
+            font-size: 0.95rem;
+            white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(138, 118, 80, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .occasions-header .btn--primary:hover {
+            background: linear-gradient(135deg, #6B5A3E 0%, #5A4A30 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(138, 118, 80, 0.3);
         }
 
         /* Alert Messages */
@@ -313,6 +344,230 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
         .category-summary-note { font-size: 0.9rem; color: #8B7355; margin: 0; line-height: 1.6; }
         .category-summary-note a { color: #8A7650; font-weight: 700; text-decoration: none; border-bottom: 1px solid transparent; transition: all 0.2s; }
         .category-summary-note a:hover { border-bottom-color: #8A7650; }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 1024px) {
+            .admin-container {
+                padding: 1.2rem;
+            }
+
+            .occasions-header h1 {
+                font-size: 1.6rem;
+            }
+
+            .occasions-grid {
+                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+                gap: 1.2rem;
+            }
+
+            .occasion-image-container {
+                height: 180px;
+            }
+
+            .category-summary-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 1rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .admin-container {
+                padding: 1rem;
+            }
+
+            .occasions-header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1rem;
+                margin-bottom: 1.5rem;
+                border-bottom: 2px solid #e0e0e0;
+                padding-bottom: 1.5rem;
+            }
+
+            .occasions-header h1 {
+                font-size: 1.3rem;
+                gap: 0.75rem;
+            }
+
+            .occasions-header .btn--primary {
+                width: 100%;
+                justify-content: center;
+                padding: 1rem;
+                font-size: 0.9rem;
+            }
+
+            .occasions-grid {
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+                gap: 1rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .occasion-card {
+                border-radius: 16px;
+            }
+
+            .occasion-image-container {
+                height: 160px;
+                font-size: 2.5rem;
+            }
+
+            .occasion-actions .btn {
+                padding: 0.55rem 1rem;
+                font-size: 0.75rem;
+            }
+
+            .category-summary {
+                padding: 1.25rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .category-summary h3 {
+                font-size: 1.3rem;
+                margin-bottom: 1rem;
+            }
+
+            .category-summary-grid {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                gap: 0.75rem;
+            }
+
+            .category-card {
+                padding: 1rem;
+                border-radius: 12px;
+            }
+
+            .modal-content {
+                max-width: 90%;
+                padding: 1.5rem;
+            }
+
+            .modal-header {
+                margin-bottom: 1.2rem;
+            }
+
+            .form-group {
+                margin-bottom: 1.2rem;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .admin-container {
+                padding: 0.75rem;
+            }
+
+            .occasions-header h1 {
+                font-size: 1.1rem;
+                gap: 0.5rem;
+            }
+
+            .occasions-header .btn--primary {
+                padding: 0.9rem 1.2rem;
+                font-size: 0.85rem;
+                gap: 0.4rem;
+            }
+
+            .occasions-grid {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+            }
+
+            .occasion-card {
+                border-radius: 12px;
+            }
+
+            .occasion-image-container {
+                height: 140px;
+                font-size: 2rem;
+            }
+
+            .occasion-actions {
+                gap: 0.5rem;
+            }
+
+            .occasion-actions .btn {
+                padding: 0.5rem 0.8rem;
+                font-size: 0.7rem;
+                min-width: 100px;
+            }
+
+            .category-summary {
+                padding: 1rem;
+                margin-bottom: 1.2rem;
+                border-radius: 12px;
+            }
+
+            .category-summary h3 {
+                font-size: 1.1rem;
+                margin-bottom: 0.75rem;
+            }
+
+            .category-summary-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.5rem;
+            }
+
+            .category-card {
+                padding: 0.75rem;
+                border-radius: 10px;
+            }
+
+            .category-card__title {
+                font-size: 0.85rem;
+            }
+
+            .category-card__count {
+                font-size: 0.75rem;
+            }
+
+            .modal-content {
+                max-width: 95%;
+                padding: 1.2rem;
+            }
+
+            .modal-header {
+                margin-bottom: 1rem;
+            }
+
+            .modal-header h3 {
+                font-size: 1.2rem;
+            }
+
+            .form-group {
+                margin-bottom: 1rem;
+            }
+
+            .form-group label {
+                font-size: 0.85rem;
+                margin-bottom: 0.4rem;
+            }
+
+            .form-group input,
+            .form-group textarea {
+                padding: 0.6rem 0.8rem;
+                font-size: 0.85rem;
+                border-radius: 8px;
+            }
+
+            .modal-footer {
+                gap: 0.75rem;
+                margin-top: 1.5rem;
+                padding-top: 1rem;
+            }
+
+            .empty-state {
+                padding: 2rem 1rem;
+            }
+
+            .empty-state i {
+                font-size: 2rem;
+            }
+
+            .alert {
+                padding: 0.75rem 1rem;
+                gap: 0.75rem;
+                font-size: 0.85rem;
+            }
+        }
     </style>
 </head>
 <body>

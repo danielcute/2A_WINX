@@ -22,11 +22,22 @@
 
 <script>
 function openLogoutModal(e) {
-    if(e) e.preventDefault();
-    document.getElementById("logoutModal").classList.add("show");
+    if(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    const modal = document.getElementById("logoutModal");
+    if (modal) {
+        modal.classList.add("show");
+        document.body.style.overflow = 'hidden';
+    }
 }
 function closeLogoutModal() {
-    document.getElementById("logoutModal").classList.remove("show");
+    const modal = document.getElementById("logoutModal");
+    if (modal) {
+        modal.classList.remove("show");
+        document.body.style.overflow = '';
+    }
 }
 function confirmLogout() {
     window.location.href = "/index.php?route=logout";

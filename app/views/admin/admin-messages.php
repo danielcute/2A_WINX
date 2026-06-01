@@ -118,9 +118,347 @@ if (method_exists($messagingController, 'getUsersForNewMessage')) {
         .reply-form textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-family: inherit; min-height: 120px; }
         .reply-form button { background: #8A7650; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; margin-top: 10px; }
         .reply-form button:hover { background: #6B5A3E; }
-        @media (max-width: 1000px) {
-            .messages-layout { grid-template-columns: 1fr; }
-            .messages-list { height: auto; max-height: 400px; }
+
+        @media (max-width: 1024px) {
+            .admin-container {
+                padding: 1.2rem;
+            }
+
+            .page-header {
+                margin-bottom: 1.5rem;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1rem;
+            }
+
+            .page-header h1 {
+                font-size: 1.6rem;
+            }
+
+            .page-header .btn {
+                width: 100%;
+            }
+
+            .messages-layout {
+                grid-template-columns: 1fr;
+                gap: 1.2rem;
+            }
+
+            .messages-list {
+                max-height: 500px;
+            }
+
+            .message-detail {
+                padding: 1.2rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .admin-container {
+                padding: 1rem;
+            }
+
+            .page-header {
+                gap: 0.75rem;
+                margin-bottom: 1.2rem;
+            }
+
+            .page-header h1 {
+                font-size: 1.3rem;
+                gap: 0.5rem;
+            }
+
+            .page-header .btn {
+                width: 100%;
+                padding: 1rem;
+                font-size: 0.9rem;
+            }
+
+            .messages-layout {
+                gap: 1rem;
+            }
+
+            .messages-list {
+                max-height: 400px;
+                border-radius: 12px;
+            }
+
+            .messages-header {
+                padding: 1rem;
+            }
+
+            .filter-buttons {
+                gap: 0.4rem;
+            }
+
+            .filter-btn {
+                padding: 0.6rem 1rem;
+                font-size: 0.8rem;
+                border-radius: 8px;
+            }
+
+            .messages-scroll {
+                max-height: 350px;
+            }
+
+            .message-item {
+                padding: 1rem 0.75rem;
+            }
+
+            .message-from {
+                font-size: 0.9rem;
+            }
+
+            .message-subject {
+                font-size: 0.85rem;
+            }
+
+            .message-preview {
+                font-size: 0.8rem;
+            }
+
+            .message-detail {
+                padding: 1rem;
+                border-radius: 12px;
+            }
+
+            .detail-header {
+                padding-bottom: 1rem;
+                margin-bottom: 1rem;
+            }
+
+            .detail-subject {
+                font-size: 1.2rem;
+            }
+
+            .detail-body {
+                padding: 1rem;
+                font-size: 0.9rem;
+            }
+
+            .conversation-item {
+                padding: 1rem;
+                margin-bottom: 0.75rem;
+            }
+
+            .conversation-sender {
+                font-size: 0.85rem;
+            }
+
+            .conversation-text {
+                font-size: 0.9rem;
+            }
+
+            .reply-form {
+                margin-top: 1.2rem;
+                padding-top: 1rem;
+            }
+
+            .reply-form label {
+                font-size: 0.9rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .reply-form textarea {
+                padding: 0.75rem;
+                font-size: 0.9rem;
+                min-height: 100px;
+                border-radius: 8px;
+            }
+
+            .reply-form button {
+                padding: 0.75rem 1.5rem;
+                font-size: 0.9rem;
+                border-radius: 8px;
+            }
+
+            .msg-success,
+            .msg-error {
+                font-size: 0.9rem;
+                padding: 1rem;
+                border-radius: 8px;
+            }
+
+            .badge {
+                margin-left: 0.5rem;
+                padding: 3px 8px;
+                font-size: 0.75rem;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .admin-container {
+                padding: 0.75rem;
+            }
+
+            .admin-page-header {
+                margin-bottom: 1rem;
+            }
+
+            .page-header {
+                gap: 0.5rem;
+                margin-bottom: 1rem;
+            }
+
+            .page-header h1 {
+                font-size: 1.1rem;
+                gap: 0.4rem;
+            }
+
+            .page-header h1 i {
+                font-size: 1.2rem;
+            }
+
+            .page-header .btn {
+                padding: 0.8rem 1rem;
+                font-size: 0.8rem;
+                border-radius: 12px;
+            }
+
+            .page-header .btn i {
+                font-size: 0.9rem;
+            }
+
+            .messages-layout {
+                gap: 0.75rem;
+            }
+
+            .messages-list {
+                max-height: 350px;
+                border-radius: 10px;
+            }
+
+            .messages-header {
+                padding: 0.75rem;
+            }
+
+            .filter-buttons {
+                gap: 0.3rem;
+            }
+
+            .filter-btn {
+                padding: 0.5rem 0.8rem;
+                font-size: 0.75rem;
+                border-radius: 6px;
+            }
+
+            .messages-scroll {
+                max-height: 300px;
+            }
+
+            .message-item {
+                padding: 0.75rem 0.5rem;
+            }
+
+            .message-from {
+                font-size: 0.85rem;
+            }
+
+            .message-subject {
+                font-size: 0.8rem;
+                margin: 3px 0;
+            }
+
+            .message-preview {
+                font-size: 0.75rem;
+            }
+
+            .message-date {
+                font-size: 0.7rem;
+            }
+
+            .message-detail {
+                padding: 0.75rem;
+                border-radius: 10px;
+            }
+
+            .msg-success,
+            .msg-error {
+                font-size: 0.8rem;
+                padding: 0.75rem;
+                border-radius: 6px;
+                margin-bottom: 1rem;
+            }
+
+            .detail-header {
+                padding-bottom: 0.75rem;
+                margin-bottom: 0.75rem;
+            }
+
+            .detail-from {
+                font-size: 0.8rem;
+            }
+
+            .detail-subject {
+                font-size: 1rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .detail-meta {
+                font-size: 0.75rem;
+            }
+
+            .detail-body {
+                padding: 0.75rem;
+                font-size: 0.85rem;
+                line-height: 1.4;
+                margin-bottom: 1rem;
+            }
+
+            .conversation {
+                margin-bottom: 1rem;
+            }
+
+            .conversation-item {
+                padding: 0.75rem;
+                margin-bottom: 0.5rem;
+                border-radius: 8px;
+            }
+
+            .conversation-sender {
+                font-size: 0.8rem;
+                margin-bottom: 0.3rem;
+            }
+
+            .conversation-text {
+                font-size: 0.8rem;
+                line-height: 1.4;
+            }
+
+            .conversation-date {
+                font-size: 0.65rem;
+                margin-top: 0.3rem;
+            }
+
+            .reply-form {
+                margin-top: 1rem;
+                padding-top: 0.75rem;
+            }
+
+            .reply-form label {
+                font-size: 0.8rem;
+                margin-bottom: 0.4rem;
+            }
+
+            .reply-form textarea {
+                padding: 0.6rem;
+                font-size: 0.8rem;
+                min-height: 80px;
+                border-radius: 6px;
+            }
+
+            .reply-form button {
+                padding: 0.6rem 1.2rem;
+                font-size: 0.8rem;
+                border-radius: 6px;
+                width: 100%;
+            }
+
+            .badge {
+                margin-left: 0.3rem;
+                padding: 2px 6px;
+                font-size: 0.7rem;
+            }
         }
     </style>
 </head>

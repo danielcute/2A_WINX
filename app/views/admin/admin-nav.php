@@ -158,6 +158,8 @@ body {
   pointer-events: auto;
   z-index: 1100;
   position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
 .admin-sidebar__logout {
@@ -169,11 +171,25 @@ body {
   font-size: 0.85rem;
   transition: var(--transition);
   font-weight: 500;
+  cursor: pointer;
+  padding: 0.8rem 1.2rem;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 1200;
+  pointer-events: auto;
+  touch-action: auto;
 }
 
 .admin-sidebar__logout:hover {
   color: #ff8a7a;
   transform: translateX(3px);
+  background: rgba(255,255,255,0.1);
+  border-color: rgba(255,255,255,0.2);
 }
 
 /* --- Main area --- */
@@ -297,21 +313,32 @@ body {
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s ease, visibility 0s linear 0.3s;
+    pointer-events: none;
   }
 
   .admin-overlay.active {
     opacity: 1;
     visibility: visible;
     transition-delay: 0s; /* Overlay appears instantly */
+    pointer-events: auto;
   }
 
   .admin-main {
     margin-left: 0;
-    padding: 70px 0 2rem;
-    min-height: calc(100vh - 60px);
+    padding: 0;
+    min-height: 100vh;
     width: 100%;
     box-sizing: border-box;
     position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .admin-content {
+    flex: 1;
+    padding: 80px 1rem 2rem;
+    width: 100%;
+    box-sizing: border-box;
   }
   
   .admin-topbar {
@@ -322,13 +349,13 @@ body {
     z-index: 8000;
     border-radius: 0;
     margin-bottom: 0;
-    background: rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(15px) saturate(180%);
     -webkit-backdrop-filter: blur(15px) saturate(180%);
     border-bottom: 1px solid var(--gray-light);
     padding: 0 1rem;
     height: 70px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -350,6 +377,13 @@ body {
     flex-shrink: 0;
     position: relative;
     z-index: 10600; /* Ensure toggle is above overlay for double-tap toggle */
+    padding: 0;
+    transition: all 0.2s ease;
+  }
+
+  .admin-mobile-toggle:active,
+  .admin-mobile-toggle:focus {
+    outline: none;
   }
 
   .admin-topbar__title {
@@ -951,18 +985,36 @@ if (mobileToggle && adminSidebar && adminOverlay) {
     document.body.style.overflow = isOpen ? 'hidden' : '';
   };
 
+  // Burger button click - opens the menu
   mobileToggle.addEventListener('click', (e) => {
     e.stopPropagation();
     toggleMenu();
   });
 
-  adminOverlay.addEventListener('click', toggleMenu);
+  // Overlay click - closes the menu
+  adminOverlay.addEventListener('click', (e) => {
+    if (e.target === adminOverlay && adminSidebar.classList.contains('open')) {
+      toggleMenu();
+    }
+  });
   
-  // Close on link click
+  // Close on sidebar link click
   adminSidebar.querySelectorAll('.admin-sidebar__link').forEach(link => {
     link.addEventListener('click', () => {
-      if (adminSidebar.classList.contains('open')) toggleMenu();
+      if (adminSidebar.classList.contains('open')) {
+        toggleMenu();
+      }
     });
   });
+
+  // Close on logout click
+  const logoutBtn = adminSidebar.querySelector('.admin-sidebar__logout');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', () => {
+      if (adminSidebar.classList.contains('open')) {
+        toggleMenu();
+      }
+    });
+  }
 }
 </script>

@@ -19,7 +19,9 @@ $page_title = 'Manage Wardrobes';
         .admin-container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 1.5rem;
+            box-sizing: border-box;
+            width: 100%;
         }
 
         .header-section {
@@ -43,26 +45,32 @@ $page_title = 'Manage Wardrobes';
         }
 
         .btn-add {
-            background: #8A7650;
+            background: linear-gradient(135deg, #8A7650 0%, #6B5A3E 100%);
             color: white;
-            padding: 10px 20px;
+            padding: 0.75rem 1.5rem;
             border: none;
-            border-radius: 5px;
+            border-radius: 18px;
             cursor: pointer;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.75rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(138, 118, 80, 0.2);
         }
 
         .btn-add:hover {
-            background: #6B5A3E;
+            background: linear-gradient(135deg, #6B5A3E 0%, #5A4A30 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(138, 118, 80, 0.3);
         }
 
         .alert {
             padding: 15px;
             margin-bottom: 20px;
-            border-radius: 5px;
+            border-radius: 15px;
         }
 
         .alert-success {
@@ -75,14 +83,15 @@ $page_title = 'Manage Wardrobes';
             margin-bottom: 40px;
             background: white;
             border: 1px solid #e0e0e0;
-            border-radius: 8px;
+            border-radius: 20px;
             overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
 
         .category-header {
             background: #f5f0e8;
-            padding: 15px 20px;
-            border-bottom: 2px solid #ddd;
+            padding: 20px;
+            border-bottom: 2px solid #e0e0e0;
             display: flex;
             align-items: center;
             gap: 0.75rem;
@@ -104,6 +113,9 @@ $page_title = 'Manage Wardrobes';
         .wardrobe-table thead {
             background: #f9f7f3;
             border-bottom: 2px solid #ddd;
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
 
         .wardrobe-table th {
@@ -127,20 +139,24 @@ $page_title = 'Manage Wardrobes';
 
         /* Mobile action dropdown menu */
         .action-menu-btn {
-            background: #8A7650;
+            background: linear-gradient(135deg, #8A7650 0%, #6B5A3E 100%);
             color: white;
             border: none;
-            padding: 8px 12px;
-            border-radius: 4px;
+            padding: 0.6rem 1rem;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             display: none;
             align-items: center;
             gap: 0.3rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
         }
 
         .action-menu-btn:hover {
-            background: #6B5A3E;
+            background: linear-gradient(135deg, #6B5A3E 0%, #5A4A30 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(138, 118, 80, 0.2);
         }
 
         .action-menu {
@@ -195,20 +211,45 @@ $page_title = 'Manage Wardrobes';
         }
 
         /* Mobile responsiveness */
+        @media (max-width: 1024px) {
+            .admin-container {
+                padding: 1.2rem;
+            }
+            
+            .category-section {
+                margin-bottom: 30px;
+            }
+            
+            .wardrobe-table {
+                font-size: 0.9rem;
+            }
+        }
+
         @media (max-width: 768px) {
             .admin-container {
-                padding: 15px;
+                padding: 1rem;
             }
 
             .header-section {
                 flex-direction: column;
-                align-items: flex-start;
+                align-items: stretch;
+                gap: 1rem;
+                margin-bottom: 2rem;
+                border-bottom: 2px solid #e0e0e0;
+                padding-bottom: 1.5rem;
+            }
+
+            .header-section h1 {
+                font-size: 1.4rem;
+                margin-bottom: 0.5rem;
             }
 
             .btn-add {
                 width: 100%;
                 justify-content: center;
-                margin-top: 10px;
+                padding: 1rem;
+                font-size: 1rem;
+                border-radius: 16px;
             }
 
             .wardrobe-table {
@@ -216,7 +257,11 @@ $page_title = 'Manage Wardrobes';
             }
 
             .wardrobe-table td, .wardrobe-table th {
-                padding: 8px 10px;
+                padding: 10px 12px;
+            }
+
+            .category-header {
+                padding: 15px;
             }
 
             /* Hide traditional action buttons on tablet/mobile */
@@ -239,6 +284,22 @@ $page_title = 'Manage Wardrobes';
         }
 
         @media (max-width: 600px) {
+            .admin-container {
+                padding: 0.75rem;
+            }
+
+            .header-section h1 {
+                font-size: 1.2rem;
+                gap: 0.5rem;
+            }
+
+            .btn-add {
+                padding: 0.9rem 1.2rem;
+                font-size: 0.9rem;
+                border-radius: 14px;
+                gap: 0.5rem;
+            }
+
             .wardrobe-table {
                 font-size: 0.75rem;
                 display: block;
@@ -255,14 +316,16 @@ $page_title = 'Manage Wardrobes';
             .wardrobe-table td {
                 display: block;
                 width: 100%;
+                box-sizing: border-box;
             }
 
             .wardrobe-table tr {
                 margin-bottom: 15px;
                 border: 1px solid #ddd;
-                border-radius: 8px;
-                padding: 10px;
+                border-radius: 12px;
+                padding: 12px;
                 background: white;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.05);
             }
 
             .wardrobe-table td {
@@ -271,17 +334,33 @@ $page_title = 'Manage Wardrobes';
                 position: relative;
                 padding-left: 100px;
                 min-height: 20px;
+                border-bottom: none;
             }
 
             .wardrobe-table td:before {
                 content: attr(data-label);
                 position: absolute;
-                left: 10px;
+                left: 12px;
                 font-weight: 600;
                 text-align: left;
                 color: #8A7650;
                 width: 90px;
             }
+
+            .category-section {
+                margin-bottom: 20px;
+                border-radius: 16px;
+            }
+
+            .category-header {
+                padding: 12px 15px;
+                border-radius: 16px 16px 0 0;
+            }
+
+            .category-header h2 {
+                font-size: 1.1rem;
+            }
+        }
 
             .wardrobe-table .wardrobe-image-cell {
                 display: block;

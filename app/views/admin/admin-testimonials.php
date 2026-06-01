@@ -90,6 +90,251 @@ $pendingCount = $testimonialModel->getPendingCount();
             from { transform: translateX(100%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
         }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 1024px) {
+            .admin-container {
+                padding: 1.2rem;
+            }
+
+            .admin-page-header {
+                margin-bottom: 1.5rem;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1rem;
+            }
+
+            .admin-page-header h1 {
+                font-size: 1.6rem;
+            }
+
+            .admin-page-header > div {
+                display: flex;
+                gap: 0.75rem;
+                flex-wrap: wrap;
+                align-items: center;
+            }
+
+            .testimonial-card {
+                margin-bottom: 0.75rem;
+                padding: 1.2rem;
+                flex-direction: column;
+                gap: 1rem;
+                border-radius: 16px;
+            }
+
+            .testimonial-card > div:last-child {
+                width: 100%;
+                display: flex;
+                gap: 0.5rem;
+                flex-wrap: wrap;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .admin-container {
+                padding: 1rem;
+            }
+
+            .admin-page-header {
+                margin-bottom: 1.2rem;
+                gap: 0.75rem;
+            }
+
+            .admin-page-header h1 {
+                font-size: 1.3rem;
+                gap: 0.5rem;
+            }
+
+            .admin-page-header > div {
+                width: 100%;
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .admin-page-header .btn {
+                width: 100%;
+                justify-content: center;
+                padding: 1rem;
+                font-size: 0.9rem;
+            }
+
+            .badge {
+                width: 100%;
+                text-align: center;
+                margin-right: 0 !important;
+            }
+
+            .testimonial-card {
+                margin-bottom: 0.6rem;
+                padding: 1rem;
+                flex-direction: column;
+                gap: 0.75rem;
+                border-radius: 14px;
+            }
+
+            .testimonial-content {
+                flex: 1;
+            }
+
+            .testimonial-quote {
+                font-size: 0.9rem;
+            }
+
+            .testimonial-author {
+                font-size: 0.9rem;
+            }
+
+            .testimonial-card > div:last-child {
+                width: 100%;
+                display: flex;
+                gap: 0.5rem;
+                flex-direction: column;
+            }
+
+            .testimonial-card .btn {
+                width: 100%;
+                justify-content: center;
+                padding: 0.75rem;
+                font-size: 0.8rem;
+            }
+
+            .status-badge {
+                padding: 0.3rem 0.75rem;
+                font-size: 0.75rem;
+            }
+
+            .form-modal[style*="display: flex"] {
+                width: 100%;
+                max-width: none;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .admin-container {
+                padding: 0.75rem;
+            }
+
+            .admin-page-header {
+                margin-bottom: 1rem;
+                gap: 0.5rem;
+            }
+
+            .admin-page-header h1 {
+                font-size: 1.1rem;
+                gap: 0.4rem;
+            }
+
+            .admin-page-header h1 i {
+                font-size: 1.2rem;
+            }
+
+            .admin-page-header > div {
+                gap: 0.5rem;
+            }
+
+            .admin-page-header .btn {
+                padding: 0.85rem 1rem;
+                font-size: 0.8rem;
+                border-radius: 12px;
+            }
+
+            .badge {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.7rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .testimonial-card {
+                margin-bottom: 0.5rem;
+                padding: 0.75rem;
+                gap: 0.6rem;
+                border-radius: 12px;
+            }
+
+            .testimonial-stars {
+                margin-bottom: 0.3rem;
+            }
+
+            .testimonial-stars i {
+                font-size: 0.85rem;
+                margin-right: 0.1rem;
+            }
+
+            .testimonial-quote {
+                font-size: 0.8rem;
+                margin-bottom: 0.4rem;
+            }
+
+            .testimonial-author {
+                font-size: 0.8rem;
+            }
+
+            .testimonial-content small {
+                font-size: 0.7rem !important;
+            }
+
+            .status-badge {
+                padding: 0.2rem 0.5rem;
+                font-size: 0.65rem;
+                margin-top: 0.3rem;
+            }
+
+            .testimonial-card > div:last-child {
+                width: 100%;
+                gap: 0.4rem;
+                flex-direction: row;
+            }
+
+            .testimonial-card .btn {
+                flex: 1;
+                min-width: 70px;
+                padding: 0.6rem 0.75rem;
+                font-size: 0.7rem;
+                border-radius: 8px;
+                gap: 0.3rem;
+            }
+
+            .testimonial-card .btn i {
+                font-size: 0.75rem;
+            }
+
+            .form-modal[style*="display: flex"] > div {
+                max-width: 95%;
+                padding: 1.2rem;
+                border-radius: 16px;
+            }
+
+            .form-modal h3 {
+                font-size: 1.1rem;
+                margin-bottom: 1rem;
+            }
+
+            .form-group {
+                margin-bottom: 0.75rem !important;
+            }
+
+            .form-group label {
+                font-size: 0.85rem;
+                margin-bottom: 0.3rem;
+            }
+
+            .form-group input,
+            .form-group textarea,
+            .form-group select {
+                padding: 0.6rem !important;
+                font-size: 0.85rem;
+                border-radius: 8px !important;
+            }
+
+            .toast {
+                bottom: 1rem;
+                right: 1rem;
+                padding: 0.6rem 1.2rem;
+                font-size: 0.85rem;
+                border-radius: 6px;
+            }
+        }
     </style>
 </head>
 <body>
