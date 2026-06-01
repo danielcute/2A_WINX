@@ -1361,12 +1361,22 @@ $wardrobesByCategory = $wardrobeModel->getAllByCategory();
       
       document.getElementById('modalPrice').textContent = '₱' + parseFloat(wardrobe.rental_price || wardrobe.price || 0).toFixed(2);
       
+      // Use binary image endpoint
       const imageContainer = document.getElementById('modalImage');
-      if (wardrobe.image && wardrobe.image_type) {
-        imageContainer.innerHTML = `<img src="data:${wardrobe.image_type};base64,${wardrobe.image}" alt="${escapeHtml(wardrobe.name)}">`;
+      const imgUrl = getWardrobeImageUrl(wardrobe);
+      if (imgUrl) {
+        imageContainer.innerHTML = `<img src="${imgUrl}" alt="${escapeHtml(wardrobe.name)}" style="width:100%;height:100%;object-fit:contain;" onerror="this.style.display='none';this.parentElement.innerHTML='<i class=\\'fas fa-tuxedo\\'></i>';">`;
       } else {
         imageContainer.innerHTML = '<i class="fas fa-tuxedo"></i>';
       }
+
+      // Update select button state
+      const isSelected = selectedWardrobes.some(w => parseInt(w.wardrobe_id) === parseInt(wardrobe.wardrobe_id));
+      const selectBtn = document.getElementById('modalSelectBtn');
+      selectBtn.innerHTML = isSelected 
+        ? '<i class="fas fa-check"></i> Deselect' 
+        : '<i class="fas fa-shopping-cart"></i> Select This Item';
+      selectBtn.style.background = isSelected ? 'var(--primary-dark)' : '';
 
       document.getElementById('wardrobeModal').classList.add('active');
     }
@@ -1407,34 +1417,42 @@ $wardrobesByCategory = $wardrobeModel->getAllByCategory();
 
       // Buttons
       document.getElementById('backBtn').addEventListener('click', function() {
-        // Go back to packages or customize depending on where we came from
         const urlParams = new URLSearchParams(window.location.search);
         const occasion = urlParams.get('occasion') || 'wedding';
-        const fromPackages = sessionStorage.getItem('checkoutCart');
-        
-        if (fromPackages) {
-          // Came from packages, go back to packages
-          window.location.href = '/index.php?route=packages&occasion=' + occasion;
-        } else {
-          // Came from customize, go back to customize
-          window.location.href = '/index.php?route=customize&occasion=' + occasion;
-        }
+        window.location.href = '/index.php?route=packages&occasion=' + encodeURIComponent(occasion);
       });
 
       document.getElementById('proceedBtn').addEventListener('click', function() {
-        // Always go to customize next to select customization options
+        if (selectedWardrobes.length === 0) {
+          alert('Please select at least one wardrobe item.');
+          return;
+        }
+
         const urlParams = new URLSearchParams(window.location.search);
         const occasion = urlParams.get('occasion') || 'wedding';
-        
-        if (selectedWardrobes.length > 0) {
-          // Store selected wardrobes in sessionStorage for customize page
-          sessionStorage.setItem('selectedWardrobes', JSON.stringify(selectedWardrobes));
-          
-          // Redirect to customize page
-          window.location.href = '/index.php?route=customize&occasion=' + occasion;
-        } else {
-          alert('Please select at least one wardrobe item.');
-        }
+
+        // Get the package already in cart (from packages page)
+        const packageData = sessionStorage.getItem('checkoutCart');
+        const packageItems = packageData ? JSON.parse(packageData) : [];
+
+        // Build wardrobe cart items
+        const wardrobeItems = selectedWardrobes.map(w => ({
+          category: 'Wardrobe',
+          name: w.name,
+          wardrobe_id: w.wardrobe_id,
+          price: parseFloat(w.rental_price || w.price || 0),
+          type: 'wardrobe',
+          description: 'Rental: ' + w.name + ' (' + (w.rental_duration_days || 1) + ' day(s))'
+        }));
+
+        // Merge package + wardrobe items
+        const allItems = [...packageItems, ...wardrobeItems];
+
+        // Save merged cart to sessionStorage
+        sessionStorage.setItem('checkoutCart', JSON.stringify(allItems));
+
+        // Go directly to checkout
+        window.location.href = '/index.php?route=checkout&occasion=' + encodeURIComponent(occasion);
       });
 
       // Original submission logic moved to a helper
@@ -1497,6 +1515,9 @@ $wardrobesByCategory = $wardrobeModel->getAllByCategory();
     }
 
     function loadWardrobes() {
+      const container = document.getElementById('wardrobesContainer');
+      container.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:3rem;color:#8A7650;"><i class="fas fa-spinner fa-spin" style="font-size:2rem;"></i><p style="margin-top:1rem;">Loading wardrobes...</p></div>';
+
       fetch('<?php echo BASE_URL; ?>/api-wardrobe.php?action=getAll')
         .then(response => {
           if (!response.ok) throw new Error('Server error: ' + response.status);
@@ -1506,18 +1527,29 @@ $wardrobesByCategory = $wardrobeModel->getAllByCategory();
           if (data.success) {
             allWardrobes = data.data || data.wardrobes || [];
             displayWardrobes(allWardrobes);
+          } else {
+            container.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:3rem;color:#999;"><i class="fas fa-exclamation-circle" style="font-size:2rem;margin-bottom:1rem;display:block;"></i><p>Failed to load wardrobes. Please refresh the page.</p></div>';
           }
         })
-        .catch(error => console.error('Error loading wardrobes:', error));
+        .catch(error => {
+          console.error('Error loading wardrobes:', error);
+          container.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:3rem;color:#999;"><i class="fas fa-exclamation-circle" style="font-size:2rem;margin-bottom:1rem;display:block;"></i><p>Error loading wardrobes. Please refresh the page.</p></div>';
+        });
+    }
+
+    // Build image URL using the public binary endpoint
+    function getWardrobeImageUrl(wardrobe) {
+      if (wardrobe.has_image || wardrobe.image) {
+        return '<?php echo BASE_URL; ?>/api-wardrobe-image.php?id=' + wardrobe.wardrobe_id;
+      }
+      return null;
     }
 
     function displayWardrobes(wardrobes) {
       const container = document.getElementById('wardrobesContainer');
       const emptyState = document.getElementById('wardrobeEmpty');
       
-      console.log('displayWardrobes called with', wardrobes.length, 'wardrobes');
-      
-      if (wardrobes.length === 0) {
+      if (!wardrobes || wardrobes.length === 0) {
         container.style.display = 'none';
         emptyState.style.display = 'block';
         return;
@@ -1526,47 +1558,87 @@ $wardrobesByCategory = $wardrobeModel->getAllByCategory();
       container.style.display = 'grid';
       emptyState.style.display = 'none';
       
-      container.innerHTML = wardrobes.map(wardrobe => `
-        <div class="wardrobe-card ${selectedWardrobes.some(w => String(w.wardrobe_id) === String(wardrobe.wardrobe_id)) ? 'selected' : ''}" 
-             data-wardrobe-id="${wardrobe.wardrobe_id}">
-          <div class="wardrobe-card__image">
-            ${(wardrobe.has_image || wardrobe.image) ? 
-              `<img src="<?php echo BASE_URL; ?>/index.php?route=admin-wardrobe-image&id=${wardrobe.wardrobe_id}" alt="${escapeHtml(wardrobe.name)}" style="width: 100%; height: 100%; object-fit: cover; cursor: pointer;">` :
-              `<i class="fas fa-tuxedo" style="cursor: pointer;"></i>`
-            }
+      container.innerHTML = wardrobes.map(wardrobe => {
+        const imgUrl = getWardrobeImageUrl(wardrobe);
+        const isSelected = selectedWardrobes.some(w => String(w.wardrobe_id) === String(wardrobe.wardrobe_id));
+        const price = parseFloat(wardrobe.rental_price || 0);
+        const desc = (wardrobe.description || '').trim();
+        
+        return `
+          <div class="wardrobe-card ${isSelected ? 'selected' : ''}" 
+               data-wardrobe-id="${wardrobe.wardrobe_id}"
+               title="${escapeHtml(wardrobe.name)}">
+            <div class="wardrobe-card__image">
+              ${imgUrl
+                ? `<img src="${imgUrl}" alt="${escapeHtml(wardrobe.name)}" 
+                        style="width:100%;height:100%;object-fit:cover;"
+                        onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                   <i class="fas fa-tuxedo" style="display:none;font-size:3rem;color:var(--primary);"></i>`
+                : `<i class="fas fa-tuxedo" style="font-size:3rem;color:var(--primary);"></i>`
+              }
+            </div>
+            <div class="wardrobe-card__content">
+              <div class="wardrobe-card__name">${escapeHtml(wardrobe.name)}</div>
+              ${desc ? `<div class="wardrobe-card__desc">${escapeHtml(desc)}</div>` : ''}
+              <div class="wardrobe-card__price">₱${price.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+              <div style="display:flex;gap:0.5rem;margin-top:0.5rem;">
+                <button class="wardrobe-card__button" 
+                        style="flex:1;background:var(--primary);color:white;"
+                        onclick="event.stopPropagation(); toggleSelectWardrobe(${wardrobe.wardrobe_id})">
+                  ${isSelected ? '<i class="fas fa-check"></i> Selected' : '<i class="fas fa-plus"></i> Select'}
+                </button>
+                <button class="wardrobe-card__button" 
+                        style="flex:1;background:transparent;color:var(--primary);border:1.5px solid var(--primary);"
+                        onclick="event.stopPropagation(); openModalForCard(${wardrobe.wardrobe_id})">
+                  <i class="fas fa-eye"></i> Details
+                </button>
+              </div>
+            </div>
           </div>
-          <div class="wardrobe-card__content">
-            <div class="wardrobe-card__name">${escapeHtml(wardrobe.name)}</div>
-            <div class="wardrobe-card__desc">${escapeHtml(wardrobe.description || '')}</div>
-            <div class="wardrobe-card__price">₱${parseFloat(wardrobe.rental_price || 0).toLocaleString()}</div>
-            <button class="wardrobe-card__button" onclick="event.stopPropagation(); openModalForCard(${wardrobe.wardrobe_id})">View Details</button>
-          </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
       
-      console.log('Cards rendered. Attaching hover listeners...');
-      
-      // Add click and hover handlers
-      container.querySelectorAll('.wardrobe-card').forEach((card, index) => {
-        const wardrobeId = card.dataset.wardrobeId; // Keep as string for comparison
-        const wardrobe = wardrobes.find(w => String(w.wardrobe_id) === String(wardrobeId));
-
-        console.log('Attaching listeners to card', index, 'wardrobeId:', wardrobeId, 'found:', !!wardrobe);
-
-        if (wardrobe) {
-          // Store wardrobe data on the element
-          card.dataset.wardrobeData = JSON.stringify(wardrobe);
-
-          // Click listener - select wardrobe when clicking anywhere on the card (except button)
-          card.addEventListener('click', function(e) {
-            if (!e.target.closest('.wardrobe-card__button')) {
-              selectWardrobe(wardrobeId, wardrobes);
-            }
-          });
-        }
+      // Attach click listeners to cards (for selecting by clicking the card body)
+      container.querySelectorAll('.wardrobe-card').forEach(card => {
+        card.addEventListener('click', function(e) {
+          if (!e.target.closest('button')) {
+            toggleSelectWardrobe(parseInt(card.dataset.wardrobeId));
+          }
+        });
       });
+    }
+
+    // Toggle select/deselect a wardrobe
+    function toggleSelectWardrobe(wardrobeId) {
+      const wardrobe = allWardrobes.find(w => parseInt(w.wardrobe_id) === parseInt(wardrobeId));
+      if (!wardrobe) return;
+
+      const card = document.querySelector(`[data-wardrobe-id="${wardrobeId}"]`);
+      if (!card) return;
+
+      const isSelected = selectedWardrobes.some(w => parseInt(w.wardrobe_id) === parseInt(wardrobeId));
       
-      console.log('Listeners attached successfully');
+      if (isSelected) {
+        // Deselect
+        selectedWardrobes = selectedWardrobes.filter(w => parseInt(w.wardrobe_id) !== parseInt(wardrobeId));
+        card.classList.remove('selected');
+      } else {
+        // Select
+        selectedWardrobes.push(wardrobe);
+        card.classList.add('selected');
+      }
+
+      // Update the select button text
+      const selectBtn = card.querySelector('button:first-of-type');
+      if (selectBtn) {
+        const nowSelected = selectedWardrobes.some(w => parseInt(w.wardrobe_id) === parseInt(wardrobeId));
+        selectBtn.innerHTML = nowSelected 
+          ? '<i class="fas fa-check"></i> Selected' 
+          : '<i class="fas fa-plus"></i> Select';
+        selectBtn.style.background = nowSelected ? 'var(--primary-dark)' : 'var(--primary)';
+      }
+
+      updateFooter();
     }
 
     function selectWardrobe(wardrobeId, wardrobes) {

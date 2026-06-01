@@ -888,6 +888,49 @@ let currentCalendarMonth = new Date();
 let bookedDates = [];
 
 // ============================================
+// SESSION STORAGE CART READER
+// Reads cart from sessionStorage (set by wardrobe/packages page)
+// and populates the checkout if PHP didn't receive it via POST/session
+// ============================================
+(function initCartFromSessionStorage() {
+  const phpCartEmpty = <?= empty($cartItems) ? 'true' : 'false' ?>;
+  
+  if (phpCartEmpty) {
+    const stored = sessionStorage.getItem('checkoutCart');
+    if (stored) {
+      try {
+        const items = JSON.parse(stored);
+        if (Array.isArray(items) && items.length > 0) {
+          // Submit a hidden form to reload the page with cart data via POST
+          // so PHP can process it properly
+          const form = document.createElement('form');
+          form.method = 'POST';
+          form.action = window.location.href;
+          form.style.display = 'none';
+          
+          const input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = 'cart_data';
+          input.value = JSON.stringify(items);
+          
+          form.appendChild(input);
+          document.body.appendChild(form);
+          form.submit();
+          return; // Stop execution — page will reload with cart
+        }
+      } catch(e) {
+        console.error('Failed to parse sessionStorage cart:', e);
+      }
+    }
+  }
+  
+  // If PHP has the cart, clear sessionStorage to avoid stale data on next visit
+  if (!phpCartEmpty) {
+    sessionStorage.removeItem('checkoutCart');
+  }
+})();
+
+// ============================================
 // BOOTSTRAP INITIALIZATION
 // ============================================
 (function() {
