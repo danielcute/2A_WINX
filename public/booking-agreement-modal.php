@@ -647,7 +647,7 @@
         const payload = window.bookingData;
 
         // Submit via AJAX
-        fetch('index.php?route=checkout-submit', {
+        fetch('/index.php?route=checkout-submit', {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',
@@ -656,7 +656,12 @@
             credentials: 'same-origin',
             body: JSON.stringify(payload)
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('HTTP ' + response.status + ': ' + response.statusText);
+            }
+            return response.json();
+        })
         .then(result => {
             if (result.success) {
                 showToast('Booking saved! Opening payment...', 'success');
@@ -669,7 +674,7 @@
                         deposit: (payload.total || 0) / 2
                     });
                 } else {
-                    window.location.href = 'index.php?route=plans';
+                    window.location.href = '/index.php?route=plans';
                 }
             } else {
                 showToast(result.message || 'Error saving booking', 'error');
@@ -677,7 +682,7 @@
         })
         .catch(err => {
             console.error('Submission error:', err);
-            showToast('Connection error. Please try again.', 'error');
+            showToast('Connection error: ' + err.message + '. Please try again.', 'error');
         });
     }
 

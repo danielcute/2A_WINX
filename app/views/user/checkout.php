@@ -1645,7 +1645,7 @@ function confirmBooking() {
         return;
     }
     
-    fetch('index.php?route=checkout-submit', {
+    fetch('/index.php?route=checkout-submit', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -1655,7 +1655,7 @@ function confirmBooking() {
     })
     .then(response => {
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            throw new Error('HTTP ' + response.status + ': ' + response.statusText);
         }
         return response.json();
     })
@@ -1677,7 +1677,7 @@ function confirmBooking() {
     })
     .catch(error => {
         console.error('Booking save error:', error);
-        showToast('Unable to save booking. Please try again.', 'error');
+        showToast('Unable to save booking: ' + error.message + '. Please try again.', 'error');
         // Re-enable button on error so user can retry
         isBookingInProgress = false;
         confirmBtn.disabled = false;
