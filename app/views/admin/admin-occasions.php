@@ -724,7 +724,7 @@ function editOccasion(id) {
     document.getElementById('modalTitle').textContent = 'Edit Occasion';
     document.getElementById('occasionId').value = id;
 
-    fetch(baseUrl + '/public/api-occasion.php?id=' + id, {
+    fetch(baseUrl + '/api-occasion.php?id=' + id, {
         credentials: 'same-origin'
     })
         .then(response => response.json())
@@ -739,17 +739,8 @@ function editOccasion(id) {
             document.getElementById('occasionDescription').value = occasion.descriptions || '';
 
             if (occasion.has_image) {
-                fetch(baseUrl + '/public/api-occasion.php?image=' + id, {
-                    credentials: 'same-origin'
-                })
-                    .then(res => res.json())
-                    .then(imgData => {
-                        if (imgData.success) {
-                            document.getElementById('previewImg').src = imgData.image;
-                            document.getElementById('imagePreview').style.display = 'block';
-                        }
-                    })
-                    .catch(err => console.error('Image fetch error:', err));
+                document.getElementById('previewImg').src = '/api-occasion-image.php?id=' + id + '&t=' + Date.now();
+                document.getElementById('imagePreview').style.display = 'block';
             } else {
                 document.getElementById('imagePreview').style.display = 'none';
             }
@@ -762,7 +753,7 @@ function editOccasion(id) {
 function deleteOccasion(id) {
     if (!confirm('Are you sure you want to delete this occasion? This will affect all associated packages.')) return;
 
-    fetch(baseUrl + '/public/api-occasion.php', {
+    fetch(baseUrl + '/api-occasion.php', {
         method: 'DELETE',
         headers: {
             'Content-Type': 'application/json',
@@ -820,7 +811,7 @@ occasionForm?.addEventListener('submit', (e) => {
     const formData = new FormData(occasionForm);
     const occasion_id = formData.get('occasion_id');
 
-    const url = occasion_id ? baseUrl + '/public/api-occasion.php?action=update' : baseUrl + '/public/api-occasion.php';
+    const url = occasion_id ? baseUrl + '/api-occasion.php?action=update' : baseUrl + '/api-occasion.php';
 
     fetch(url, {
         method: 'POST',

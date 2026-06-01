@@ -11,7 +11,7 @@ if (!defined('ROOT_PATH')) {
 
 require_once ROOT_PATH . '/app/models/Feedback.php';
 
-if (!isset($_SESSION['user_logged_in']) || !isset($_SESSION['user_id'])) {
+if (!isset($_SESSION['user_id'])) {
     header('Location: /index.php?route=signin');
     exit;
 }

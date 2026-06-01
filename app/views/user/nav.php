@@ -753,12 +753,15 @@ if (session_status() === PHP_SESSION_NONE) {
 const notificationTypes = {
   'realtime': { icon: 'fa-clock', label: 'Real-time Update', color: '#8A7650' },
   'messages': { icon: 'fa-envelope', label: 'Message', color: '#3498db' },
+  'message_reply': { icon: 'fa-reply', label: 'Message Reply', color: '#1abc9c' },
   'ratings': { icon: 'fa-star', label: 'Rating', color: '#f39c12' },
   'replies': { icon: 'fa-reply', label: 'Reply', color: '#1abc9c' },
   'feedback': { icon: 'fa-comment-dots', label: 'Feedback', color: '#9b59b6' },
+  'feedback_reply': { icon: 'fa-comment-dots', label: 'Feedback Reply', color: '#9b59b6' },
   'book_confirmation': { icon: 'fa-calendar-check', label: 'Book Confirmation', color: '#27ae60' },
   'new_updates': { icon: 'fa-bell', label: 'New Update', color: '#e74c3c' },
   'receipts': { icon: 'fa-receipt', label: 'Receipt', color: '#2c3e50' },
+  'payment_due': { icon: 'fa-credit-card', label: 'Payment Due', color: '#e67e22' },
   'system_update': { icon: 'fa-cog', label: 'System Update', color: '#95a5a6' }
 };
 

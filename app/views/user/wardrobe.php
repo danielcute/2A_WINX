@@ -1302,7 +1302,7 @@ $wardrobesByCategory = $wardrobeModel->getAllByCategory();
     }
 
     function loadWardrobes() {
-      fetch('<?php echo BASE_URL; ?>/public/api-wardrobe.php?action=getAll')
+      fetch('<?php echo BASE_URL; ?>/api-wardrobe.php?action=getAll')
         .then(response => {
           if (!response.ok) throw new Error('Server error: ' + response.status);
           return response.json();

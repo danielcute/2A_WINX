@@ -189,37 +189,14 @@ $occasions = $occasionModel->getAll();
       <?php if (!empty($occasions)): ?>
         <?php foreach ($occasions as $occasion): ?>
           <a href="/index.php?route=packages&occasion=<?= urlencode(strtolower($occasion['events'])) ?>" class="occ-card">
-            <div class="occ-card__img" id="img_<?= $occasion['occasion_id'] ?>" style="background: linear-gradient(135deg, #E2D9C8 0%, #D4C7B1 100%); display: flex; align-items: center; justify-content: center;">
-              <i class="fas fa-image" style="font-size: 2.5rem; color: #8A7650; opacity: 0.3;"></i>
+            <?php if (!empty($occasion['image'])): ?>
+            <div class="occ-card__img" style="background-image: url('/api-occasion-image.php?id=<?= (int)$occasion['occasion_id'] ?>'); background-size: cover; background-position: center;">
             </div>
-            <script>
-              (function() {
-                const occId = <?= $occasion['occasion_id'] ?>;
-                const imgContainer = document.getElementById('img_' + occId);
-                
-                // Load image via API
-                fetch('public/api-occasion.php?image=' + occId)
-                  .then(res => {
-                    if (!res.ok) throw new Error('Image not found');
-                    return res.json();
-                  })
-                  .then(data => {
-                    if (data.success && data.image) {
-                      imgContainer.style.backgroundImage = 'url(' + data.image + ')';
-                      imgContainer.style.backgroundSize = 'cover';
-                      imgContainer.style.backgroundPosition = 'center';
-                      // Clear the loading icon
-                      imgContainer.innerHTML = '';
-                    } else {
-                      console.warn('No image for occasion', occId);
-                    }
-                  })
-                  .catch(err => {
-                    console.warn('Image load failed for occasion ' + occId + ':', err.message);
-                    // Keep placeholder visible
-                  });
-              })();
-            </script>
+            <?php else: ?>
+            <div class="occ-card__img" style="background: linear-gradient(135deg, #E2D9C8 0%, #D4C7B1 100%); display: flex; align-items: center; justify-content: center;">
+              <i class="fas fa-calendar-alt" style="font-size: 2.5rem; color: #8A7650; opacity: 0.4;"></i>
+            </div>
+            <?php endif; ?>
             <div class="occ-card__body">
               <div class="occ-card__icon"><i class="fas fa-calendar"></i></div>
               <div class="occ-card__text">

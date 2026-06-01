@@ -548,7 +548,7 @@ function openAddModal() {
 function editPackage(packageId) {
     // Fetch package data via AJAX
     // FIX: target the public/ folder where API files reside
-    fetch('/public/api-package.php?action=get_package&id=' + packageId, {
+    fetch('/api-package.php?action=get_package&id=' + packageId, {
       credentials: 'same-origin'
     })
         .then(response => response.json())

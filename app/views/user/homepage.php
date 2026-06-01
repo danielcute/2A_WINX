@@ -862,7 +862,7 @@ if (!empty($_SESSION['user_id'])) {
         right: 'dayGridMonth,listMonth'
       },
       events: function(info, successCallback, failureCallback) {
-fetch('<?php echo BASE_URL; ?>/public/api-calendar.php?action=getUserBookings&userId=<?= $_SESSION['user_id'] ?? 0 ?>')
+fetch('<?php echo BASE_URL; ?>/api-calendar.php?action=getUserBookings&userId=<?= $_SESSION['user_id'] ?? 0 ?>')
           .then(response => response.json())
           .then(data => successCallback(data))
           .catch(error => {

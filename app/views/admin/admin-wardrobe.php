@@ -1122,7 +1122,7 @@ $page_title = 'Manage Wardrobes';
             
 // Fetch wardrobe data
             console.log('Fetching wardrobe data for ID:', wardrobeId);
-            fetch('<?php echo BASE_URL; ?>/public/api-wardrobe.php?action=get&id=' + wardrobeId, {
+            fetch('<?php echo BASE_URL; ?>/api-wardrobe.php?action=get&id=' + wardrobeId, {
                 credentials: 'same-origin'
             })
                 .then(response => {

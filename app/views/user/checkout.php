@@ -1294,7 +1294,7 @@ async function checkAvailabilityAndShowTimes(selectedDate) {
     const timeSlots = generateTimeSlots();
     
     try {
-        const apiUrl = `public/api-calendar.php?action=getDateBookings&date=${selectedDate}`;
+        const apiUrl = `/api-calendar.php?action=getDateBookings&date=${selectedDate}`;
         console.log('Fetching bookings from:', apiUrl);
         
         const response = await fetch(apiUrl);
