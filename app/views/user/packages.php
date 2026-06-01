@@ -1,5 +1,4 @@
 <?php 
-session_start(); 
 $page = 'packages';
 
 // Get occasion from URL parameter
@@ -10,21 +9,21 @@ $occasionLabel = ucfirst($occasion);
 if (!defined('ROOT_PATH')) {
     define('ROOT_PATH', dirname(dirname(__DIR__)));
 }
-require_once ROOT_PATH . '/config/database.php';
 require_once ROOT_PATH . '/app/models/Package.php';
-require_once ROOT_PATH . '/app/models/Occasion.php';
 
-$db = new Database();
 $packageModel = new Package();
-$occasionModel = new Occasion();
 
-// Get occasion ID from occasion name
-$occasionData = $db->query("SELECT occasion_id FROM occasions_tbl WHERE events = '" . $db->real_escape_string($occasion) . "' LIMIT 1");
-$occasionId = null;
-if ($occasionData && $occasionData->num_rows > 0) {
-    $row = $occasionData->fetch_assoc();
-    $occasionId = $row['occasion_id'];
-}
+// Get occasion ID from occasion name using the Package model's database connection
+$occasion_mapping = [
+    'wedding' => 1,
+    'birthday' => 2,
+    'debut' => 3,
+    'corporate' => 4,
+    'anniversary' => 5,
+    'other' => 6
+];
+
+$occasionId = $occasion_mapping[$occasion] ?? null;
 
 // Get all packages for this occasion
 $packages = $packageModel->getAll($occasionId);
