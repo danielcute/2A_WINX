@@ -1,7 +1,5 @@
 <?php 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+session_start(); 
 $page = 'wardrobe';
 
 // Load wardrobe options from database
@@ -1028,9 +1026,6 @@ $wardrobesByCategory = $wardrobeModel->getAllByCategory();
   </div>
 
   <script>
-    // Load Agreement Modal Logic
-    <?php include_once ROOT_PATH . '/public/booking-agreement-modal.php'; ?>
-
     let selectedWardrobes = []; // Array of selected wardrobes for multiple selections
     let allWardrobes = [];
     let currentFilter = 'all';
@@ -1235,15 +1230,6 @@ $wardrobesByCategory = $wardrobeModel->getAllByCategory();
       });
 
       document.getElementById('proceedBtn').addEventListener('click', function() {
-        if (typeof openAgreementModal === 'function') {
-          openAgreementModal();
-        } else {
-          window.handleCheckoutSubmission();
-        }
-      });
-
-      // Original submission logic moved to a helper
-      window.handleCheckoutSubmission = function() {
         if (selectedWardrobes.length > 0) {
           // Get customization items from sessionStorage
           const customizationData = sessionStorage.getItem('customizationItems');
@@ -1284,36 +1270,39 @@ $wardrobesByCategory = $wardrobeModel->getAllByCategory();
           // Clean up session storage
           sessionStorage.removeItem('customizationItems');
         }
-      };
-    }
-
-    function initializeMap() {
-        const mapEl = document.getElementById('map');
-        if (!mapEl) return;
-        const map = L.map('map').setView([14.5995, 120.9842], 13);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-        let marker;
-        map.on('click', function(e) {
-            if (marker) map.removeLayer(marker);
-            marker = L.marker(e.latlng).addTo(map);
-            document.getElementById('latitude').value = e.latlng.lat;
-            document.getElementById('longitude').value = e.latlng.lng;
-        });
+      });
     }
 
     function loadWardrobes() {
-      fetch('<?php echo BASE_URL; ?>/api-wardrobe.php?action=getAll')
-        .then(response => {
-          if (!response.ok) throw new Error('Server error: ' + response.status);
-          return response.json();
-        })
+      fetch('/api-wardrobe.php?action=getAll')
+        .then(response => response.json())
         .then(data => {
           if (data.success) {
-            allWardrobes = data.data || data.wardrobes || [];
+            allWardrobes = data.data;
             displayWardrobes(allWardrobes);
           }
         })
         .catch(error => console.error('Error loading wardrobes:', error));
+    }
+
+    function filterByCategory(category) {
+      if (category === 'all') {
+        displayWardrobes(allWardrobes);
+      } else {
+        const filtered = allWardrobes.filter(w => w.category === category);
+        displayWardrobes(filtered);
+      }
+    }
+
+    function searchWardrobes(query) {
+      fetch('/api-wardrobe.php?action=search&q=' + encodeURIComponent(query))
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            displayWardrobes(data.data);
+          }
+        })
+        .catch(error => console.error('Error searching wardrobes:', error));
     }
 
     function displayWardrobes(wardrobes) {
@@ -1332,18 +1321,18 @@ $wardrobesByCategory = $wardrobeModel->getAllByCategory();
       emptyState.style.display = 'none';
       
       container.innerHTML = wardrobes.map(wardrobe => `
-        <div class="wardrobe-card ${selectedWardrobes.some(w => String(w.wardrobe_id) === String(wardrobe.wardrobe_id)) ? 'selected' : ''}" 
+        <div class="wardrobe-card ${selectedWardrobes.find(w => w.wardrobe_id == wardrobe.wardrobe_id) ? 'selected' : ''}" 
              data-wardrobe-id="${wardrobe.wardrobe_id}">
           <div class="wardrobe-card__image">
-            ${(wardrobe.has_image || wardrobe.image) ? 
-              `<img src="<?php echo BASE_URL; ?>/index.php?route=admin-wardrobe-image&id=${wardrobe.wardrobe_id}" alt="${escapeHtml(wardrobe.name)}" style="width: 100%; height: 100%; object-fit: cover; cursor: pointer;">` :
+            ${wardrobe.image && wardrobe.image_type ? 
+              `<img src="data:${wardrobe.image_type};base64,${wardrobe.image}" alt="${escapeHtml(wardrobe.name)}" style="width: 100%; height: 100%; object-fit: cover; cursor: pointer;">` :
               `<i class="fas fa-tuxedo" style="cursor: pointer;"></i>`
             }
           </div>
           <div class="wardrobe-card__content">
             <div class="wardrobe-card__name">${escapeHtml(wardrobe.name)}</div>
             <div class="wardrobe-card__desc">${escapeHtml(wardrobe.description || '')}</div>
-            <div class="wardrobe-card__price">₱${parseFloat(wardrobe.rental_price || 0).toLocaleString()}</div>
+            <div class="wardrobe-card__price">₱${parseFloat(wardrobe.rental_price || wardrobe.price || 0).toFixed(2)}</div>
             <button class="wardrobe-card__button" onclick="event.stopPropagation(); openModalForCard(${wardrobe.wardrobe_id})">View Details</button>
           </div>
         </div>
@@ -1435,7 +1424,7 @@ $wardrobesByCategory = $wardrobeModel->getAllByCategory();
     }
 
     function calculateTotal() {
-      return selectedWardrobes.reduce((sum, w) => sum + parseFloat(w.rental_price || w.price || 0), 0);
+      return selectedWardrobe ? parseFloat(selectedWardrobe.price) : 0;
     }
 
     function escapeHtml(text) {

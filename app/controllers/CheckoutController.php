@@ -98,7 +98,13 @@ class CheckoutController {
             $totalPrice = isset($data['total']) ? (float)$data['total'] : 0;
             $status = 'pending';
             $paymentMethod = trim($data['paymentMethod'] ?? 'bank');
-            $paymentDetails = trim($data['paymentDetails'] ?? '{}');
+            // Handle paymentDetails which might be array or string
+            $paymentDetailsRaw = $data['paymentDetails'] ?? '{}';
+            if (is_array($paymentDetailsRaw)) {
+                $paymentDetails = json_encode($paymentDetailsRaw);
+            } else {
+                $paymentDetails = trim($paymentDetailsRaw);
+            }
             $latitude = $data['latitude'] ?? null;
             $longitude = $data['longitude'] ?? null;
 

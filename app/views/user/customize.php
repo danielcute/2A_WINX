@@ -1353,8 +1353,23 @@ $extraIconMap = [
       occasion: '<?= urlencode($occasion) ?>'
     }));
 
-    // Redirect to wardrobe selection page
-    window.location.href = '/index.php?route=wardrobe&occasion=<?= urlencode($occasion) ?>';
+    // Get the package from sessionStorage
+    const packageData = sessionStorage.getItem('checkoutCart');
+    
+    // If we have package data, merge with customization items and go to checkout
+    if (packageData) {
+      const packageItems = JSON.parse(packageData);
+      const allItems = [...packageItems, ...cartItems];
+      
+      // Store all items for checkout
+      sessionStorage.setItem('checkoutCart', JSON.stringify(allItems));
+      
+      // Proceed to checkout
+      window.location.href = '/index.php?route=checkout&occasion=<?= urlencode($occasion) ?>';
+    } else {
+      // No package selected, go to wardrobe instead (for backward compatibility)
+      window.location.href = '/index.php?route=wardrobe&occasion=<?= urlencode($occasion) ?>';
+    }
   }
 
   updateSummary();

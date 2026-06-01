@@ -987,21 +987,20 @@ function addToCart(packageData) {
   }
   
   cart = [packageItem]; // Replace cart with selected package only
-  showToast('✓ ' + packageItem.name + ' added to cart! Total: ₱' + packageItem.price.toLocaleString(), 'success');
+  showToast('✓ ' + packageItem.name + ' added to cart! Redirecting to wardrobe selection...', 'success');
   
   // Store in sessionStorage for client-side access
   sessionStorage.setItem('checkoutCart', JSON.stringify(cart));
-  // Store in session via POST for server-side access
-  const form = document.createElement('form');
-  form.method = 'POST';
-  form.action = '/index.php?route=checkout';
-  const cartInput = document.createElement('input');
-  cartInput.type = 'hidden';
-  cartInput.name = 'cart_data';
-  cartInput.value = JSON.stringify(cart);
-  form.appendChild(cartInput);
-  document.body.appendChild(form);
-  form.submit();
+  
+  // Get the occasion from URL or from packageData
+  const urlParams = new URLSearchParams(window.location.search);
+  const occasion = packageData.occasion || urlParams.get('occasion') || 'wedding';
+  
+  // Redirect to wardrobe selection instead of checkout
+  // Redirect to wardrobe after brief delay to show the toast message
+  setTimeout(() => {
+    window.location.href = '/index.php?route=wardrobe&occasion=' + occasion;
+  }, 500);
 }
 
 function toggleDropdown() {
