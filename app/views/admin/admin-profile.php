@@ -628,7 +628,7 @@ async function previewImage(input) {
         formData.append('avatar', input.files[0]);
 
         try {
-            const response = await fetch('/public/api-admin-profile.php', {
+            const response = await fetch('/api-admin-profile.php', {
                 method: 'POST',
                 body: formData
             });

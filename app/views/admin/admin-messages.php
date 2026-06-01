@@ -628,5 +628,4 @@ setInterval(() => {
         }).catch(console.log);
 }, 10000);
 </script>
-<?php include 'admin-footer.php'; ?></script>
-<?php include "admin-footer.php"; ?>
+<?php include 'admin-footer.php'; ?>

@@ -863,7 +863,7 @@ async function handleAvatarUpload() {
     formData.append('avatar', fileInput.files[0]);
 
     try {
-        const response = await fetch('/public/api-user-profile.php', {
+        const response = await fetch('/api-user-profile.php', {
             method: 'POST',
             body: formData
         });
@@ -903,7 +903,7 @@ function selectDefaultAvatar(src, event) {
     formData.append('action', 'upload_avatar_default'); // New action for default avatars
     formData.append('avatar_path', src);
 
-    fetch('/public/api-user-profile.php', {
+    fetch('/api-user-profile.php', {
         method: 'POST',
         body: formData
     })
